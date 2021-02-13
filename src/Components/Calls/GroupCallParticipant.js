@@ -165,7 +165,8 @@ class GroupCallParticipant extends React.Component {
         // console.log('[call][GroupCallParticipant] render', participant);
         if (!participant) return null;
 
-        const { is_speaking, is_muted, can_unmute_self, can_be_muted_for_all_users, can_be_unmuted_for_all_users } = participant;
+        const { is_speaking, is_muted_for_all_users, is_muted_for_current_user, can_unmute_self, can_be_muted_for_all_users, can_be_unmuted_for_all_users } = participant;
+        const isMuted = is_muted_for_all_users || is_muted_for_current_user;
 
         return (
             <div className='group-call-participant' onClick={this.handleOpenContextMenu} onContextMenu={this.handleOpenContextMenu}>
@@ -180,8 +181,8 @@ class GroupCallParticipant extends React.Component {
                         {is_speaking ? t('Speaking') : t('Listening')}
                     </div>
                 </div>
-                <div className={classNames('group-call-participant-mic', { 'participant-muted-by-admin': is_muted && !can_unmute_self, 'participant-speaking': is_speaking })}>
-                    {!is_muted ? <MicIcon /> : <MicOffIcon />}
+                <div className={classNames('group-call-participant-mic', { 'participant-muted-by-admin': isMuted && !can_unmute_self, 'participant-speaking': is_speaking })}>
+                    {!isMuted ? <MicIcon /> : <MicOffIcon />}
                 </div>
 
                 <Popover

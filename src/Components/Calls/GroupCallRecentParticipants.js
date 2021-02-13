@@ -89,12 +89,13 @@ class GroupCallRecentParticipants extends React.Component {
             speakers = recent_speakers;
         }
 
+        clearTimeout(this.timeout);
         if (!speakers.length) {
             this.setState({ speakers });
         } else {
             this.loadContent(speakers);
 
-            setTimeout(() => {
+            this.timeout = setTimeout(() => {
                 this.setState({ speakers });
             }, PROFILE_PHOTO_PRELOAD_TIME_MS);
         }

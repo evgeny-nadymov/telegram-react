@@ -117,13 +117,14 @@ class CallStore extends EventEmitter {
                     this.participants.set(group_call_id, participants);
                 }
 
-                const { user_id, is_muted, order } = participant;
+                const { user_id, is_muted_for_all_users, is_muted_for_current_user, order } = participant;
+                const isMuted = is_muted_for_all_users || is_muted_for_current_user;
                 const prevParticipant = participants.get(user_id);
 
                 participants.set(user_id, participant);
 
                 // mute stream on updateGroupCallParticipant, unmute can be done only on UI user action
-                if (user_id === UserStore.getMyId() && is_muted) {
+                if (user_id === UserStore.getMyId() && isMuted) {
                     const { currentGroupCall } = this;
                     if (currentGroupCall) {
                         const { groupCallId, stream } = currentGroupCall;
@@ -667,7 +668,8 @@ class CallStore extends EventEmitter {
                 can_be_muted: true,
                 can_be_unmuted: true,
                 can_unmute_self: true,
-                is_muted: true,
+                is_muted_for_all_users: true,
+                is_muted_for_current_user: false,
                 is_speaking: false,
                 order: Number
             };
