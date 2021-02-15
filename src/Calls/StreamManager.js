@@ -6,18 +6,22 @@
  */
 
 import { getAmplitude } from './Utils';
+import { LOG_CALL } from '../Stores/CallStore';
 import TdLibController from '../Controllers/TdLibController';
 
-export default class TrackManager {
+export default class StreamManager {
     constructor(interval) {
         this.context = new (window.AudioContext || window.webkitAudioContext)();
         this.interval = interval;
         this.timer = null;
 
         this.items = [];
+        this.inputStream = new MediaStream();
     }
 
     addTrack(stream, type) {
+        LOG_CALL('[manager] addTrack', type, stream);
+
         if (!stream) return;
 
         const tracks = stream.getAudioTracks();
@@ -26,15 +30,16 @@ export default class TrackManager {
         const track = tracks[0];
         if (!track) return;
 
-        const { context, items } = this;
+        const { context, items, inputStream } = this;
 
         // add analyser
-        const source = Number(track.id.substring(6));
+        const source = Number(stream.id.substring(6));
         const streamSource = context.createMediaStreamSource(stream);
         const analyser = context.createAnalyser();
 
         track.e = source;
         track.onended = () => {
+            // LOG_CALL('[manager] track.onended');
             this.removeTrack(track);
         };
 
@@ -57,17 +62,34 @@ export default class TrackManager {
             analyser,
         });
 
+        switch (type) {
+            case 'input': {
+                inputStream.addTrack(track);
+                break;
+            }
+        }
+
         this.changeTimer();
     }
 
     removeTrack(track) {
+        // LOG_CALL('[manager] removeTrack', track);
         if (!track) return;
 
-        const source = Number(track.id.substring(6));
+        const { items, inputStream } = this;
+
+        const source = track.e;
         for (let i = 0; i < items.length; i++) {
             const { track: t } = items[i];
             if (t.e === source) {
                 items.splice(i, 1);
+                break;
+            }
+        }
+
+        switch (type) {
+            case 'input': {
+                inputStream.removeTrack(track);
                 break;
             }
         }
@@ -80,12 +102,12 @@ export default class TrackManager {
 
         clearInterval(timer);
         if (items.length > 0) {
-            this.timer = setInterval(this.analyse, interval);
+            this.timer = setInterval(() => this.analyse(), interval);
         }
     }
 
     getAmplitude(item) {
-        const { analyser, stream, track, source } = item;
+        const { analyser, stream, track, source, type } = item;
         if (!analyser) return;
 
         const array = new Uint8Array(analyser.frequencyBinCount);
@@ -105,6 +127,7 @@ export default class TrackManager {
         const { items } = this;
         const amplitudes = items.map(x => this.getAmplitude(x));
 
+        // LOG_CALL('[manager] analyse', amplitudes);
         TdLibController.clientUpdate({
             '@type': 'clientUpdateGroupCallAmplitude',
             amplitudes

@@ -21,6 +21,7 @@ export const EMOJI_PICKER_TIMEOUT_MS = 100;
 export const FILE_PRIORITY = 1;
 export const FILTER_COUNT_MAX = 10;
 export const FILTER_TITLE_MAX_LENGTH = 12;
+export const GROUP_CALL_AMPLITUDE_ANALYZE_INTERVAL_MS = 500;
 export const IV_LOCATION_HEIGHT = 300;
 export const IV_LOCATION_WIDTH = 600;
 export const IV_PHOTO_SIZE = 800;
