@@ -17,6 +17,7 @@ export default class StreamManager {
 
         this.items = [];
         this.inputStream = new MediaStream();
+        this.outputStream = null;
     }
 
     addTrack(stream, type) {
