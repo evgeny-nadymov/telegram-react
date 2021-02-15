@@ -706,14 +706,22 @@ class CallStore extends EventEmitter {
 
         currentGroupCall.description = description
 
-        const limit = 1000;
+        const limit = 50;
         LOG_CALL(`[tdweb] loadGroupCallParticipants limit=${limit}`);
-        const r = await TdLibController.send({
+        const r1 = await TdLibController.send({
             '@type': 'loadGroupCallParticipants',
             group_call_id: groupCallId,
             limit
         });
-        LOG_CALL(`[tdweb] loadGroupCallParticipants result`, r);
+        LOG_CALL(`[tdweb] loadGroupCallParticipants result`, r1);
+
+        LOG_CALL(`[tdweb] loadGroupCallParticipants limit=${limit}`);
+        const r2 = await TdLibController.send({
+            '@type': 'loadGroupCallParticipants',
+            group_call_id: groupCallId,
+            limit
+        });
+        LOG_CALL(`[tdweb] loadGroupCallParticipants result`, r2);
 
         let meParticipant = null;
         const participants = this.participants.get(groupCallId);
