@@ -79,10 +79,12 @@ export default class StreamManager {
         const { items, inputStream } = this;
 
         const source = track.e;
+        let type = null;
         for (let i = 0; i < items.length; i++) {
-            const { track: t } = items[i];
+            const { track: t, type: tp } = items[i];
             if (t.e === source) {
                 items.splice(i, 1);
+                type = tp;
                 break;
             }
         }

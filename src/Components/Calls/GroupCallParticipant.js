@@ -182,7 +182,7 @@ class GroupCallParticipant extends React.Component {
                     </div>
                 </div>
                 <div className={classNames('group-call-participant-mic', { 'participant-muted-by-admin': isMuted && !can_unmute_self, 'participant-speaking': is_speaking })}>
-                    {!isMuted ? <MicIcon /> : <MicOffIcon />}
+                    {!isMuted || is_speaking ? <MicIcon /> : <MicOffIcon />}
                 </div>
 
                 <Popover
