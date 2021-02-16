@@ -256,7 +256,7 @@ class GroupCallTopPanel extends React.Component {
         const title = connected ? getChatTitle(chatId).toUpperCase() : t('Connecting');
 
         return (
-            <div className='group-call-top-panel-wrapper' onClick={this.handleOpenGroupCall}>
+            <div className='group-call-top-panel-wrapper'>
                 { animated ? (
                     <TopBar ref={this.topBarRef}/>
                     ) : (
@@ -270,7 +270,7 @@ class GroupCallTopPanel extends React.Component {
                     >
                     </div>
                 )}
-                <div className='group-call-top-panel-buttons'>
+                <div className='group-call-top-panel-buttons' onClick={this.handleOpenGroupCall}>
                     <IconButton className='header-player-button' style={{ color: 'white' }} onClick={this.handleMicrophone}>
                         {status === 'unmuted' ? <MicIcon fontSize='small'/> : <MicOffIcon fontSize='small' />}
                     </IconButton>

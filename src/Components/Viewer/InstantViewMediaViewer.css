@@ -6,7 +6,7 @@
  */
 
 .instant-view-media-viewer {
-    z-index: 2;
+    z-index: 10;
     position: fixed;
     top: 0;
     right: 0;

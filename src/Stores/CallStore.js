@@ -22,6 +22,7 @@ import TdLibController from '../Controllers/TdLibController';
 const JOIN_TRACKS = true;
 
 export function LOG_CALL(str, ...data) {
+    return;
     console.log('[call]' + str, ...data);
 }
 

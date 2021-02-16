@@ -506,7 +506,7 @@ class Button extends React.Component {
         if (!this.focused) {
             return;
         }
-        // console.log('[button] draw');
+        // console.log('[button] draw', [this.focused, this.mounted]);
         const { currentState, prevState, left, top, right, bottom } = this;
 
         const newTime = new Date();

@@ -81,6 +81,7 @@ class TopBar extends React.Component {
     }
 
     componentDidMount() {
+        this.mounted = true;
         window.addEventListener('blur', this.handleBlur);
         window.addEventListener('focus', this.handleFocus);
         window.addEventListener('resize', this.handleResize);
@@ -101,6 +102,7 @@ class TopBar extends React.Component {
     }
 
     componentWillUnmount() {
+        this.mounted = false;
         window.removeEventListener('blur', this.handleBlur);
         window.removeEventListener('focus', this.handleFocus);
         window.removeEventListener('resize', this.handleResize);
@@ -158,12 +160,15 @@ class TopBar extends React.Component {
 
     draw = (force = false) => {
         this.raf = null;
+        if (!this.mounted) {
+            return;
+        }
         const { lbd, lbd1, lbd2, scale, left, top, right, bottom, currentState, previousState, focused, resizing } = this;
         if (!focused && !resizing) {
             return;
         }
 
-        // console.log('draw', [focused, resizing]);
+        // console.log('[top] draw', [focused, resizing, this.mounted]);
 
         const newTime = new Date();
         let dt = (newTime - this.lastUpdateTime);
