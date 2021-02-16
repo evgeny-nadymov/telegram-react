@@ -10,10 +10,10 @@ import StreamManager from '../Calls/StreamManager';
 import { canManageVoiceChats, getChatTitle } from '../Utils/Chat';
 import { closeGroupCallPanel } from '../Actions/Call';
 import { getUserFullName } from '../Utils/User';
-import { fromTelegramSource, getAmplitude, getStream, getTransport, parseSdp, toTelegramSource } from '../Calls/Utils';
+import { fromTelegramSource, getStream, getTransport, parseSdp, toTelegramSource } from '../Calls/Utils';
 import { showAlert, showLeaveVoiceChatAlert } from '../Actions/Client';
 import { throttle } from '../Utils/Common';
-import { GROUP_CALL_AMPLITUDE_ANALYZE_INTERVAL_MS } from '../Constants';
+import { GROUP_CALL_AMPLITUDE_ANALYSE_INTERVAL_MS, GROUP_CALL_PARTICIPANTS_LOAD_LIMIT } from '../Constants';
 import AppStore from './ApplicationStore';
 import LStore from './LocalizationStore';
 import UserStore from './UserStore';
@@ -167,52 +167,60 @@ class CallStore extends EventEmitter {
             }
             case 'clientUpdateGroupCallAmplitude': {
                 const { amplitudes } = update;
-                for (let i = 1; i < amplitudes.length; i++) {
-                    const { type, source, value } = amplitudes[i];
 
-                    switch (type) {
-                        case 'input': {
-                            const { currentGroupCall } = this;
-                            if (currentGroupCall) {
-                                const { isSpeakingMap, groupCallId } = currentGroupCall;
+                const { currentGroupCall } = this;
+                if (currentGroupCall) {
+                    const { isSpeakingMap, groupCallId, meSignSource } = currentGroupCall;
 
-                                let params = isSpeakingMap.get(source);
-                                if (!params) {
-                                    params = { isSpeaking: false, speakingTimer: null, cancelSpeakingTimer: null };
-                                    isSpeakingMap.set(source, params);
-                                }
+                    for (let i = 0; i < amplitudes.length; i++) {
+                        const { type, source, value } = amplitudes[i];
 
-                                const isSpeaking = value > 0.2;
-                                if (isSpeaking !== params.isSpeaking) {
-                                    params.isSpeaking = isSpeaking;
-                                    if (isSpeaking) {
-                                        clearTimeout(params.cancelSpeakingTimer);
-                                        params.speakingTimer = setTimeout(() => {
-                                            if (params.isSpeaking) {
-                                                TdLibController.send({
-                                                    '@type': 'setGroupCallParticipantIsSpeaking',
-                                                    source: toTelegramSource(source),
-                                                    group_call_id : groupCallId,
-                                                    is_speaking : true
-                                                });
-                                            }
-                                        }, 150);
-                                    } else {
-                                        clearTimeout(params.cancelSpeakingTimer);
-                                        params.cancelSpeakingTimer = setTimeout(() => {
-                                            if (!params.isSpeaking) {
-                                                TdLibController.send({
-                                                    '@type': 'setGroupCallParticipantIsSpeaking',
-                                                    source: toTelegramSource(source),
-                                                    group_call_id: groupCallId,
-                                                    is_speaking: false
-                                                });
-                                            }
-                                        }, 1000);
-                                    }
-                                }
+                        let telegramSource = null;
+                        switch (type) {
+                            case 'input': {
+                                telegramSource = toTelegramSource(source);
+                                break;
                             }
-                            break;
+                            case 'output': {
+                                telegramSource = meSignSource;
+                                break;
+                            }
+                        }
+
+                        let params = isSpeakingMap.get(source);
+                        if (!params) {
+                            params = { isSpeaking: false, speakingTimer: null, cancelSpeakingTimer: null };
+                            isSpeakingMap.set(source, params);
+                        }
+
+                        const isSpeaking = value > 0.2;
+                        if (isSpeaking !== params.isSpeaking) {
+                            params.isSpeaking = isSpeaking;
+                            if (isSpeaking) {
+                                clearTimeout(params.cancelSpeakingTimer);
+                                params.speakingTimer = setTimeout(() => {
+                                    if (params.isSpeaking) {
+                                        TdLibController.send({
+                                            '@type': 'setGroupCallParticipantIsSpeaking',
+                                            source: toTelegramSource(source),
+                                            group_call_id : groupCallId,
+                                            is_speaking : true
+                                        });
+                                    }
+                                }, 150);
+                            } else {
+                                clearTimeout(params.cancelSpeakingTimer);
+                                params.cancelSpeakingTimer = setTimeout(() => {
+                                    if (!params.isSpeaking) {
+                                        TdLibController.send({
+                                            '@type': 'setGroupCallParticipantIsSpeaking',
+                                            source: toTelegramSource(source),
+                                            group_call_id: groupCallId,
+                                            is_speaking: false
+                                        });
+                                    }
+                                }, 1000);
+                            }
                         }
                     }
                 }
@@ -227,60 +235,6 @@ class CallStore extends EventEmitter {
             case 'clientUpdateGroupCallPanel': {
                 this.panelOpened = update.opened;
                 this.emit('clientUpdateGroupCallPanel', update);
-                break;
-            }
-            case 'clientUpdateStreamAmplitudeChange': {
-                const { type, value } = update;
-                switch (type) {
-                    case 'output': {
-                        const { currentGroupCall } = this;
-                        if (currentGroupCall) {
-                            const { isSpeakingMap, groupCallId, meSignSource } = currentGroupCall;
-
-                            let params = isSpeakingMap.get(meSignSource);
-                            if (!params) {
-                                params = { isSpeaking: false, speakingTimer: null, cancelSpeakingTimer: null };
-                                isSpeakingMap.set(meSignSource, params);
-                            }
-
-                            const isSpeaking = value > 0.2;
-                            if (isSpeaking !== params.isSpeaking) {
-                                params.isSpeaking = isSpeaking;
-                                if (isSpeaking) {
-                                    clearTimeout(params.cancelSpeakingTimer);
-                                    params.speakingTimer = setTimeout(() => {
-                                        if (params.isSpeaking) {
-                                            TdLibController.send({
-                                                '@type': 'setGroupCallParticipantIsSpeaking',
-                                                source: meSignSource,
-                                                group_call_id : groupCallId,
-                                                is_speaking : true
-                                            });
-                                        }
-                                    }, 150);
-                                } else {
-                                    clearTimeout(params.cancelSpeakingTimer);
-                                    params.cancelSpeakingTimer = setTimeout(() => {
-                                        if (!params.isSpeaking) {
-                                            TdLibController.send({
-                                                '@type': 'setGroupCallParticipantIsSpeaking',
-                                                source: meSignSource,
-                                                group_call_id: groupCallId,
-                                                is_speaking: false
-                                            });
-                                        }
-                                    }, 1000);
-                                }
-                            }
-                        }
-                        break;
-                    }
-                    case 'input': {
-                        break;
-                    }
-                }
-
-                this.emit('clientUpdateStreamAmplitudeChange', update);
                 break;
             }
             default:
@@ -466,7 +420,7 @@ class CallStore extends EventEmitter {
                     audio: true,
                     video: false
                 };
-                streamManager = new StreamManager(GROUP_CALL_AMPLITUDE_ANALYZE_INTERVAL_MS);
+                streamManager = new StreamManager(GROUP_CALL_AMPLITUDE_ANALYSE_INTERVAL_MS);
                 streamManager.outputStream = await getStream(constraints, muted);
             }
         } catch (e) {
@@ -614,7 +568,7 @@ class CallStore extends EventEmitter {
                 isSpeakingMap: new Map()
             }
             this.setCurrentGroupCall(currentGroupCall);
-            this.addAmplitudeAnalyzer(streamManager.outputStream, null, 'output');
+            streamManager.addTrack(streamManager.outputStream, 'output');
             LOG_CALL('joinGroupCallInternal set currentGroupCall', groupCallId, currentGroupCall);
         }
 
@@ -688,20 +642,19 @@ class CallStore extends EventEmitter {
 
         currentGroupCall.description = description
 
-        const limit = 50;
-        LOG_CALL(`[tdweb] loadGroupCallParticipants limit=${limit}`);
+        LOG_CALL(`[tdweb] loadGroupCallParticipants limit=${GROUP_CALL_PARTICIPANTS_LOAD_LIMIT}`);
         const r1 = await TdLibController.send({
             '@type': 'loadGroupCallParticipants',
             group_call_id: groupCallId,
-            limit
+            limit: GROUP_CALL_PARTICIPANTS_LOAD_LIMIT
         });
         LOG_CALL(`[tdweb] loadGroupCallParticipants result`, r1);
 
-        LOG_CALL(`[tdweb] loadGroupCallParticipants limit=${limit}`);
+        LOG_CALL(`[tdweb] loadGroupCallParticipants limit=${GROUP_CALL_PARTICIPANTS_LOAD_LIMIT}`);
         const r2 = await TdLibController.send({
             '@type': 'loadGroupCallParticipants',
             group_call_id: groupCallId,
-            limit
+            limit: GROUP_CALL_PARTICIPANTS_LOAD_LIMIT
         });
         LOG_CALL(`[tdweb] loadGroupCallParticipants result`, r2);
 
@@ -837,8 +790,10 @@ class CallStore extends EventEmitter {
 
         try {
             if (streamManager) {
-                streamManager.outputStream.getTracks().forEach(t => t.stop());
-                this.addAmplitudeAnalyzer(null, streamManager.outputStream, 'output');
+                streamManager.outputStream.getTracks().forEach(t => {
+                    t.stop();
+                    streamManager.removeTrack(t);
+                });
             }
         } catch (e) {
             LOG_CALL('hangUp error 2', e);
@@ -920,7 +875,7 @@ class CallStore extends EventEmitter {
             const { currentGroupCall } = this;
             if (!currentGroupCall) return;
 
-            const { streamManager } = currentGroupCall;
+            const { streamManager, meSignSource } = currentGroupCall;
             if (!streamManager) return;
 
             const player = document.getElementById('group-call-player');
@@ -1181,76 +1136,6 @@ class CallStore extends EventEmitter {
             user_id: userId,
             is_muted: muted
         });
-    }
-
-    addAmplitudeAnalyzer(stream, oldStream, type) {
-        LOG_CALL('[analyser] addAmplitudeAnalyzer remove old', oldStream ? oldStream.getAudioTracks().length : 0, type);
-        if (oldStream) {
-            let streamAnalyser = null;
-            switch (type) {
-                case 'input': {
-                    streamAnalyser = this.inputStreamAnalyser;
-                    break;
-                }
-                case 'output': {
-                    streamAnalyser = this.outputStreamAnalyser;
-                    break;
-                }
-            }
-
-            if (streamAnalyser) {
-                const { sources, analyser, processor } = streamAnalyser;
-                for (let i = 0; i < sources.length; i++) {
-                    sources[i].disconnect();
-                }
-                // source.disconnect();
-                analyser.disconnect();
-                processor.disconnect();
-            }
-        }
-
-        LOG_CALL('[analyser] addAmplitudeAnalyzer add new', stream ? stream.getAudioTracks().length : 0, type);
-        if (stream) {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const analyser = audioContext.createAnalyser();
-            const sources = [];
-            const processor = audioContext.createScriptProcessor(2048 * 2, 1, 1);
-
-            switch (type) {
-                case 'input': {
-                    this.inputStreamAnalyser = { sources, analyser, processor };
-                    break;
-                }
-                case 'output': {
-                    this.outputStreamAnalyser = { sources, analyser, processor };
-                    break;
-                }
-            }
-
-            analyser.minDecibels = -100;
-            analyser.maxDecibels = -30;
-            analyser.smoothingTimeConstant = 0.05;
-            analyser.fftSize = 1024;
-
-            for (let t of stream.getAudioTracks()) {
-                const source = audioContext.createMediaStreamSource(new MediaStream([t]));
-                source.connect(analyser);
-                sources.push(source);
-            }
-            analyser.connect(processor);
-            processor.connect(audioContext.destination);
-            processor.onaudioprocess = () =>  {
-                const array = new Uint8Array(analyser.frequencyBinCount);
-                analyser.getByteFrequencyData(array);
-
-                // console.log('clientUpdateStreamAmplitudeChange', type, value);
-                TdLibController.clientUpdate({
-                    '@type': 'clientUpdateStreamAmplitudeChange',
-                    type,
-                    value: getAmplitude(array),
-                })
-            }
-        }
     }
 
     toggleMuteNewParticipants(groupCallId, mute) {

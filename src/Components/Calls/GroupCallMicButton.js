@@ -61,7 +61,7 @@ class GroupCallMicButton extends React.Component {
     componentDidMount() {
         this.switchButtonState(false);
 
-        CallStore.on('clientUpdateStreamAmplitudeChange', this.onClientUpdateStreamAmplitudeChange);
+        CallStore.on('clientUpdateGroupCallAmplitude', this.onClientUpdateGroupCallAmplitudeChange);
         CallStore.on('clientUpdateGroupCall', this.onClientUpdateGroupCall);
         CallStore.on('clientUpdateGroupCallConnectionState', this.onClientUpdateGroupCallConnectionState);
         CallStore.on('updateGroupCallParticipant', this.onUpdateGroupCallParticipant);
@@ -69,18 +69,24 @@ class GroupCallMicButton extends React.Component {
     }
 
     componentWillUnmount() {
-        CallStore.off('clientUpdateStreamAmplitudeChange', this.onClientUpdateStreamAmplitudeChange);
+        CallStore.off('clientUpdateGroupCallAmplitude', this.onClientUpdateGroupCallAmplitudeChange);
         CallStore.off('clientUpdateGroupCall', this.onClientUpdateGroupCall);
         CallStore.off('clientUpdateGroupCallConnectionState', this.onClientUpdateGroupCallConnectionState);
         CallStore.off('updateGroupCallParticipant', this.onUpdateGroupCallParticipant);
         CallStore.off('updateGroupCall', this.onUpdateGroupCall);
     }
 
-    onClientUpdateStreamAmplitudeChange = update => {
-        const { value, type } = update;
-        if (type !== 'output') return;
+    onClientUpdateGroupCallAmplitudeChange = update => {
+        const { amplitudes } = update;
+        if (!amplitudes.length) return;
 
-        this.buttonRef.current && this.buttonRef.current.setAmplitude(value);
+        for (let i = 0; i < amplitudes.length; i++) {
+            const { type, value } = amplitudes[i];
+            if (type === 'output') {
+                this.buttonRef.current && this.buttonRef.current.setAmplitude(value);
+                return;
+            }
+        }
     };
 
     switchButtonState(animated = true) {

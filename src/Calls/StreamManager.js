@@ -7,6 +7,7 @@
 
 import { getAmplitude } from './Utils';
 import { LOG_CALL } from '../Stores/CallStore';
+import { GROUP_CALL_AMPLITUDE_ANALYSE_COUNT_MAX } from '../Constants';
 import TdLibController from '../Controllers/TdLibController';
 
 export default class StreamManager {
@@ -18,23 +19,23 @@ export default class StreamManager {
         this.items = [];
         this.inputStream = new MediaStream();
         this.outputStream = null;
+        this.counter = 0;
     }
 
     addTrack(stream, type) {
-        LOG_CALL('[manager] addTrack', type, stream);
-
         if (!stream) return;
 
         const tracks = stream.getAudioTracks();
         if (!tracks.length) return;
 
         const track = tracks[0];
+        LOG_CALL('[manager] addTrack', type, track, stream);
         if (!track) return;
 
         const { context, items, inputStream } = this;
 
         // add analyser
-        const source = Number(stream.id.substring(6));
+        const source = type === 'output' ? stream.id : Number(stream.id.substring(6));
         const streamSource = context.createMediaStreamSource(stream);
         const analyser = context.createAnalyser();
 
@@ -51,9 +52,26 @@ export default class StreamManager {
 
         // connect Web Audio API
         streamSource.connect(analyser);
-        analyser.connect(context.destination);
+        // analyser.connect(context.destination);
 
         this.removeTrack(track);
+
+        switch (type) {
+            case 'input': {
+                for (let i = 0; i < items.length; i++) {
+                    const { track: t, type } = items[i];
+                    if (t.e === source && type === 'input') {
+                        items.splice(i, 1);
+                        inputStream.removeTrack(t);
+                        break;
+                    }
+                }
+
+                inputStream.addTrack(track);
+                break;
+            }
+        }
+
         items.push({
             type,
             source,
@@ -62,13 +80,6 @@ export default class StreamManager {
             streamSource,
             analyser,
         });
-
-        switch (type) {
-            case 'input': {
-                inputStream.addTrack(track);
-                break;
-            }
-        }
 
         this.changeTimer();
     }
@@ -79,21 +90,25 @@ export default class StreamManager {
 
         const { items, inputStream } = this;
 
-        const source = track.e;
-        let type = null;
-        for (let i = 0; i < items.length; i++) {
-            const { track: t, type: tp } = items[i];
-            if (t.e === source) {
-                items.splice(i, 1);
-                type = tp;
-                break;
-            }
-        }
-
-        switch (type) {
-            case 'input': {
-                inputStream.removeTrack(track);
-                break;
+        let handled = false;
+        for (let i = 0; i < items.length && !handled; i++) {
+            const { track: t, type } = items[i];
+            switch (type) {
+                case 'input': {
+                    if (t === track) {
+                        items.splice(i, 1);
+                        inputStream.removeTrack(track);
+                        handled = true;
+                    }
+                    break;
+                }
+                case 'output': {
+                    if (t === track) {
+                        items.splice(i, 1);
+                        handled = true;
+                    }
+                    break;
+                }
             }
         }
 
@@ -128,9 +143,14 @@ export default class StreamManager {
 
     analyse() {
         const { items } = this;
-        const amplitudes = items.map(x => this.getAmplitude(x));
+        const filteredItems = this.counter % 3 === 0 ? items : items.filter(x => x.type === 'output');
+        const amplitudes = filteredItems.slice(0, GROUP_CALL_AMPLITUDE_ANALYSE_COUNT_MAX).map(x => this.getAmplitude(x));
+        this.counter++;
+        if (this.counter >= 10) {
+            this.counter = 0;
+        }
 
-        // LOG_CALL('[manager] analyse', amplitudes);
+        // LOG_CALL('[manager] analyse', this.counter, amplitudes);
         TdLibController.clientUpdate({
             '@type': 'clientUpdateGroupCallAmplitude',
             amplitudes
