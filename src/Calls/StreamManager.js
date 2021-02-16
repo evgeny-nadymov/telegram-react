@@ -38,6 +38,8 @@ export default class StreamManager {
         const source = type === 'output' ? stream.id : Number(stream.id.substring(6));
         const streamSource = context.createMediaStreamSource(stream);
         const analyser = context.createAnalyser();
+        const gain = context.createGain();
+        const streamDestination = context.createMediaStreamDestination();
 
         track.e = source;
         track.onended = () => {
@@ -54,8 +56,7 @@ export default class StreamManager {
         streamSource.connect(analyser);
         // analyser.connect(context.destination);
 
-        this.removeTrack(track);
-
+        // this.removeTrack(track);
         switch (type) {
             case 'input': {
                 for (let i = 0; i < items.length; i++) {
@@ -143,17 +144,18 @@ export default class StreamManager {
 
     analyse() {
         const { items } = this;
-        const filteredItems = this.counter % 3 === 0 ? items : items.filter(x => x.type === 'output');
+        const all = this.counter % 3 === 0;
+        const filteredItems = all ? items : items.filter(x => x.type === 'output');
         const amplitudes = filteredItems.slice(0, GROUP_CALL_AMPLITUDE_ANALYSE_COUNT_MAX).map(x => this.getAmplitude(x));
         this.counter++;
-        if (this.counter >= 10) {
+        if (this.counter >= 1000) {
             this.counter = 0;
         }
 
-        // LOG_CALL('[manager] analyse', this.counter, amplitudes);
         TdLibController.clientUpdate({
             '@type': 'clientUpdateGroupCallAmplitude',
-            amplitudes
+            amplitudes,
+            type: all ? 'all' : 'outputOnly'
         });
     }
 }

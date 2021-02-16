@@ -45,6 +45,7 @@ class CallStore extends EventEmitter {
         this.items = new Map();
         this.participants = new Map();
         this.panelOpened = false;
+        this.animated = true;
     };
 
     onUpdate = async update => {

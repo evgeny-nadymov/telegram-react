@@ -60,8 +60,8 @@ class TopBar extends React.Component {
         this.focused = true;
         this.resizing = false;
         this.lastUpdateTime = new Date();
-        this.amplitude = 0;
-        this.amplitude2 = 0;
+        this.amplitude = 0.0;
+        this.amplitude2 = 0.0;
 
         this.states = [
             new WeavingState(MUTE_BUTTON_STATE_UNMUTE),

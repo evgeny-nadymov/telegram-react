@@ -31,7 +31,7 @@ class GroupCallMicButton extends React.Component {
             call,
             status,
             connected,
-            animated: true
+            animated: CallStore.animated
         };
     }
 
