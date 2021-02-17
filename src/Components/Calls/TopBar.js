@@ -70,7 +70,7 @@ class TopBar extends React.Component {
             new WeavingState(MUTE_BUTTON_STATE_MUTED_BY_ADMIN),
         ];
         this.prevState = null;
-        this.currentState = this.states[MUTE_BUTTON_STATE_MUTED_BY_ADMIN];
+        this.currentState = this.states[MUTE_BUTTON_STATE_CONNECTING];
         this.progressToState = 1.0;
 
         this.scale = window.devicePixelRatio;
@@ -167,7 +167,7 @@ class TopBar extends React.Component {
             return;
         }
         const { lbd, lbd1, lbd2, scale, left, top, right, bottom, currentState, previousState, focused, resizing } = this;
-        if (!focused && !resizing) {
+        if (!focused && !resizing && this.progressToState >= 1.0) {
             return;
         }
 

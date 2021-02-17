@@ -133,7 +133,7 @@ class CallStore extends EventEmitter {
                     if (currentGroupCall) {
                         const { groupCallId, streamManager } = currentGroupCall;
                         if (group_call_id === groupCallId) {
-                            const audioTracks = streamManager.outputStream.getAudioTracks();
+                            const audioTracks = streamManager.inputStream.getAudioTracks();
                             if (audioTracks.length > 0) {
                                 audioTracks[0].enabled = false;
                             }
@@ -422,8 +422,10 @@ class CallStore extends EventEmitter {
                     audio: true,
                     video: false
                 };
+                const stream = await getStream(constraints, muted);
+
                 streamManager = new StreamManager(GROUP_CALL_AMPLITUDE_ANALYSE_INTERVAL_MS);
-                streamManager.outputStream = await getStream(constraints, muted);
+                streamManager.addTrack(stream, 'input');
             }
         } catch (e) {
             ERROR_CALL('joinGroupCall getStream error', e);
@@ -433,7 +435,7 @@ class CallStore extends EventEmitter {
                 ok: LStore.getString('OK')
             });
         }
-        if (!streamManager || !streamManager.outputStream) return;
+        if (!streamManager || !streamManager.inputStream) return;
 
         LOG_CALL('joinGroupCall has another', groupCallId, currentGroupCall);
         if (currentGroupCall && !rejoin) {
@@ -546,10 +548,10 @@ class CallStore extends EventEmitter {
             LOG_CALL(`[conn] ondatachannel`);
         };
 
-        if (streamManager.outputStream) {
-            streamManager.outputStream.getTracks().forEach(track => {
+        if (streamManager.inputStream) {
+            streamManager.inputStream.getTracks().forEach(track => {
                 LOG_CALL('[conn] addTrack', track);
-                connection.addTrack(track, streamManager.outputStream);
+                connection.addTrack(track, streamManager.inputStream);
             });
         }
 
@@ -570,7 +572,6 @@ class CallStore extends EventEmitter {
                 isSpeakingMap: new Map()
             }
             this.setCurrentGroupCall(currentGroupCall);
-            streamManager.addTrack(streamManager.outputStream, 'output');
             LOG_CALL('joinGroupCallInternal set currentGroupCall', groupCallId, currentGroupCall);
         }
 
@@ -792,7 +793,7 @@ class CallStore extends EventEmitter {
 
         try {
             if (streamManager) {
-                streamManager.outputStream.getTracks().forEach(t => {
+                streamManager.inputStream.getTracks().forEach(t => {
                     t.stop();
                     streamManager.removeTrack(t);
                 });
@@ -803,7 +804,7 @@ class CallStore extends EventEmitter {
 
         try {
             if (streamManager) {
-                streamManager.inputStream.getTracks().forEach(t => {
+                streamManager.outputStream.getTracks().forEach(t => {
                     t.stop();
                     streamManager.removeTrack(t);
                 });
@@ -850,7 +851,7 @@ class CallStore extends EventEmitter {
             const audio = tags.length > 0 ? tags[0] : null;
             if (!audio) return;
 
-            audio.srcObject = streamManager.inputStream;
+            audio.srcObject = streamManager.outputStream;
         } else {
             const players = document.getElementById('players');
             if (!players) return;
@@ -891,13 +892,13 @@ class CallStore extends EventEmitter {
                 this.removeTrack(track, streamManager, endpoint, stream);
             }
 
-            streamManager.addTrack(stream, 'input');
+            streamManager.addTrack(stream, 'output');
 
             if (!audio) {
                 audio = document.createElement('audio');
                 audio.e = endpoint;
                 audio.autoplay = true;
-                audio.srcObject = streamManager.inputStream;
+                audio.srcObject = streamManager.outputStream;
                 audio.volume = 1.0;
                 if (typeof audio.sinkId !== 'undefined') {
                     const { outputDeviceId } = currentGroupCall;
@@ -909,7 +910,7 @@ class CallStore extends EventEmitter {
                 player.appendChild(audio);
                 audio.play();
             } else {
-                audio.srcObject = streamManager.inputStream;
+                audio.srcObject = streamManager.outputStream;
             }
         } else {
             const players = document.getElementById('players');
@@ -1028,7 +1029,7 @@ class CallStore extends EventEmitter {
         const { connection, streamManager } = currentGroupCall;
         if (!connection) return;
 
-        const { outputStream } = streamManager;
+        const { inputStream } = streamManager;
 
         // const videoTrack = stream.getVideoTracks()[0];
         // const sender = pc.getSenders().find(function(s) {
@@ -1037,16 +1038,14 @@ class CallStore extends EventEmitter {
         // sender.replaceTrack(videoTrack);
 
         const audioTrack = stream.getAudioTracks()[0];
-        console.log('[track] replace', stream, audioTrack.getSettings());
         const sender2 = connection.getSenders().find(x => {
             return x.track.kind === audioTrack.kind;
         });
+        const oldTrack = sender2.track;
         await sender2.replaceTrack(audioTrack);
 
-        // outputStream.getAudioTracks().forEach(x => {
-        //
-        // });
-        streamManager.outputStream = stream;
+        oldTrack.stop();
+        streamManager.replaceInputAudio(stream, oldTrack);
     }
 
     async setInputAudioDeviceId(deviceId, stream) {
@@ -1068,29 +1067,6 @@ class CallStore extends EventEmitter {
         return null;
     }
 
-    // changeStream(stream) {
-    //     const { currentGroupCall } = this;
-    //     if (!currentGroupCall) return;
-    //
-    //     const { stream: oldStream, connection } = currentGroupCall;
-    //     try {
-    //         if (oldStream) {
-    //             oldStream.getTracks().forEach(t => {
-    //                 // connection.removeTrack(t);
-    //                 t.stop();
-    //             });
-    //         }
-    //
-    //         if (stream) {
-    //             stream.getTracks().forEach(t => {
-    //                 connection.addTrack(t);
-    //             });
-    //         }
-    //     } catch (e) {
-    //         LOG_CALL('changeStream error', e);
-    //     }
-    // }
-
     onTrack(event) {
         this.tryAddTrack(event);
     }
@@ -1102,7 +1078,7 @@ class CallStore extends EventEmitter {
         const { groupCallId, streamManager } = currentGroupCall;
         if (!streamManager) return true;
 
-        const audioTracks = streamManager.outputStream.getAudioTracks();
+        const audioTracks = streamManager.inputStream.getAudioTracks();
         if (audioTracks.length > 0) {
             return !audioTracks[0].enabled;
         }
@@ -1117,7 +1093,7 @@ class CallStore extends EventEmitter {
         const { groupCallId, streamManager } = currentGroupCall;
         if (!streamManager) return;
 
-        const audioTracks = streamManager.outputStream.getAudioTracks();
+        const audioTracks = streamManager.inputStream.getAudioTracks();
         if (audioTracks.length > 0) {
             audioTracks[0].enabled = !muted;
         }

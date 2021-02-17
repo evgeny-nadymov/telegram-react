@@ -17,8 +17,8 @@ export default class StreamManager {
         this.timer = null;
 
         this.items = [];
-        this.inputStream = new MediaStream();
-        this.outputStream = null;
+        this.outputStream = new MediaStream();
+        this.inputStream = null;
         this.counter = 0;
     }
 
@@ -32,10 +32,10 @@ export default class StreamManager {
         LOG_CALL('[manager] addTrack', type, track, stream);
         if (!track) return;
 
-        const { context, items, inputStream } = this;
+        const { context, items, inputStream, outputStream } = this;
 
         // add analyser
-        const source = type === 'output' ? stream.id : Number(stream.id.substring(6));
+        const source = type === 'input' ? stream.id : Number(stream.id.substring(6));
         const streamSource = context.createMediaStreamSource(stream);
         const analyser = context.createAnalyser();
         const gain = context.createGain();
@@ -59,16 +59,24 @@ export default class StreamManager {
         // this.removeTrack(track);
         switch (type) {
             case 'input': {
+                if (!inputStream) {
+                    this.inputStream = stream;
+                } else {
+                    this.inputStream.addTrack(track);
+                }
+                break;
+            }
+            case 'output': {
                 for (let i = 0; i < items.length; i++) {
                     const { track: t, type } = items[i];
                     if (t.e === source && type === 'input') {
                         items.splice(i, 1);
-                        inputStream.removeTrack(t);
+                        outputStream.removeTrack(t);
                         break;
                     }
                 }
 
-                inputStream.addTrack(track);
+                outputStream.addTrack(track);
                 break;
             }
         }
@@ -89,12 +97,20 @@ export default class StreamManager {
         // LOG_CALL('[manager] removeTrack', track);
         if (!track) return;
 
-        const { items, inputStream } = this;
+        const { items, inputStream, outputStream } = this;
 
         let handled = false;
         for (let i = 0; i < items.length && !handled; i++) {
             const { track: t, type } = items[i];
             switch (type) {
+                case 'output': {
+                    if (t === track) {
+                        items.splice(i, 1);
+                        outputStream.removeTrack(track);
+                        handled = true;
+                    }
+                    break;
+                }
                 case 'input': {
                     if (t === track) {
                         items.splice(i, 1);
@@ -103,17 +119,17 @@ export default class StreamManager {
                     }
                     break;
                 }
-                case 'output': {
-                    if (t === track) {
-                        items.splice(i, 1);
-                        handled = true;
-                    }
-                    break;
-                }
             }
         }
 
         this.changeTimer();
+    }
+
+    replaceInputAudio(stream, oldTrack) {
+        if (!stream) return;
+
+        this.removeTrack(oldTrack);
+        this.addTrack(stream, 'input');
     }
 
     changeTimer() {
@@ -145,8 +161,8 @@ export default class StreamManager {
     analyse() {
         const { items } = this;
         const all = this.counter % 3 === 0;
-        const filteredItems = all ? items : items.filter(x => x.type === 'output');
-        const amplitudes = filteredItems.slice(0, GROUP_CALL_AMPLITUDE_ANALYSE_COUNT_MAX).map(x => this.getAmplitude(x));
+        const filteredItems = all ? items : items.filter(x => x.type === 'input');
+        const amplitudes = filteredItems.filter(x => x.track.kind === 'audio').slice(0, GROUP_CALL_AMPLITUDE_ANALYSE_COUNT_MAX).map(x => this.getAmplitude(x));
         this.counter++;
         if (this.counter >= 1000) {
             this.counter = 0;
@@ -155,7 +171,7 @@ export default class StreamManager {
         TdLibController.clientUpdate({
             '@type': 'clientUpdateGroupCallAmplitude',
             amplitudes,
-            type: all ? 'all' : 'outputOnly'
+            type: all ? 'all' : 'input'
         });
     }
 }

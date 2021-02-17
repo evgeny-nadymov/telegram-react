@@ -109,7 +109,7 @@ class GroupCallTopPanel extends React.Component {
             max = value > max ? value : max;
         }
 
-        if (type !== 'outputOnly') {
+        if (type !== 'input') {
             this.topBarRef.current && this.topBarRef.current.setAmplitude(max);
         }
     };

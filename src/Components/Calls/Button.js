@@ -343,7 +343,7 @@ class Button extends React.Component {
             new WeavingState(MUTE_BUTTON_STATE_CONNECTING),
             new WeavingState(MUTE_BUTTON_STATE_MUTED_BY_ADMIN),
         ];
-        this.switchProgress = 1;
+        this.switchProgress = 1.0;
         this.muteButtonState = MUTE_BUTTON_STATE_MUTE;
         this.prevState = null;
         this.currentState = this.states[this.muteButtonState];
@@ -503,7 +503,7 @@ class Button extends React.Component {
         if (!this.mounted) {
             return;
         }
-        if (!this.focused) {
+        if (!this.focused && this.switchProgress >= 1.0) {
             return;
         }
         // console.log('[button] draw', [this.focused, this.mounted]);

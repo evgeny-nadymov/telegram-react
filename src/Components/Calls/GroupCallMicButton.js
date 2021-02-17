@@ -82,7 +82,7 @@ class GroupCallMicButton extends React.Component {
 
         for (let i = 0; i < amplitudes.length; i++) {
             const { type, value } = amplitudes[i];
-            if (type === 'output') {
+            if (type === 'input') {
                 this.buttonRef.current && this.buttonRef.current.setAmplitude(value);
                 return;
             }

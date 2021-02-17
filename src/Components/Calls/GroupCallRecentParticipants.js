@@ -91,15 +91,28 @@ class GroupCallRecentParticipants extends React.Component {
 
         clearTimeout(this.timeout);
         if (!speakers.length) {
-            this.setState({ speakers });
+            this.setState({ speakers: [] });
         } else {
             this.loadContent(speakers);
 
             this.timeout = setTimeout(() => {
-                this.setState({ speakers });
+                this.updateSpeakers();
             }, PROFILE_PHOTO_PRELOAD_TIME_MS);
         }
     };
+
+    updateSpeakers() {
+        const { id } = this.props;
+
+        let speakers = [];
+        const groupCall = CallStore.get(id);
+        if (groupCall) {
+            const { recent_speakers } = groupCall;
+            speakers = recent_speakers;
+        }
+
+        this.setState({ speakers });
+    }
 
     render() {
         const { speakers } = this.state;

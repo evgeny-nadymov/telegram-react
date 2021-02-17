@@ -10,13 +10,13 @@ import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
 import AddMemberIcon from '../../Assets/Icons/AddMember';
 import GroupCallParticipant from './GroupCallParticipant';
-import { loadUsersContent } from '../../Utils/File';
 import { albumHistoryEquals, orderCompare } from '../../Utils/Common';
+import { canManageVoiceChats } from '../../Utils/Chat';
+import { loadUsersContent } from '../../Utils/File';
 import { PROFILE_PHOTO_PRELOAD_TIME_MS } from '../../Constants';
 import CallStore from '../../Stores/CallStore';
 import FileStore from '../../Stores/FileStore';
 import './GroupCallParticipants.css';
-import { canManageVoiceChats, chatListEquals } from '../../Utils/Chat';
 
 class GroupCallParticipants extends React.Component {
     constructor(props) {
@@ -73,26 +73,30 @@ class GroupCallParticipants extends React.Component {
 
         if (group_call_id !== groupCallId) return;
 
-        const participantsMap = CallStore.participants.get(groupCallId) || new Map();
-        const participants = Array.from(participantsMap.values()).filter(x => x.order !== '0').sort((a, b) => orderCompare(b.order, a.order));
-
         const { order, user_id } = participant;
         if (order !== '0') {
             this.participantsMap.set(user_id, user_id);
             this.loadContent();
 
-            // wait 500 ms for profile photo
+            // wait for profile photo
             setTimeout(() => {
-                this.setState({
-                    participants: participants.map(x => x.user_id)
-                });
+                this.updateParticipants();
             }, PROFILE_PHOTO_PRELOAD_TIME_MS);
         } else {
-            this.setState({
-                participants: participants.map(x => x.user_id)
-            });
+            this.updateParticipants();
         }
     };
+
+    updateParticipants() {
+        const { groupCallId } = this.props;
+
+        const participantsMap = CallStore.participants.get(groupCallId) || new Map();
+        const participants = Array.from(participantsMap.values()).filter(x => x.order !== '0').sort((a, b) => orderCompare(b.order, a.order));
+
+        this.setState({
+            participants: participants.map(x => x.user_id)
+        });
+    }
 
     preloadContent = () => {
         const { participants } = this.state;
