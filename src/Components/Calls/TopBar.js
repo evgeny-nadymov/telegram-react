@@ -114,7 +114,10 @@ class TopBar extends React.Component {
         this.left = 0 * this.scale;
         this.top = 20 * this.scale;
         this.bottom = 63 * this.scale;
+
         const topBar = document.getElementById('top-bar');
+        if (!topBar) return;
+
         this.right = topBar.offsetWidth * this.scale;
         this.forceUpdate();
     }

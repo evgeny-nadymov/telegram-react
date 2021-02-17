@@ -267,8 +267,7 @@ class GroupCallTopPanel extends React.Component {
                             'group-call-top-panel-connecting': !connected,
 
                         })}
-                    >
-                    </div>
+                    />
                 )}
                 <div className='group-call-top-panel-buttons' onClick={this.handleOpenGroupCall}>
                     <IconButton className='header-player-button' style={{ color: 'white' }} onClick={this.handleMicrophone}>

@@ -22,7 +22,7 @@ import TdLibController from '../Controllers/TdLibController';
 const JOIN_TRACKS = true;
 
 export function LOG_CALL(str, ...data) {
-    return;
+    // return;
     console.log('[call]' + str, ...data);
 }
 
@@ -1028,6 +1028,8 @@ class CallStore extends EventEmitter {
         const { connection, streamManager } = currentGroupCall;
         if (!connection) return;
 
+        const { outputStream } = streamManager;
+
         // const videoTrack = stream.getVideoTracks()[0];
         // const sender = pc.getSenders().find(function(s) {
         //     return s.track.kind == videoTrack.kind;
@@ -1035,11 +1037,15 @@ class CallStore extends EventEmitter {
         // sender.replaceTrack(videoTrack);
 
         const audioTrack = stream.getAudioTracks()[0];
+        console.log('[track] replace', stream, audioTrack.getSettings());
         const sender2 = connection.getSenders().find(x => {
             return x.track.kind === audioTrack.kind;
         });
         await sender2.replaceTrack(audioTrack);
 
+        // outputStream.getAudioTracks().forEach(x => {
+        //
+        // });
         streamManager.outputStream = stream;
     }
 

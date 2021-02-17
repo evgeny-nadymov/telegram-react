@@ -203,7 +203,7 @@ class GroupCallSettings extends React.Component {
         });
     };
 
-    handleSelectDevice = (type, deviceId) => {
+    handleSelectDevice = async (type, deviceId) => {
         this.handleCloseDeviceSelect();
 
         switch (type) {
@@ -215,15 +215,39 @@ class GroupCallSettings extends React.Component {
                 break;
             }
             case 'inputAudio': {
-                // const stream = getStream({
-                //     audio: { exact: deviceId },
-                //     video: false
-                // });
-                //
-                // this.setState({
-                //     inputAudioDeviceId: deviceId,
-                //     inputAudioStream: stream
-                // });
+                const { currentGroupCall } = CallStore;
+                if (!currentGroupCall) return;
+
+                const { streamManager } = currentGroupCall;
+                if (!streamManager) return;
+
+                const { outputStream } = streamManager;
+                if (outputStream) {
+                    const audioTrack = outputStream.getAudioTracks()[0];
+                    if (audioTrack && audioTrack.getSettings().deviceId === deviceId) {
+                        return;
+                    }
+                }
+
+                const { inputAudioStream, inputAudioDeviceId } = this.state;
+                if (inputAudioDeviceId === deviceId) return;
+
+                if (inputAudioStream) {
+                    inputAudioStream.getAudioTracks().forEach(t => {
+                        t.stop()
+                    });
+                }
+
+                const stream = await getStream({
+                    audio: { deviceId: { exact: deviceId } },
+                    video: false
+                });
+
+                console.log('[track] getStream', deviceId, stream, stream.getAudioTracks()[0].getSettings());
+                this.setState({
+                    inputAudioDeviceId: deviceId,
+                    inputAudioStream: stream
+                });
                 break;
             }
             case 'inputVideo': {
@@ -250,6 +274,18 @@ class GroupCallSettings extends React.Component {
         });
 
         CallStore.toggleMuteNewParticipants(groupCallId, !muteNewParticipants);
+    };
+
+    handleDone = async () => {
+        const { onClose } = this.props;
+        const { inputAudioStream } = this.state;
+
+        // replace track if needed
+        if (inputAudioStream) {
+            await CallStore.replaceInputAudioDevice(inputAudioStream);
+        }
+
+        onClose && onClose();
     };
 
     render() {
@@ -389,7 +425,7 @@ class GroupCallSettings extends React.Component {
                         )}
                     </div>
                     <div className='group-call-settings-panel-buttons'>
-                        <div className='group-call-settings-panel-done' onClick={onClose}>
+                        <div className='group-call-settings-panel-done' onClick={this.handleDone}>
                             {t('Done')}
                         </div>
                     </div>
