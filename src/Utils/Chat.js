@@ -72,7 +72,7 @@ export function canSwitchBlocked(chatId) {
         }
         case 'chatTypePrivate':
         case 'chatTypeSecret': {
-            return true;
+            return UserStore.getMyId() !== chat.type.user_id;
         }
     }
 
