@@ -1053,18 +1053,48 @@ class CallStore extends EventEmitter {
         if (!currentGroupCall) return;
 
         await this.replaceInputAudioDevice(stream);
-        currentGroupCall.inputAudioDeviceId = deviceId;
     }
 
     getInputAudioDeviceId() {
         const { currentGroupCall } = this;
         if (!currentGroupCall) return null;
 
-        return currentGroupCall.inputAudioDeviceId;
+        const { connection } = currentGroupCall;
+        if (!connection) return null;
+
+        let deviceId = null
+        connection.getSenders().forEach(s => {
+            const { track } = s;
+            if (track && track.kind === 'audio') {
+                const settings = track.getSettings();
+                if (settings) {
+                    deviceId = settings.deviceId;
+                }
+            }
+        });
+
+        return deviceId;
     }
 
     getInputVideoDeviceId() {
-        return null;
+        const { currentGroupCall } = this;
+        if (!currentGroupCall) return null;
+
+        const { connection } = currentGroupCall;
+        if (!connection) return null;
+
+        let deviceId = null
+        connection.getSenders().forEach(s => {
+            const { track } = s;
+            if (track && track.kind === 'video') {
+                const settings = track.getSettings();
+                if (settings) {
+                    deviceId = settings.deviceId;
+                }
+            }
+        });
+
+        return deviceId;
     }
 
     onTrack(event) {

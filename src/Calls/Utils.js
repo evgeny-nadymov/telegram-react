@@ -138,7 +138,7 @@ export function getCallStatus(call) {
     return { connected, status };
 }
 
-export function getAmplitude(array) {
+export function getAmplitude(array, scale = 3) {
     if (!array) return 0;
 
     const { length } = array;
@@ -148,5 +148,5 @@ export function getAmplitude(array) {
     }
     const rms = Math.sqrt(total / length) / 255;
 
-    return Math.min(1, rms * 3);
+    return Math.min(1, rms * scale);
 }

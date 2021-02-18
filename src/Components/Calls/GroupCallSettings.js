@@ -11,6 +11,7 @@ import { withTranslation } from 'react-i18next';
 import IconButton from '@material-ui/core/IconButton';
 import Switch from '@material-ui/core/Switch';
 import CloseIcon from '../../Assets/Icons/Close';
+import GroupCallMicAmplitude from './GroupCallMicAmplitude';
 import KeyboardManager, { KeyboardHandler } from '../Additional/KeyboardManager';
 import { modalManager } from '../../Utils/Modal';
 import { copy } from '../../Utils/Text';
@@ -106,6 +107,7 @@ class GroupCallSettings extends React.Component {
     }
 
     componentDidMount() {
+        this.handleSelectDevice('inputAudio', CallStore.getInputAudioDeviceId());
         navigator.mediaDevices.addEventListener('devicechange', this.onDeviceChange);
         KeyboardManager.add(this.keyboardHandler);
         CallStore.on('updateGroupCall', this.onUpdateGroupCall);
@@ -220,16 +222,8 @@ class GroupCallSettings extends React.Component {
                 const { streamManager } = currentGroupCall;
                 if (!streamManager) return;
 
-                const { inputStream } = streamManager;
-                if (inputStream) {
-                    const audioTrack = inputStream.getAudioTracks()[0];
-                    if (audioTrack && audioTrack.getSettings().deviceId === deviceId) {
-                        return;
-                    }
-                }
-
                 const { inputAudioStream, inputAudioDeviceId } = this.state;
-                if (inputAudioDeviceId === deviceId) return;
+                if (inputAudioDeviceId === deviceId && inputAudioStream) return;
 
                 if (inputAudioStream) {
                     inputAudioStream.getAudioTracks().forEach(t => {
@@ -278,9 +272,14 @@ class GroupCallSettings extends React.Component {
         const { onClose } = this.props;
         const { inputAudioDeviceId, inputAudioStream } = this.state;
 
-        // replace audio track if needed
         if (inputAudioStream) {
-            await CallStore.setInputAudioDeviceId(inputAudioDeviceId, inputAudioStream);
+            if (inputAudioDeviceId !== CallStore.getInputAudioDeviceId()) {
+                await CallStore.setInputAudioDeviceId(inputAudioDeviceId, inputAudioStream);
+            } else {
+                inputAudioStream.getAudioTracks().forEach(t => {
+                    t.stop();
+                });
+            }
         }
 
         onClose && onClose();
@@ -303,6 +302,7 @@ class GroupCallSettings extends React.Component {
         const { groupCallId, t } = this.props;
         const {
             inputAudioDeviceId,
+            inputAudioStream,
             inputAudio,
             inputVideoDeviceId,
             inputVideo,
@@ -312,6 +312,7 @@ class GroupCallSettings extends React.Component {
             muteNewParticipants,
             allowedChangeMuteNewParticipants
         } = this.state;
+
 
         const outputDeviceInfo = output.find(x => x.deviceId === outputDeviceId || !outputDeviceId && x.deviceId === 'default');
         const outputString = !outputDeviceInfo || outputDeviceInfo.deviceId === 'default' || !outputDeviceInfo.label ? t('Default') : outputDeviceInfo.label;
@@ -371,18 +372,7 @@ class GroupCallSettings extends React.Component {
             );
         }
 
-        let d = '';
-        const rects = [];
-        for (let i = 0; i < 35; i++) {
-            const x = i * 8;
-            rects.push(<rect key={i} x={x} y={0} height={18} width={3} fill='currentColor' rx={1} ry={1} strokeWidth={0}/>);
-        }
 
-        const svg = (
-            <svg className='waveform-bars' viewBox='0 0 275 18' style={{ width: 275, height: 18, color: '#91979E', padding: '10px 22px' }}>
-                {rects}
-            </svg>
-        );
 
         const canManage = canManageVoiceChats(chatId);
         // console.log('[call][GroupCallSettings] render', muteNewParticipants, allowedChangeMuteNewParticipants);
@@ -422,8 +412,7 @@ class GroupCallSettings extends React.Component {
                             <div className='group-call-settings-panel-item-title'>{t('Microphone')}</div>
                             <div className='group-call-settings-panel-item-subtitle'>{inputAudioString}</div>
                         </div>
-                        {svg}
-
+                        <GroupCallMicAmplitude stream={inputAudioStream}/>
                         { username && (
                             <div className='group-call-settings-panel-item' onClick={this.handleCopyLink}>
                                 {t('VoipGroupCopyInviteLink')}
