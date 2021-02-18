@@ -68,13 +68,13 @@ class GroupCallSettings extends React.Component {
             const { devices } = CallStore;
 
             const outputDeviceId = CallStore.getOutputDeviceId();
-            const output = (devices || []).filter(x => x.kind === 'audiooutput');
+            const output = (devices || []).filter(x => x.kind === 'audiooutput' && x.deviceId);
 
             const inputAudioDeviceId = CallStore.getInputAudioDeviceId();
-            const inputAudio = (devices || []).filter(x => x.kind === 'audioinput');
+            const inputAudio = (devices || []).filter(x => x.kind === 'audioinput' && x.deviceId);
 
             const inputVideoDeviceId = CallStore.getInputVideoDeviceId();
-            const inputVideo = (devices || []).filter(x => x.kind === 'videoinput');
+            const inputVideo = (devices || []).filter(x => x.kind === 'videoinput' && x.deviceId);
 
             let muteSettings = { };
             const groupCall = CallStore.get(groupCallId);
@@ -109,12 +109,14 @@ class GroupCallSettings extends React.Component {
     componentDidMount() {
         this.handleSelectDevice('inputAudio', CallStore.getInputAudioDeviceId());
         navigator.mediaDevices.addEventListener('devicechange', this.onDeviceChange);
+        // navigator.permissions.addEventListener('onchange', this.onDeviceChange);
         KeyboardManager.add(this.keyboardHandler);
         CallStore.on('updateGroupCall', this.onUpdateGroupCall);
     }
 
     componentWillUnmount() {
         navigator.mediaDevices.removeEventListener('devicechange', this.onDeviceChange);
+        // navigator.permissions.removeEventListener('onchange', this.onDeviceChange);
         KeyboardManager.remove(this.keyboardHandler);
         CallStore.off('updateGroupCall', this.onUpdateGroupCall);
     }
@@ -142,13 +144,13 @@ class GroupCallSettings extends React.Component {
         CallStore.devices = devices;
 
         const outputDeviceId = CallStore.getOutputDeviceId();
-        const output = (devices || []).filter(x => x.kind === 'audiooutput');
+        const output = (devices || []).filter(x => x.kind === 'audiooutput' && x.deviceId);
 
         const inputAudioDeviceId = CallStore.getInputAudioDeviceId();
-        const inputAudio = (devices || []).filter(x => x.kind === 'audioinput');
+        const inputAudio = (devices || []).filter(x => x.kind === 'audioinput' && x.deviceId);
 
         const inputVideoDeviceId = CallStore.getInputVideoDeviceId();
-        const inputVideo = (devices || []).filter(x => x.kind === 'videoinput');
+        const inputVideo = (devices || []).filter(x => x.kind === 'videoinput' && x.deviceId);
 
         this.setState({
             devices,
@@ -193,6 +195,23 @@ class GroupCallSettings extends React.Component {
     };
 
     handleOpenDeviceSelect = async type => {
+        switch (type) {
+            case 'inputAudio': {
+                const { inputAudio } = this.state;
+                if (!inputAudio.length) {
+                    return;
+                }
+                break;
+            }
+            case 'output': {
+                const { output } = this.state;
+                if (!output.length) {
+                    return;
+                }
+                break;
+            }
+        }
+
         this.setState({
             openDeviceSelect: { type }
         });
@@ -315,10 +334,10 @@ class GroupCallSettings extends React.Component {
 
 
         const outputDeviceInfo = output.find(x => x.deviceId === outputDeviceId || !outputDeviceId && x.deviceId === 'default');
-        const outputString = !outputDeviceInfo || outputDeviceInfo.deviceId === 'default' || !outputDeviceInfo.label ? t('Default') : outputDeviceInfo.label;
+        const outputString = !outputDeviceInfo || outputDeviceInfo.deviceId === 'default' || !outputDeviceInfo.deviceId || !outputDeviceInfo.label ? t('Default') : outputDeviceInfo.label;
 
         const inputAudioDeviceInfo = inputAudio.find(x => x.deviceId === inputAudioDeviceId || !inputAudioDeviceId && x.deviceId === 'default');
-        const inputAudioString = !inputAudioDeviceInfo || inputAudioDeviceInfo.deviceId === 'default' || !inputAudioDeviceInfo.label ? t('Default') : inputAudioDeviceInfo.label;
+        const inputAudioString = !inputAudioDeviceInfo || inputAudioDeviceInfo.deviceId === 'default' || !inputAudioDeviceInfo.deviceId || !inputAudioDeviceInfo.label ? t('Default') : inputAudioDeviceInfo.label;
 
         const { currentGroupCall } = CallStore;
         const chatId = currentGroupCall ? currentGroupCall.chatId : 0;
@@ -349,7 +368,7 @@ class GroupCallSettings extends React.Component {
 
             return (
                 <div className='group-call-settings-device-select'>
-                    <div className='group-call-settings-panel' onClick={this.handlePanelClick}>
+                    <div className='group-call-settings-panel'>
                         <div className='group-call-settings-panel-header'>
                             <div className='group-call-panel-caption'>
                                 <div className='group-call-title'>{type === 'output' ? t('OutputDevice') : t('InputDevice')}</div>
@@ -358,7 +377,7 @@ class GroupCallSettings extends React.Component {
                         <div className='group-call-settings-panel-content'>
                             {items.map(x => (
                                 <div key={x.deviceId} className='group-call-settings-panel-item' onClick={() => this.handleSelectDevice(type, x.deviceId)}>
-                                    <div className='group-call-settings-panel-item-title'>{x.label}</div>
+                                    <div className='group-call-settings-panel-item-title'>{x.label || t('Default')}</div>
                                 </div>
                             ))}
                         </div>

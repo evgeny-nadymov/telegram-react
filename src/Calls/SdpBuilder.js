@@ -55,13 +55,22 @@ export class SdpBuilder {
         return this;
     }
 
-    addHeader(sessionId, ssrcs) {
+    addHeader(sessionId, transport, ssrcs) {
         this.add("v=0"); // version
         this.add(`o=- ${sessionId} 2 IN IP4 0.0.0.0`); // sessionId, 2=sesionVersion
         this.add("s=-"); // name of the session
+        // this.add("c=IN IP4 0.0.0.0");
         this.add("t=0 0"); // time when session is valid
         this.add(`a=group:BUNDLE ${ssrcs.map(toAudioSsrc).join(" ")}`);
         this.add("a=ice-lite"); // ice-lite: is a minimal version of the ICE specification, intended for servers running on a public IP address.
+        // this.add(`a=ice-ufrag:${transport.ufrag}`);
+        // this.add(`a=ice-pwd:${transport.pwd}`);
+        // for (let fingerprint of transport.fingerprints) {
+        //     this.add(`a=fingerprint:${fingerprint.hash} ${fingerprint.fingerprint}`);
+        //     //this.add(`a=setup:${fingerprint.setup}`);
+        //     this.add(`a=setup:passive`);
+        // }
+
         return this;
     }
 
@@ -73,7 +82,7 @@ export class SdpBuilder {
             //this.add(`a=setup:${fingerprint.setup}`);
             this.add(`a=setup:passive`);
         }
-        let candidates = transport.candidates;
+        const { candidates } = transport;
         for (let candidate of candidates) {
             this.addCandidate(candidate);
         }
@@ -85,7 +94,7 @@ export class SdpBuilder {
         let ssrc = entry.ssrc;
         // TODO: port = 0 or 1
         add(`m=audio ${entry.isMain ? 1 : 0} RTP/SAVPF 111 126`);
-        if (entry.isMain) {
+        if (true || entry.isMain) {
             add("c=IN IP4 0.0.0.0");
         }
         add(`a=mid:${toAudioSsrc(entry)}`);
@@ -94,7 +103,7 @@ export class SdpBuilder {
             return;
         }
 
-        if (entry.isMain) {
+        if (true || entry.isMain) {
             this.addTransport(transport);
         }
 
@@ -140,7 +149,7 @@ export class SdpBuilder {
             }
         }
 
-        this.addHeader(conference.sessionId, ssrcs);
+        this.addHeader(conference.sessionId, conference.transport, ssrcs);
         for (let entry of ssrcs) {
             this.addSsrcEntry(entry, conference.transport, isAnswer);
         }

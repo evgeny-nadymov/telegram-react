@@ -908,7 +908,7 @@ class CallStore extends EventEmitter {
                 }
 
                 player.appendChild(audio);
-                audio.play();
+                // audio.play();
             } else {
                 audio.srcObject = streamManager.outputStream;
             }
@@ -1141,7 +1141,17 @@ class CallStore extends EventEmitter {
         const { currentGroupCall } = this;
         if (!currentGroupCall) return;
 
-        const { groupCallId } = currentGroupCall;
+        const { groupCallId, connection } = currentGroupCall;
+        if (!connection) return;
+
+        if (UserStore.getMyId() === userId) {
+            connection.getSenders().forEach(s => {
+                const { track } = s;
+                if (track && track.kind === 'audio') {
+                    track.enabled = !muted;
+                }
+            });
+        }
 
         LOG_CALL(`[tdweb] toggleGroupCallParticipantIsMuted id=${groupCallId} user_id=${UserStore.getMyId()} is_muted=${muted}`, this.get(groupCallId));
         TdLibController.send({
@@ -1164,6 +1174,22 @@ class CallStore extends EventEmitter {
             '@type': 'toggleGroupCallMuteNewParticipants',
             group_call_id: groupCallId,
             mute_new_participants: mute
+        });
+    }
+
+    setGroupCallParticipantVolumeLevel(groupCallId, userId, volume) {
+        const { currentGroupCall } = this;
+        if (!currentGroupCall) return;
+
+        const { groupCallId: currentGroupCallId } = currentGroupCall;
+        if (groupCallId !== currentGroupCallId) return;
+
+        LOG_CALL('setGroupCallParticipantVolumeLevel', groupCallId, userId, volume);
+        TdLibController.send({
+            '@type': 'setGroupCallParticipantVolumeLevel',
+            group_call_id: groupCallId,
+            user_id: userId,
+            volume_level: volume
         });
     }
 }

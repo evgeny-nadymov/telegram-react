@@ -188,7 +188,7 @@ class GroupCallMicButton extends React.Component {
                 });
             }
         } else {
-            CallStore.changeMuted(!CallStore.isMuted());
+            CallStore.changeUserMuted(UserStore.getMyId(), !CallStore.isMuted());
         }
     };
 

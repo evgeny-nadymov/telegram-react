@@ -160,6 +160,12 @@ class ActionBar extends React.Component {
                 );
                 break;
             }
+            case 'chatActionBarInviteMembers': {
+                break;
+            }
+        }
+        if (!content) {
+            return null;
         }
 
         return (

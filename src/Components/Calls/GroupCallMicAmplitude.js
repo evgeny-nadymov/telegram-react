@@ -80,7 +80,7 @@ class GroupCallMicAmplitude extends React.Component {
 
         const array = new Uint8Array(analyser.frequencyBinCount);
         analyser.getByteFrequencyData(array);
-        const value = getAmplitude(array, 1);
+        const value = getAmplitude(array, 1.5);
 
         this.setState({
             value
