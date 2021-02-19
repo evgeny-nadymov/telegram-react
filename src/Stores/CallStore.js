@@ -532,10 +532,10 @@ class CallStore extends EventEmitter {
                     break;
                 }
                 case 'disconnected': {
-                    // this.hangUp(groupCallId);    // Firefox can issue disconnected then connected state changing
                     break;
                 }
                 case 'failed': {
+                    //TODO: replace with ICE restart
                     this.hangUp(groupCallId);
                     break;
                 }
@@ -707,8 +707,10 @@ class CallStore extends EventEmitter {
             sdp: sdp1,
         });
 
-        currentGroupCall.handleUpdateGroupCallParticipants = true;
-        await this.updateGroupCallParticipants(groupCallId);
+        // setTimeout(async () => {
+            currentGroupCall.handleUpdateGroupCallParticipants = true;
+            await this.updateGroupCallParticipants(groupCallId);
+        // }, 2500);
 
         // const data2 = {
         //     transport,
