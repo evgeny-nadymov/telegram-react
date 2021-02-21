@@ -10,6 +10,14 @@ import { openUser } from './Client';
 import { MUTED_VALUE_MAX, MUTED_VALUE_MIN } from '../Constants';
 import ChatStore from '../Stores/ChatStore';
 
+export function openReportChat(chatId, messageIds) {
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateReportChat',
+        chatId,
+        messageIds
+    });
+}
+
 export async function openSupportChat() {
     const user = await TdLibController.send({ '@type': 'getSupportUser' });
     if (!user) return;

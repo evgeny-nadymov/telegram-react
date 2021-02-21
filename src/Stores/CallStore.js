@@ -495,6 +495,7 @@ class CallStore extends EventEmitter {
         };
         connection.onnegotiationneeded = event => {
             LOG_CALL('[conn] onnegotiationneeded', connection.signalingState);
+            this.startNegotiation(muted, rejoin);
         };
         connection.onicecandidate = event => {
             LOG_CALL('[conn] onicecandidate', event);
@@ -536,7 +537,8 @@ class CallStore extends EventEmitter {
                 }
                 case 'failed': {
                     //TODO: replace with ICE restart
-                    this.hangUp(groupCallId);
+                    // this.hangUp(groupCallId);
+                    connection.restartIce();
                     break;
                 }
                 case 'new': {
@@ -574,17 +576,32 @@ class CallStore extends EventEmitter {
             this.setCurrentGroupCall(currentGroupCall);
             LOG_CALL('joinGroupCallInternal set currentGroupCall', groupCallId, currentGroupCall);
         }
+    }
+
+    startNegotiation = async (isMuted, rejoin) => {
+        const { currentGroupCall } = this;
+        if (!currentGroupCall) return;
+
+        const { connection, groupCallId, streamManager } = currentGroupCall;
+        if (!connection) return;
 
         const offerOptions = {
             offerToReceiveAudio: 1,
             offerToReceiveVideo: 0,
         };
-        LOG_CALL('[conn][joinGroupCallInternal] createOffer', offerOptions);
-        const offer = await connection.createOffer(offerOptions);
+        let offer = await connection.createOffer(offerOptions);
         LOG_CALL('[conn][joinGroupCallInternal] setLocalDescription', offer);
         await connection.setLocalDescription(offer);
-        const clientInfo = parseSdp(offer.sdp);
-        const { ufrag, pwd, hash, setup, fingerprint, source } = clientInfo;
+        let clientInfo = parseSdp(offer.sdp);
+        let { ufrag, pwd, hash, setup, fingerprint, source } = clientInfo;
+        LOG_CALL('[conn][joinGroupCallInternal] clientInfo', clientInfo);
+
+
+        offer = await connection.createOffer(offerOptions);
+        LOG_CALL('[conn][joinGroupCallInternal] setLocalDescription', offer);
+        await connection.setLocalDescription(offer);
+        clientInfo = parseSdp(offer.sdp);
+        LOG_CALL('[conn][joinGroupCallInternal] clientInfo', clientInfo);
 
         currentGroupCall.meSignSource = toTelegramSource(source);
 
@@ -603,7 +620,7 @@ class CallStore extends EventEmitter {
                 fingerprints: [{ '@type': 'groupCallPayloadFingerprint', hash, setup: 'active', fingerprint }]
             },
             source: currentGroupCall.meSignSource,
-            is_muted: muted
+            is_muted: isMuted
         };
 
         let result = null;
@@ -708,8 +725,8 @@ class CallStore extends EventEmitter {
         });
 
         // setTimeout(async () => {
-            currentGroupCall.handleUpdateGroupCallParticipants = true;
-            await this.updateGroupCallParticipants(groupCallId);
+        currentGroupCall.handleUpdateGroupCallParticipants = true;
+        await this.updateGroupCallParticipants(groupCallId);
         // }, 2500);
 
         // const data2 = {

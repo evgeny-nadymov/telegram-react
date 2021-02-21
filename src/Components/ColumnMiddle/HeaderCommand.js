@@ -13,6 +13,8 @@ import { clearSelection, deleteMessages, forwardMessages } from '../../Actions/C
 import MessageStore from '../../Stores/MessageStore';
 import './HeaderCommand.css';
 import AnimatedCounter from './AnimatedCounter';
+import { canBeReported } from '../../Utils/Chat';
+import { openReportChat } from '../../Actions/Chat';
 
 class HeaderCommand extends React.Component {
     handleCancel = () => {
@@ -27,6 +29,7 @@ class HeaderCommand extends React.Component {
             messageIds.push(messageId);
         }
 
+        clearSelection();
         deleteMessages(id, messageIds);
     };
 
@@ -38,7 +41,20 @@ class HeaderCommand extends React.Component {
             messageIds.push(messageId);
         }
 
+        clearSelection();
         forwardMessages(id, messageIds);
+    };
+
+    handleReport = () => {
+        let id;
+        const messageIds = [];
+        for (let { chatId, messageId } of MessageStore.selectedItems.values()) {
+            id = chatId;
+            messageIds.push(messageId);
+        }
+
+        clearSelection();
+        openReportChat(id, messageIds);
     };
 
     render() {
@@ -70,6 +86,9 @@ class HeaderCommand extends React.Component {
             }
         }
 
+        const items = Array.from(MessageStore.selectedItems.values());
+        const canReport = canBeReported(items.length > 0 ? items[0].chatId : 0);
+
         return (
             <div className='header-command'>
                 {canBeForwarded && (
@@ -82,6 +101,13 @@ class HeaderCommand extends React.Component {
                 {canBeDeleted && (
                     <Button color='primary' className='header-command-button' onClick={this.handleDelete}>
                         {t('Delete')}
+                        <span>&nbsp;</span>
+                        <AnimatedCounter counter={count}/>
+                    </Button>
+                )}
+                {canReport && (
+                    <Button color='primary' className='header-command-button' onClick={this.handleReport}>
+                        {t('ReportChat')}
                         <span>&nbsp;</span>
                         <AnimatedCounter counter={count}/>
                     </Button>

@@ -28,6 +28,13 @@ import SupergroupStore from '../Stores/SupergroupStore';
 import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
 
+export function canBeReported(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
+
+    return chat.can_be_reported;
+}
+
 export function canManageVoiceChats(chatId) {
     const chat = ChatStore.get(chatId);
     if (!chat) return false;

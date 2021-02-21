@@ -88,6 +88,7 @@ export default class StreamManager {
             track,
             streamSource,
             analyser,
+            gain
         });
 
         this.changeTimer();

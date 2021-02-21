@@ -132,7 +132,7 @@ export function getCallStatus(call) {
                 status = !CallStore.isMuted() ? 'unmuted' : 'muted';
             }
         }
-        connected = connection && connection.iceConnectionState !== 'new' && connection.iceConnectionState !== 'connecting';
+        connected = connection && connection.iceConnectionState !== 'new' && connection.iceConnectionState !== 'connecting' && connection.iceConnectionState !== 'checking';
     }
 
     return { connected, status };

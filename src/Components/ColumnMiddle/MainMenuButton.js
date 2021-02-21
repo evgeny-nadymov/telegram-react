@@ -17,11 +17,23 @@ import BroomIcon from '../../Assets/Icons/Broom';
 import DeleteIcon from '../../Assets/Icons/Delete';
 import GroupIcon from '../../Assets/Icons/Group';
 import MoreVertIcon from '../../Assets/Icons/More';
+import ReportOutlinedIcon from '@material-ui/icons/ReportOutlined';
 import PhoneIcon from '../../Assets/Icons/Phone';
 import UnpinIcon from '../../Assets/Icons/PinOff';
 import UserIcon from '../../Assets/Icons/User';
-import { canClearHistory, canDeleteChat, getViewInfoTitle, isPrivateChat, getDeleteChatTitle, hasOnePinnedMessage, canSwitchBlocked, getChatSender, canManageVoiceChats } from '../../Utils/Chat';
-import { clearHistory, leaveChat } from '../../Actions/Chat';
+import {
+    canClearHistory,
+    canDeleteChat,
+    getViewInfoTitle,
+    isPrivateChat,
+    getDeleteChatTitle,
+    hasOnePinnedMessage,
+    canSwitchBlocked,
+    getChatSender,
+    canManageVoiceChats,
+    canBeReported
+} from '../../Utils/Chat';
+import { clearHistory, leaveChat, openReportChat } from '../../Actions/Chat';
 import { requestBlockSender, unblockSender } from '../../Actions/Message';
 import { requestUnpinMessage, showAlert } from '../../Actions/Client';
 import AppStore from '../../Stores/ApplicationStore';
@@ -123,6 +135,14 @@ class MainMenuButton extends React.Component {
         })
     };
 
+    handleReport = () => {
+        this.handleMenuClose();
+
+        const { chatId } = this.props;
+
+        openReportChat(chatId, []);
+    };
+
     render() {
         const { t } = this.props;
         const { anchorEl } = this.state;
@@ -139,6 +159,7 @@ class MainMenuButton extends React.Component {
         const unpinMessage = hasOnePinnedMessage(chatId);
         const switchBlocked = canSwitchBlocked(chatId);
         const manageVoiceChats = canManageVoiceChats(chatId);
+        const reported = canBeReported(chatId);
 
         return (
             <>
@@ -209,6 +230,14 @@ class MainMenuButton extends React.Component {
                                 <BlockIcon />
                             </ListItemIcon>
                             <ListItemText primary={is_blocked ? t('Unblock') : t('BlockContact')} />
+                        </MenuItem>
+                    )}
+                    {reported && (
+                        <MenuItem onClick={this.handleReport}>
+                            <ListItemIcon>
+                                <ReportOutlinedIcon />
+                            </ListItemIcon>
+                            <ListItemText primary={t('ReportChat')} />
                         </MenuItem>
                     )}
                 </Menu>

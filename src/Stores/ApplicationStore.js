@@ -333,6 +333,10 @@ class ApplicationStore extends EventEmitter {
                 this.recording = false;
                 break;
             }
+            case 'clientUpdateReportChat': {
+                this.emit('clientUpdateReportChat', update);
+                break;
+            }
             case 'clientUpdateRequestBlockSender': {
                 this.emit('clientUpdateRequestBlockSender', update);
                 break;
