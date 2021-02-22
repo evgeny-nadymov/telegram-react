@@ -92,7 +92,7 @@ class MessageAuthor extends React.Component {
 
         let { user_id: userId, chat_id: chatId } = sender;
 
-        if (isMeChat(chatId) && forwardInfo) {
+        if (isMeChat(userId) && forwardInfo) {
             switch (forwardInfo.origin['@type']) {
                 case 'messageForwardOriginHiddenUser': {
                     userId = 0;
@@ -106,6 +106,11 @@ class MessageAuthor extends React.Component {
                 }
                 case 'messageForwardOriginChannel': {
                     chatId = forwardInfo.origin.chat_id;
+                    userId = 0;
+                    break;
+                }
+                case 'messageForwardOriginChat': {
+                    chatId = forwardInfo.origin.sender_chat_id;
                     userId = 0;
                     break;
                 }
@@ -148,6 +153,12 @@ class MessageAuthor extends React.Component {
                 case 'messageForwardOriginChannel': {
                     userId = 0;
                     chatId = forwardInfo.origin.chat_id;
+                    fullName = MessageAuthor.getFullName({ '@type': 'messageSenderChat', chat_id: chatId }, t);
+                    break;
+                }
+                case 'messageForwardOriginChat': {
+                    userId = 0;
+                    chatId = forwardInfo.origin.sender_chat_id;
                     fullName = MessageAuthor.getFullName({ '@type': 'messageSenderChat', chat_id: chatId }, t);
                     break;
                 }

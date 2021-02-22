@@ -77,6 +77,9 @@ export function forwardInfoEquals(lhs, rhs) {
         case 'messageForwardOriginUser': {
             return lhs.origin.sender_user_id === rhs.origin.sender_user_id;
         }
+        case 'messageForwardOriginChat': {
+            return lhs.origin.sender_chat_id === rhs.origin.sender_chat_id;
+        }
     }
 
     return false;
@@ -179,11 +182,17 @@ function getAuthor(message, t = k => k) {
 
 function getTitle(message, t = k => k) {
     if (!message) return null;
-
-    const { sender, chat_id } = message;
+    const { sender, chat_id, forward_info } = message;
 
     if (!sender) {
         return null;
+    }
+
+    if (forward_info) {
+        const chat = ChatStore.get(forward_info.origin.chat_id);
+        if (chat) {
+            return chat.title;
+        }
     }
 
     if (sender.user_id) {
@@ -199,6 +208,7 @@ function getTitle(message, t = k => k) {
             return chat.title;
         }
     }
+
 
     return null;
 }
@@ -519,6 +529,9 @@ function isForwardOriginHidden(forwardInfo) {
         case 'messageForwardOriginChannel': {
             return false;
         }
+        case 'messageForwardOriginChat': {
+            return false;
+        }
     }
 
     return false;
@@ -545,6 +558,10 @@ function getForwardTitle(forwardInfo, t = key => key) {
             const { chat_id, author_signature } = origin;
 
             return getChatTitle(chat_id, false, t) + (author_signature ? ` (${author_signature})` : '');
+        }
+        case 'messageForwardOriginChat': {
+            const { sender_chat_id } = origin;
+            return getChatTitle(sender_chat_id, false, t);
         }
     }
 

@@ -1010,6 +1010,10 @@ function loadMessageContents(store, messages) {
                     users.set(origin.sender_user_id, origin.sender_user_id);
                     break;
                 }
+                case 'messageForwardOriginChat': {
+                    chats.set(origin.sender_chat_id, origin.sender_chat_id);
+                    break;
+                }
             }
         }
 

@@ -10,13 +10,17 @@ import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
+import Button from '@material-ui/core/Button';
 import EditIcon from '@material-ui/icons/EditOutlined';
 import TextField from '@material-ui/core/TextField';
 import HeaderProgress from '../ColumnMiddle/HeaderProgress';
 import { cleanProgressStatus, formatPhoneNumber, isConnecting } from './Phone';
 import AppStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
+import Link from '@material-ui/core/Link';
 import './Code.css';
+
+
 
 class Code extends React.Component {
     constructor(props) {
@@ -25,7 +29,8 @@ class Code extends React.Component {
         this.state = {
             connecting: isConnecting(AppStore.connectionState),
             error: '',
-            loading: false
+            loading: false,
+            resendButtonDisabled: true
         };
 
         this.inputRef = React.createRef();
@@ -41,6 +46,7 @@ class Code extends React.Component {
 
     componentWillUnmount() {
         AppStore.off('updateConnectionState', this.onUpdateConnectionState);
+        clearInterval(this.countdown);
     }
 
     onUpdateConnectionState = update => {
@@ -93,7 +99,9 @@ class Code extends React.Component {
 
     handleBack = () => {
         this.props.onChangePhone();
-    };
+        TdLibController.send({ '@type': 'destroy' });
+        setTimeout(() => window.location.reload(), 100);
+  };
 
     isValid(code) {
         let isBad = !code.match(/^[\d\-+\s]+$/);
@@ -162,21 +170,62 @@ class Code extends React.Component {
 
         switch (codeInfo.type['@type']) {
             case 'authenticationCodeTypeCall': {
-                return 'Telegram dialed your number';
+                //return 'Telegram dialed your number';
+                return 'SentCallOnly';
             }
             case 'authenticationCodeTypeFlashCall': {
-                return 'Telegram dialed your number';
+                return 'Telegram dialed your number'; //  this type available only for official app 
             }
             case 'authenticationCodeTypeSms': {
-                return 'We have sent you a message with activation code to your phone. Please enter it below.';
+                //return 'We have sent you a message with activation code to your phone. Please enter it below.';
+                return t('SentSmsCode');
             }
             case 'authenticationCodeTypeTelegramMessage': {
-                return 'Please enter the code you\'ve just received in your previous Telegram app.';
+                //return 'Please enter the code you\'ve just received in your previous Telegram app.';
+                return 'SentAppCode';
             }
         }
 
         return '';
     }
+
+    getNextType(codeInfo, t = k => k) {
+        if (!codeInfo) return '';
+        if (!codeInfo.next_type) return '';
+
+        switch (codeInfo.next_type['@type']) {
+            case 'authenticationCodeTypeCall': {
+                return 'Call';
+            }
+            case 'authenticationCodeTypeFlashCall': {
+                return 'Telegram dialed your number';
+            }
+            case 'authenticationCodeTypeSms': {
+                return 'DidNotGetTheCodeSms';
+            }
+            case 'authenticationCodeTypeTelegramMessage': {
+                return 'SentAppCode';
+            }
+        }
+
+        return '';
+    }
+
+
+    getTimeout(codeInfo) {
+        if (!codeInfo) return null;
+        const timeout = codeInfo.timeout;
+        if(timeout && this.state.resendButtonDisabled) { 
+            setTimeout(() => this.setState({ resendButtonDisabled: false }), timeout*1000);
+        } 
+        return timeout;
+    }
+
+    handleResend = () => {
+        this.state.resendButtonDisabled = true;
+        TdLibController.send({ '@type': 'resendAuthenticationCode' });
+  };
+    
 
     render() {
         const { codeInfo, t } = this.props;
@@ -184,7 +233,12 @@ class Code extends React.Component {
 
         this.phoneNumber = this.getPhoneNumber(codeInfo);
         this.codeLength = this.getCodeLength(codeInfo);
-        const subtitle = this.getSubtitle(codeInfo);
+        const subtitle = t(this.getSubtitle(codeInfo)).replace(' **%1$s**','');
+        const nexttype = t(this.getNextType(codeInfo)).replace(' **%1$s**','');
+        const timeout = this.getTimeout(codeInfo);
+        const timeouttext = t('SlowmodeSeconds').replace('%1$d', timeout);
+
+        if(!timeout) { this.state.resendButtonDisabled = false; }
 
         let title = 'Title';
         if (connecting) {
@@ -223,6 +277,10 @@ class Code extends React.Component {
                     onChange={this.handleChange}
                     onKeyPress={this.handleKeyPress}
                 />
+                <Typography className='auth-subtitle'>
+                {!this.state.resendButtonDisabled && (nexttype ? t('DidNotGetTheCode') : <Link onClick={this.handleBack}>{t('WrongNumber')}</Link>) }
+                {!this.state.resendButtonDisabled && (<div><Button color='primary' disabled={this.state.resendButtonDisabled} onClick={this.handleResend}>{nexttype} {timeout && this.state.resendButtonDisabled ? (timeouttext) :''}</Button></div>)}
+                </Typography>
             </form>
         );
     }

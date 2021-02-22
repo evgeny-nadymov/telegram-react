@@ -208,7 +208,7 @@ class InstantViewer extends React.Component {
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         const { instantView, block, url } = this.props;
-
+        if (!url) return this.handleScroll(); 
         const hash = new URL(url).hash;
         if (prevProps.instantView !== instantView) {
             if (prevProps.url !== url) {
