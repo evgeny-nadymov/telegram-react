@@ -30,6 +30,15 @@ export function ERROR_CALL(str, ...data) {
     console.error('[call]' + str, ...data);
 }
 
+export function LOG_P2P_CALL(str, ...data) {
+    // return;
+    console.log('[call][p2p]' + str, ...data);
+}
+
+export function ERROR_P2P_CALL(str, ...data) {
+    console.error('[call][p2p]' + str, ...data);
+}
+
 class CallStore extends EventEmitter {
     constructor() {
         super();
@@ -74,6 +83,31 @@ class CallStore extends EventEmitter {
                 }
 
                 this.emit('updateAuthorizationState', update);
+                break;
+            }
+            case 'updateCall': {
+                LOG_CALL('[update] updateCall', update);
+                if (this.p2pCallsEnabled) {
+                    const { call } = update;
+                    if (call) {
+                        const { id, state, is_outgoing } = call;
+
+                        switch (state['@type']) {
+                            case 'callStatePending': {
+                                if (!is_outgoing) {
+                                    this.p2pAcceptCall(id);
+                                }
+                                break;
+                            }
+                            case 'callStateReady': {
+                                this.p2p2SendCallSignalingData(id, 'Hello world!');
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                this.emit('updateCall', update);
                 break;
             }
             case 'updateChatVoiceChat': {
@@ -148,6 +182,13 @@ class CallStore extends EventEmitter {
                 }
 
                 this.emit('updateGroupCallParticipant', update);
+                break;
+            }
+            case 'updateNewCallSignalingData': {
+                const { data } = update;
+                LOG_CALL('[update] updateNewCallSignalingData', update, atob(data));
+
+                this.emit('updateNewCallSignalingData', update);
                 break;
             }
             default:
@@ -1209,6 +1250,71 @@ class CallStore extends EventEmitter {
             group_call_id: groupCallId,
             user_id: userId,
             volume_level: volume
+        });
+    }
+
+    get p2pCallsEnabled() {
+        return TdLibController.calls;
+    }
+
+    p2pGetProtocol() {
+        return {
+            '@type': 'callProtocol',
+            udp_p2p: true,
+            udp_reflector: true,
+            min_layer: 65,
+            max_layer: 65,
+            library_versions: []
+        };
+    }
+
+    p2pStartCall(userId, isVideo) {
+        LOG_P2P_CALL('p2pStartCall', userId, isVideo);
+
+        const protocol = this.p2pGetProtocol();
+        LOG_P2P_CALL('[tdlib] createCall', userId, protocol, isVideo);
+        TdLibController.send({
+            '@type': 'createCall',
+            user_id: userId,
+            protocol,
+            is_video: isVideo
+        });
+    }
+
+    p2pAcceptCall(callId) {
+        LOG_P2P_CALL('p2pAcceptCall', callId);
+
+        const protocol = this.p2pGetProtocol();
+        LOG_P2P_CALL('[tdlib] acceptCall', callId, protocol);
+        TdLibController.send({
+            '@type': 'acceptCall',
+            call_id: callId,
+            protocol
+        });
+    }
+
+    p2pDiscardCall(callId, isDisconnected, duration, isVideo, connectionId) {
+        LOG_P2P_CALL('p2pDiscardCall', callId);
+
+        LOG_P2P_CALL('[tdlib] discardCall', callId, isDisconnected, duration, isVideo, connectionId);
+        TdLibController.send({
+            '@type': 'discardCall',
+            call_id: callId,
+            is_disconnected: isDisconnected,
+            duration,
+            is_video: isVideo,
+            connection_id: connectionId
+        });
+    }
+
+    p2pSendCallSignalingData(callId, data) {
+        LOG_P2P_CALL('p2pSendCallSignalingData', callId, data);
+
+        LOG_P2P_CALL('[tdlib] sendCallSignalingData', callId, data);
+        TdLibController.send({
+            '@type': 'sendCallSignalingData',
+            call_id: callId,
+            data: btoa(data)
         });
     }
 }

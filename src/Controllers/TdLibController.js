@@ -49,6 +49,7 @@ class TdLibController extends EventEmitter {
 
         this.disableLog = true;
         this.streaming = true;
+        this.calls = false;
 
         this.setParameters(window.location);
     }
@@ -159,6 +160,9 @@ class TdLibController extends EventEmitter {
         }
         if (params.has('streaming')) {
             this.streaming = stringToBoolean(params.get('streaming'));
+        }
+        if (params.has('calls')) {
+            this.calls = stringToBoolean(params.get('calls'));
         }
     };
 

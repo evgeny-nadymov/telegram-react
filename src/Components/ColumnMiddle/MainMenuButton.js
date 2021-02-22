@@ -31,7 +31,7 @@ import {
     canSwitchBlocked,
     getChatSender,
     canManageVoiceChats,
-    canBeReported
+    canBeReported, getChatUserId
 } from '../../Utils/Chat';
 import { clearHistory, leaveChat, openReportChat } from '../../Actions/Chat';
 import { requestBlockSender, unblockSender } from '../../Actions/Message';
@@ -135,6 +135,13 @@ class MainMenuButton extends React.Component {
         })
     };
 
+    handleStartP2PCall = () => {
+        this.handleMenuClose();
+
+        const userId = getChatUserId(AppStore.getChatId());
+        CallStore.p2pStartCall(userId, false);
+    };
+
     handleReport = () => {
         this.handleMenuClose();
 
@@ -160,6 +167,7 @@ class MainMenuButton extends React.Component {
         const switchBlocked = canSwitchBlocked(chatId);
         const manageVoiceChats = canManageVoiceChats(chatId);
         const reported = canBeReported(chatId);
+        const isPrivate = isPrivateChat(chatId);
 
         return (
             <>
@@ -186,6 +194,14 @@ class MainMenuButton extends React.Component {
                         vertical: 'top',
                         horizontal: 'right'
                     }}>
+                    { CallStore.p2pCallsEnabled && isPrivate && (
+                        <MenuItem onClick={this.handleStartP2PCall}>
+                            <ListItemIcon>
+                                <PhoneIcon />
+                            </ListItemIcon>
+                            <ListItemText primary={t('Call')} />
+                        </MenuItem>
+                    )}
                     { !Boolean(voice_chat_group_call_id) && manageVoiceChats && (
                         <MenuItem onClick={this.handleStartGroupCall}>
                             <ListItemIcon>
