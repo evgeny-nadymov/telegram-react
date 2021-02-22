@@ -233,6 +233,11 @@ class SafeLink extends React.Component {
 
                                 } else if (url.searchParams.has('comment')) {
 
+                                } else if (username.indexOf('/') !== -1 ) {
+                                    href = href.replace(/\/$/, "");
+                                } else {
+                                    await this.handleOpenUsername(username);
+                                    handled = true;
                                 }
 
                                 if (!handled) {
@@ -246,7 +251,7 @@ class SafeLink extends React.Component {
                     }
                     case 'tg:': {
                         if (href.startsWith('tg:resolve') || href.startsWith('tg://resolve')) {
-                            const username = url.searchParams('domain');
+                            const username = url.searchParams.get('domain');
                             if (username) {
                                 if (username === 'telegrampassport') {
 
@@ -266,6 +271,9 @@ class SafeLink extends React.Component {
 
                                     } else if (url.searchParams.has('comment')) {
 
+                                    } else {
+                                        await this.handleOpenUsername(username);
+                                        handled = true;
                                     }
 
                                     if (!handled) {
