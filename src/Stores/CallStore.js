@@ -578,8 +578,8 @@ class CallStore extends EventEmitter {
                 }
                 case 'failed': {
                     //TODO: replace with ICE restart
-                    // this.hangUp(groupCallId);
-                    connection.restartIce();
+                    this.hangUp(groupCallId);
+                    // connection.restartIce();
                     break;
                 }
                 case 'new': {
