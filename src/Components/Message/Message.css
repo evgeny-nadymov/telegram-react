@@ -414,6 +414,10 @@ pre code {
     line-height: normal;
 }
 
+.message-text-rtl {
+    text-align: right;
+}
+
 .message-body {
     overflow: hidden;
     flex-grow: 1;
