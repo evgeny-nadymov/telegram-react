@@ -100,7 +100,7 @@ class CallStore extends EventEmitter {
                                 break;
                             }
                             case 'callStateReady': {
-                                this.p2p2SendCallSignalingData(id, 'Hello world!');
+                                this.p2pSendCallSignalingData(id, 'Hello world!');
                                 break;
                             }
                         }
@@ -533,6 +533,9 @@ class CallStore extends EventEmitter {
         };
         connection.onsignalingstatechange = event => {
             LOG_CALL('[conn] onsignalingstatechange', connection.signalingState);
+        };
+        connection.onconnectionstatechange = event => {
+            LOG_CALL('[conn] onconnectionstatechange', connection.connectionState);
         };
         connection.onnegotiationneeded = event => {
             LOG_CALL('[conn] onnegotiationneeded', connection.signalingState);
@@ -1262,8 +1265,8 @@ class CallStore extends EventEmitter {
             '@type': 'callProtocol',
             udp_p2p: true,
             udp_reflector: true,
-            min_layer: 65,
-            max_layer: 65,
+            min_layer: 126,
+            max_layer: 126,
             library_versions: []
         };
     }

@@ -119,6 +119,17 @@ class GroupCallSettings extends React.Component {
         // navigator.permissions.removeEventListener('onchange', this.onDeviceChange);
         KeyboardManager.remove(this.keyboardHandler);
         CallStore.off('updateGroupCall', this.onUpdateGroupCall);
+
+        this.closeStreams();
+    }
+
+    closeStreams() {
+        const { inputAudioStream, inputAudioDeviceId } = this.state;
+        if (inputAudioStream && (!CallStore.currentGroupCall || inputAudioDeviceId === CallStore.getInputAudioDeviceId())) {
+            inputAudioStream.getAudioTracks().forEach(x => {
+                x.stop();
+            });
+        }
     }
 
     onUpdateGroupCall = update => {
@@ -291,14 +302,8 @@ class GroupCallSettings extends React.Component {
         const { onClose } = this.props;
         const { inputAudioDeviceId, inputAudioStream } = this.state;
 
-        if (inputAudioStream) {
-            if (inputAudioDeviceId !== CallStore.getInputAudioDeviceId()) {
-                await CallStore.setInputAudioDeviceId(inputAudioDeviceId, inputAudioStream);
-            } else {
-                inputAudioStream.getAudioTracks().forEach(t => {
-                    t.stop();
-                });
-            }
+        if (inputAudioStream && inputAudioDeviceId !== CallStore.getInputAudioDeviceId()) {
+            await CallStore.setInputAudioDeviceId(inputAudioDeviceId, inputAudioStream);
         }
 
         onClose && onClose();
@@ -306,13 +311,6 @@ class GroupCallSettings extends React.Component {
 
     handleCancel = () => {
         const { onClose } = this.props;
-        const { inputAudioStream } = this.state;
-
-        if (inputAudioStream) {
-            inputAudioStream.getAudioTracks().forEach(x => {
-                x.stop();
-            });
-        }
 
         onClose && onClose();
     };
