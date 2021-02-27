@@ -111,6 +111,11 @@
 
 .group-call-settings-panel-item-title {
     flex: 1 1 auto;
+    word-wrap: break-word;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 70px;
 }
 
 .group-call-settings-panel-item-subtitle {

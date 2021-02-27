@@ -61,8 +61,8 @@ class GroupCallSettings extends React.Component {
     };
 
     static getDerivedStateFromProps(props, state) {
-        const { groupCallId } = props;
-        const { prevGroupCallId } = state;
+        const { groupCallId, callId } = props;
+        const { prevGroupCallId, prevCallId } = state;
 
         if (prevGroupCallId !== groupCallId) {
             const { devices } = CallStore;
@@ -100,6 +100,28 @@ class GroupCallSettings extends React.Component {
                 inputVideoDeviceId,
                 inputVideo,
                 ...muteSettings
+            };
+        } else if (prevCallId !== callId) {
+            const { devices } = CallStore;
+
+            const outputDeviceId = CallStore.getOutputDeviceId();
+            const output = (devices || []).filter(x => x.kind === 'audiooutput' && x.deviceId);
+
+            const inputAudioDeviceId = CallStore.getInputAudioDeviceId();
+            const inputAudio = (devices || []).filter(x => x.kind === 'audioinput' && x.deviceId);
+
+            const inputVideoDeviceId = CallStore.getInputVideoDeviceId();
+            const inputVideo = (devices || []).filter(x => x.kind === 'videoinput' && x.deviceId);
+
+            return {
+                prevCallId: callId,
+                devices,
+                outputDeviceId,
+                output,
+                inputAudioDeviceId,
+                inputAudio,
+                inputVideoDeviceId,
+                inputVideo
             };
         }
 
@@ -273,6 +295,27 @@ class GroupCallSettings extends React.Component {
                 break;
             }
             case 'inputVideo': {
+                const { currentCall } = CallStore;
+                if (!currentCall) return;
+
+                const { inputVideoStream, inputVideoDeviceId } = this.state;
+                if (inputVideoDeviceId === deviceId && inputVideoStream) return;
+
+                if (inputVideoStream) {
+                    inputVideoStream.getAudioTracks().forEach(t => {
+                        t.stop()
+                    });
+                }
+
+                const stream = await getStream({
+                    audio: false,
+                    video: { deviceId: { exact: deviceId } }
+                });
+
+                this.setState({
+                    inputVideoDeviceId: deviceId,
+                    inputVideoStream: stream
+                });
                 break;
             }
         }
@@ -300,10 +343,14 @@ class GroupCallSettings extends React.Component {
 
     handleDone = async () => {
         const { onClose } = this.props;
-        const { inputAudioDeviceId, inputAudioStream } = this.state;
+        const { inputAudioDeviceId, inputAudioStream, inputVideoDeviceId, inputVideoStream } = this.state;
 
         if (inputAudioStream && inputAudioDeviceId !== CallStore.getInputAudioDeviceId()) {
             await CallStore.setInputAudioDeviceId(inputAudioDeviceId, inputAudioStream);
+        }
+
+        if (inputVideoStream && inputVideoDeviceId !== CallStore.getInputVideoDeviceId()) {
+            await CallStore.setInputVideoDeviceId(inputVideoDeviceId, inputVideoStream);
         }
 
         onClose && onClose();
@@ -316,7 +363,7 @@ class GroupCallSettings extends React.Component {
     };
 
     render() {
-        const { groupCallId, t } = this.props;
+        const { callId, t } = this.props;
         const {
             inputAudioDeviceId,
             inputAudioStream,
@@ -336,6 +383,9 @@ class GroupCallSettings extends React.Component {
 
         const inputAudioDeviceInfo = inputAudio.find(x => x.deviceId === inputAudioDeviceId || !inputAudioDeviceId && x.deviceId === 'default');
         const inputAudioString = !inputAudioDeviceInfo || inputAudioDeviceInfo.deviceId === 'default' || !inputAudioDeviceInfo.deviceId || !inputAudioDeviceInfo.label ? t('Default') : inputAudioDeviceInfo.label;
+
+        const inputVideoDeviceInfo = inputVideo.find(x => x.deviceId === inputVideoDeviceId || !inputVideoDeviceId && x.deviceId === 'default');
+        const inputVideoString = !inputVideoDeviceInfo || inputVideoDeviceInfo.deviceId === 'default' || !inputVideoDeviceInfo.deviceId || !inputVideoDeviceInfo.label ? t('Default') : inputVideoDeviceInfo.label;
 
         const { currentGroupCall } = CallStore;
         const chatId = currentGroupCall ? currentGroupCall.chatId : 0;
@@ -429,6 +479,13 @@ class GroupCallSettings extends React.Component {
                             <div className='group-call-settings-panel-item-title'>{t('Microphone')}</div>
                             <div className='group-call-settings-panel-item-subtitle'>{inputAudioString}</div>
                         </div>
+
+                        { callId && (
+                            <div className='group-call-settings-panel-item' onClick={() => this.handleOpenDeviceSelect('inputVideo')}>
+                                <div className='group-call-settings-panel-item-title'>{t('Camera')}</div>
+                                <div className='group-call-settings-panel-item-subtitle'>{inputVideoString}</div>
+                            </div>
+                        )}
                         <GroupCallMicAmplitude stream={inputAudioStream}/>
                         { username && (
                             <div className='group-call-settings-panel-item' onClick={this.handleCopyLink}>
@@ -453,6 +510,7 @@ class GroupCallSettings extends React.Component {
 }
 
 GroupCallSettings.propTypes = {
+    callId: PropTypes.number,
     groupCallId: PropTypes.number,
     onClose: PropTypes.func
 };

@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import GroupCallPanel from './GroupCallPanel';
+import CallPanel from './CallPanel';
 import KeyboardManager, { KeyboardHandler } from '../Additional/KeyboardManager';
 import { clamp } from '../../Utils/Common';
 import { closeGroupCallPanel } from '../../Actions/Call';
@@ -17,7 +17,7 @@ import { PIP_PLAYER_BORDER_PRECISION } from '../../Constants';
 import CallStore from '../../Stores/CallStore';
 import './GroupCall.css';
 
-class GroupCall extends React.Component {
+class Call extends React.Component {
 
     constructor(props) {
         super(props);
@@ -79,7 +79,7 @@ class GroupCall extends React.Component {
     handleMouseDown = event => {
         if (event.nativeEvent.which !== 1) return;
 
-        const element = document.getElementById('group-call');
+        const element = document.getElementById('call');
         if (element) element.focus();
 
         this.mouseDownRoot = true;
@@ -100,7 +100,7 @@ class GroupCall extends React.Component {
         const fullscreenElement = document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement;
         if (fullscreenElement) return;
 
-        const player = document.getElementById('group-call');
+        const player = document.getElementById('call');
 
         const oldLeft = parseInt(player.style.left, 10);
         const oldTop = parseInt(player.style.top, 10);
@@ -120,7 +120,7 @@ class GroupCall extends React.Component {
         const { left: startLeft, top: startTop, pageX, pageY } = this;
         const { left, top } = this.normalizePosition(startLeft + event.pageX - pageX, startTop + event.pageY - pageY, false);
 
-        const element = document.getElementById('group-call');
+        const element = document.getElementById('call');
         element.style.left = left + 'px';
         element.style.top = top + 'px';
     };
@@ -135,7 +135,7 @@ class GroupCall extends React.Component {
     };
 
     setPosition() {
-        const element = document.getElementById('group-call');
+        const element = document.getElementById('call');
         let { pipParams } = CallStore;
         if (!pipParams) {
             pipParams = {
@@ -153,7 +153,7 @@ class GroupCall extends React.Component {
     }
 
     normalizePosition(left, top, checkGlue = true) {
-        const player = document.getElementById('group-call');
+        const player = document.getElementById('call');
         const playerWidth = player ? player.clientWidth : 300;
         const playerHeight = player ? player.clientHeight : 300;
 
@@ -193,23 +193,23 @@ class GroupCall extends React.Component {
     }
 
     render() {
-        const { groupCallId } = this.props;
+        const { callId } = this.props;
         const { fullscreen } = this.state;
 
         return (
             <div
-                id='group-call'
+                id='call'
                 className={classNames('group-call', { 'group-call-fullscreen': fullscreen })}
                 onMouseDown={this.handleMouseDown}
             >
-                <GroupCallPanel groupCallId={groupCallId}/>
+                <CallPanel callId={callId}/>
             </div>
         )
     }
 }
 
-GroupCall.propTypes = {
-    groupCallId: PropTypes.number
+Call.propTypes = {
+    callId: PropTypes.number
 };
 
-export default GroupCall;
+export default Call;

@@ -20,3 +20,18 @@ export function closeGroupCallPanel() {
         opened: false
     });
 }
+
+export function openCallPanel(id) {
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateCallPanel',
+        callId: id,
+        opened: true
+    });
+}
+
+export function closeCallPanel() {
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateCallPanel',
+        opened: false
+    });
+}

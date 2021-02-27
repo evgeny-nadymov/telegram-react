@@ -823,7 +823,7 @@ function isVideoMessage(chatId, messageId) {
         }
         case 'messageText': {
             const { web_page } = content;
-            return Boolean(web_page.video);
+            return web_page && Boolean(web_page.video);
         }
         default: {
             return false;

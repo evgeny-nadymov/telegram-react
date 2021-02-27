@@ -11,6 +11,7 @@ import { compose } from '../Utils/HOC';
 import withLanguage from '../Language';
 import withSnackbarNotifications from '../Notifications';
 import Actions from './Actions';
+import Call from './Calls/Call';
 import ChatInfo from './ColumnRight/ChatInfo';
 import Dialogs from './ColumnLeft/Dialogs';
 import DialogDetails from './ColumnMiddle/DialogDetails';
@@ -46,7 +47,8 @@ class MainPage extends React.Component {
             forwardInfo: null,
             instantViewContent: null,
             videoInfo: null,
-            groupCallId: 0
+            groupCallId: 0,
+            callId: 0
         };
     }
 
@@ -60,6 +62,7 @@ class MainPage extends React.Component {
         AppStore.on('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
         AppStore.on('clientUpdateForward', this.onClientUpdateForward);
         CallStore.on('clientUpdateGroupCallPanel', this.onClientUpdateGroupCallPanel);
+        CallStore.on('clientUpdateCallPanel', this.onClientUpdateCallPanel);
         InstantViewStore.on('clientUpdateInstantViewContent', this.onClientUpdateInstantViewContent);
         PlayerStore.on('clientUpdatePictureInPicture', this.onClientUpdatePictureInPicture);
     }
@@ -74,9 +77,18 @@ class MainPage extends React.Component {
         AppStore.off('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
         AppStore.off('clientUpdateForward', this.onClientUpdateForward);
         CallStore.off('clientUpdateGroupCallPanel', this.onClientUpdateGroupCallPanel);
+        CallStore.off('clientUpdateCallPanel', this.onClientUpdateCallPanel);
         InstantViewStore.off('clientUpdateInstantViewContent', this.onClientUpdateInstantViewContent);
         PlayerStore.off('clientUpdatePictureInPicture', this.onClientUpdatePictureInPicture);
     }
+
+    onClientUpdateCallPanel = update => {
+        const { opened, callId } = update;
+
+        this.setState({
+            callId: opened ? callId : 0
+        });
+    };
 
     onClientUpdateGroupCallPanel = update => {
         const { opened } = update;
@@ -193,9 +205,12 @@ class MainPage extends React.Component {
             profileMediaViewerContent,
             forwardInfo,
             videoInfo,
+            callId,
             groupCallId,
             isSmallWidth
         } = this.state;
+
+        console.log('[p2p] mainPage.render', callId);
 
         return (
             <>
@@ -215,6 +230,7 @@ class MainPage extends React.Component {
                 {forwardInfo && <ForwardDialog {...forwardInfo} />}
                 {videoInfo && <PipPlayer {...videoInfo}/>}
                 {groupCallId && <GroupCall groupCallId={groupCallId}/>}
+                {callId && <Call callId={callId}/>}
             </>
         );
     }

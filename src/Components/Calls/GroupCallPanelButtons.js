@@ -8,10 +8,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { getCallStatus } from '../../Calls/Utils';
 import CallStore from '../../Stores/CallStore';
 import UserStore from '../../Stores/UserStore';
 import './GroupCallPanelButtons.css'
-import { getCallStatus } from '../../Calls/Utils';
 
 class GroupCallPanelButtons extends React.Component {
     constructor(props) {
