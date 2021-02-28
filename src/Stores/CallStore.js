@@ -1423,7 +1423,7 @@ class CallStore extends EventEmitter {
             udp_reflector: true,
             min_layer: 126,
             max_layer: 126,
-            library_versions: []
+            library_versions: ['3.0.0']
         };
     }
 
@@ -1475,6 +1475,56 @@ class CallStore extends EventEmitter {
         });
     }
 
+    p2pGetConfiguration(state){
+        if (!state) return null;
+
+        const { servers, allow_p2p } = state;
+
+        const iceServers = [];
+        servers.forEach(x => {
+            const { ip_address, ipv6_address, port, type } = x;
+            switch (type['@type']) {
+                case 'callServerTypeTelegramReflector': {
+                    break;
+                }
+                case 'callServerTypeWebrtc': {
+                    const { username, password: credential, supports_turn, supports_stun } = type;
+                    const urls = [];
+                    if (supports_turn) {
+                        if (ip_address) {
+                            urls.push(`turn:${ip_address}:${port}`);
+                        }
+                        if (ipv6_address) {
+                            urls.push(`turn:[${ipv6_address}]:${port}`);
+                        }
+
+                    } else if (supports_stun) {
+                        if (ip_address) {
+                            urls.push(`stun:${ip_address}:${port}`);
+                        }
+                        if (ipv6_address) {
+                            urls.push(`stun:[${ipv6_address}]:${port}`);
+                        }
+                    }
+
+                    if (urls.length > 0) {
+                        iceServers.push({
+                            urls,
+                            username,
+                            credential
+                        });
+                    }
+                    break;
+                }
+            }
+        });
+
+        return {
+            iceServers,
+            iceTransportPolicy: allow_p2p ? 'all' : 'relay'
+        };
+    }
+
     async p2pJoinCall(callId) {
         LOG_P2P_CALL('p2pJoinCall', callId);
         const call = this.p2pGet(callId);
@@ -1486,7 +1536,11 @@ class CallStore extends EventEmitter {
 
         const outputStream = new MediaStream();
 
-        const connection = new RTCPeerConnection();
+        const configuration = this.p2pGetConfiguration(state);
+        LOG_P2P_CALL('p2pJoinCall configuration', configuration);
+        if (!configuration) return;
+
+        const connection = new RTCPeerConnection(configuration);
         connection.oniceconnectionstatechange = event => {
             LOG_P2P_CALL('[conn] oniceconnectionstatechange', connection.iceConnectionState);
         };
@@ -1570,6 +1624,7 @@ class CallStore extends EventEmitter {
 
     async p2pApplyCallSignalingData(callId, signalingData) {
         if (!signalingData) return;
+
         const { currentCall } = this;
         LOG_P2P_CALL('p2pApplyCallSignalingData', callId, signalingData);
         if (!currentCall) return;
