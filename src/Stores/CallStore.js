@@ -1521,7 +1521,7 @@ class CallStore extends EventEmitter {
 
         return {
             iceServers,
-            iceTransportPolicy: allow_p2p ? 'all' : 'relay'
+            iceTransportPolicy: 'all'//allow_p2p ? 'all' : 'relay'
         };
     }
 
@@ -1551,7 +1551,7 @@ class CallStore extends EventEmitter {
         connection.onicecandidate = event => {
             const { candidate } = event;
             LOG_P2P_CALL('[conn] onicecandidate', candidate);
-            if (candidate) {
+            if (candidate && candidate.candidate) {
                 this.p2pSendIceCandidate(id, candidate);
             }
         };
@@ -1581,6 +1581,8 @@ class CallStore extends EventEmitter {
         inputStream.getTracks().forEach(t => {
             connection.addTrack(t, inputStream);
         });
+
+        // this.p2pStartNegotiation(id);
     }
 
     p2pStartNegotiation = async id => {
@@ -1627,11 +1629,20 @@ class CallStore extends EventEmitter {
 
         const { currentCall } = this;
         LOG_P2P_CALL('p2pApplyCallSignalingData', callId, signalingData);
-        if (!currentCall) return;
-        if (currentCall.callId !== callId) return;
+        if (!currentCall) {
+            ERROR_P2P_CALL('p2pApplyCallSignalingData 0');
+            return;
+        }
+        if (currentCall.callId !== callId) {
+            ERROR_P2P_CALL('p2pApplyCallSignalingData 1');
+            return;
+        }
 
         const { connection } = currentCall;
-        if (!connection) return;
+        if (!connection) {
+            ERROR_P2P_CALL('p2pApplyCallSignalingData 2');
+            return;
+        }
 
         const { type, data } = signalingData;
         switch (type) {
@@ -1648,11 +1659,13 @@ class CallStore extends EventEmitter {
             }
             case 'candidate': {
                 const candidate = new RTCIceCandidate(data);
-                if (!currentCall.hasRemoteSdp) {
-                    currentCall.candidates = currentCall.candidates || [];
-                    currentCall.candidates.push(candidate);
-                } else {
-                    await connection.addIceCandidate(candidate);
+                if (candidate.candidate) {
+                    if (!currentCall.hasRemoteSdp) {
+                        currentCall.candidates = currentCall.candidates || [];
+                        currentCall.candidates.push(candidate);
+                    } else {
+                        await connection.addIceCandidate(candidate);
+                    }
                 }
                 break;
             }
@@ -1695,11 +1708,16 @@ class CallStore extends EventEmitter {
 
         const screenStream = await navigator.mediaDevices.getDisplayMedia(options);
 
+        let replaced = false;
         connection.getSenders().forEach(x => {
             if (x.track.kind === 'video') {
                 x.replaceTrack(screenStream.getVideoTracks()[0]);
+                replaced = true;
             }
-        })
+        });
+        if (!replaced) {
+            connection.addTrack(screenStream.getVideoTracks()[0], screenStream);
+        }
 
         currentCall.screenStream = screenStream;
     }
