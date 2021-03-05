@@ -6,8 +6,18 @@
  */
 
 #call-output-video {
-    width: 100%;
-    height: auto;
+    max-width: 348px;
+    max-height: 320px;
+}
+
+#call-input-video {
+    transform: scaleX(-1);
+    max-width: 100px;
+    max-height: 100px;
+    border-radius: 5px;
+    position: absolute;
+    right: 0;
+    top: 0;
 }
 
 .group-call-panel {
@@ -18,6 +28,10 @@
     display: flex;
     flex-direction: column;
     will-change: left, top;
+}
+
+.group-call-panel.full-screen {
+    border-radius: 0;
 }
 
 .group-call-panel-header {
@@ -57,6 +71,19 @@
     margin: 0 16px;
     border-radius: 5px;
     z-index: 1;
+    position: relative;
+}
+
+.call-panel-content {
+    flex: 1 1 auto;
+    overflow-y: hidden;
+    margin: 0 16px;
+    border-radius: 5px;
+    z-index: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .group-call-panel-buttons {

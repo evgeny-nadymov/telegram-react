@@ -31,7 +31,7 @@ import {
     canSwitchBlocked,
     getChatSender,
     canManageVoiceChats,
-    canBeReported, getChatUserId
+    canBeReported, getChatUserId, canBeCalled
 } from '../../Utils/Chat';
 import { clearHistory, leaveChat, openReportChat } from '../../Actions/Chat';
 import { requestBlockSender, unblockSender } from '../../Actions/Message';
@@ -167,7 +167,7 @@ class MainMenuButton extends React.Component {
         const switchBlocked = canSwitchBlocked(chatId);
         const manageVoiceChats = canManageVoiceChats(chatId);
         const reported = canBeReported(chatId);
-        const isPrivate = isPrivateChat(chatId);
+        const called = canBeCalled(chatId);
 
         return (
             <>
@@ -194,7 +194,7 @@ class MainMenuButton extends React.Component {
                         vertical: 'top',
                         horizontal: 'right'
                     }}>
-                    { CallStore.p2pCallsEnabled && isPrivate && (
+                    { CallStore.p2pCallsEnabled && called && (
                         <MenuItem onClick={this.handleStartP2PCall}>
                             <ListItemIcon>
                                 <PhoneIcon />

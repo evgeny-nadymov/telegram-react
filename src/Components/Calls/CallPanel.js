@@ -7,35 +7,59 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
+import ListItemText from '@material-ui/core/ListItemText';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import MenuList from '@material-ui/core/MenuList';
+import Popover from '@material-ui/core/Popover';
 import CallEndIcon from '../../Assets/Icons/CallEnd';
 import CloseIcon from '../../Assets/Icons/Close';
-import GroupCallMicButton from './GroupCallMicButton';
 import GroupCallPanelButtons from './GroupCallPanelButtons';
-import GroupCallParticipants from './GroupCallParticipants';
 import GroupCallSettings from './GroupCallSettings';
 import GroupCallSettingsButton from './GroupCallSettingsButton';
-import GroupCallSubtitle from './GroupCallJoinPanelSubtitle';
 import MenuIcon from '../../Assets/Icons/More';
 import { closeGroupCallPanel } from '../../Actions/Call';
-import { getChatTitle } from '../../Utils/Chat';
+import { getUserFullName } from '../../Utils/User';
 import { stopPropagation } from '../../Utils/Message';
 import CallStore from '../../Stores/CallStore';
-import './GroupCallPanel.css';
-import { getUserFullName } from '../../Utils/User';
-import MenuList from '@material-ui/core/MenuList';
-import MenuItem from '@material-ui/core/MenuItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import Popover from '@material-ui/core/Popover';
 import UserStore from '../../Stores/UserStore';
-import Menu from '@material-ui/core/Menu';
+import './GroupCallPanel.css';
 
 class CallPanel extends React.Component {
-    state = {
-        openSettings: false,
-        contextMenu: false,
-        left: 0,
-        top: 0
+    constructor(props) {
+        super(props);
+
+        this.callPanelRef = React.createRef();
+
+        this.state = {
+            openSettings: false,
+            contextMenu: false,
+            left: 0,
+            top: 0,
+            fullScreen: false
+        };
+    }
+
+    componentDidMount() {
+        const callPanel = this.callPanelRef.current;
+        if (callPanel) {
+            callPanel.addEventListener('fullscreenchange', this.handleFullScreenChange);
+        }
+    }
+
+    componentWillUnmount() {
+        const callPanel = this.callPanelRef.current;
+        if (callPanel) {
+            callPanel.removeEventListener('fullscreenchange', this.handleFullScreenChange);
+        }
+    }
+
+    handleFullScreenChange = () => {
+        this.setState({
+            fullScreen: this.isFullScreen()
+        });
     };
 
     handleClick = () => {
@@ -79,7 +103,7 @@ class CallPanel extends React.Component {
     };
 
     handleShareScreen = () => {
-        this.handleCloseContextMenu()
+        this.handleCloseContextMenu();
 
         const { currentCall } = CallStore;
         if (!currentCall) return;
@@ -91,6 +115,42 @@ class CallPanel extends React.Component {
             CallStore.p2pStartScreenSharing();
         }
     };
+
+    handleFullScreen = () => {
+        this.handleCloseContextMenu();
+
+        setTimeout(() => {
+            if (this.isFullScreen()) {
+                this.exitFullscreen();
+                return;
+            }
+
+            this.requestFullscreen();
+        }, 250);
+    }
+
+    isFullScreen() {
+        const callPanel = this.callPanelRef.current;
+        if (!callPanel) return false;
+
+        const fullscreenElement = document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement;
+        return fullscreenElement === callPanel;
+    }
+
+    requestFullscreen() {
+        const callPanel = this.callPanelRef.current;
+        if (!callPanel) return false;
+
+        const method = callPanel.requestFullscreen || callPanel.mozRequestFullScreen || callPanel.webkitRequestFullscreen;
+
+        method && method.call(callPanel);
+    }
+
+    exitFullscreen() {
+        const method = document.exitFullscreen || document.mozCancelFullScreen || document.webkitExitFullscreen;
+
+        method && method.call(document);
+    }
 
     handleOpenContextMenu = event => {
         if (event) {
@@ -123,7 +183,7 @@ class CallPanel extends React.Component {
 
     render() {
         const { callId, t } = this.props;
-        const { openSettings, anchorEl } = this.state;
+        const { openSettings, anchorEl, fullScreen } = this.state;
         const { currentCall } = CallStore;
         // if (!currentGroupCall) return null;
 
@@ -135,7 +195,7 @@ class CallPanel extends React.Component {
         let screenSharing = currentCall && Boolean(currentCall.screenStream);
 
         return (
-            <div className='group-call-panel'>
+            <div className={classNames('group-call-panel', { 'full-screen': fullScreen })} ref={this.callPanelRef}>
                 <div className='group-call-panel-header'>
                     <div className='group-call-panel-caption-button' onMouseDown={stopPropagation} onClick={this.handleClose}>
                         <CloseIcon />
@@ -148,6 +208,7 @@ class CallPanel extends React.Component {
                         <MenuIcon />
                     </div>
                     <Popover
+                        container={this.callPanelRef.current}
                         classes={{
                             paper: 'group-call-participant-menu-root'
                         }}
@@ -155,7 +216,6 @@ class CallPanel extends React.Component {
                         open={Boolean(anchorEl)}
                         onClose={this.handleCloseContextMenu}
                         getContentAnchorEl={null}
-                        disableAutoFocusItem
                         disableRestoreFocus={true}
                         anchorOrigin={{
                             vertical: 'bottom',
@@ -177,14 +237,26 @@ class CallPanel extends React.Component {
                                     }
                                 }}
                                 onClick={this.handleShareScreen}>
-                                <ListItemText primary={screenSharing ? 'Stop screen sharing' : 'Start screen sharing'} />
+                                <ListItemText primary={screenSharing ? t('StopScreenSharing') : t('StartScreenSharing')} />
+                            </MenuItem>
+                            <MenuItem
+                                classes={{ root: 'group-call-participant-menu-item' }}
+                                ListItemClasses={{ focusVisible: 'group-call-participant-menu-item-focus-visible' }}
+                                TouchRippleProps={{
+                                    classes : {
+                                        child : 'group-call-participant-menu-item-ripple-child',
+                                        rippleVisible : 'group-call-participant-menu-item-ripple-visible'
+                                    }
+                                }}
+                                onClick={this.handleFullScreen}>
+                                <ListItemText primary={fullScreen ? t('ExitFullScreen') : t('EnterFullScreen')} />
                             </MenuItem>
                         </MenuList>
                     </Popover>
                 </div>
-                <div className='group-call-panel-participants scrollbars-hidden'>
-                    {/*<GroupCallParticipants groupCallId={groupCallId}/>*/}
+                <div className='call-panel-content scrollbars-hidden'>
                     <video id='call-output-video' autoPlay={true} muted={true}/>
+                    <video id='call-input-video' autoPlay={true} muted={true}/>
                 </div>
                 <GroupCallPanelButtons>
                     {/*<GroupCallMicButton/>*/}

@@ -35,6 +35,14 @@ export function canBeReported(chatId) {
     return chat.can_be_reported;
 }
 
+export function canBeCalled(chatId) {
+    const userId = getChatUserId(chatId);
+    const fullInfo = UserStore.getFullInfo(userId);
+    if (!fullInfo) return false;
+
+    return fullInfo.can_be_called;
+}
+
 export function canManageVoiceChats(chatId) {
     const chat = ChatStore.get(chatId);
     if (!chat) return false;

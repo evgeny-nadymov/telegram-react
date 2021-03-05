@@ -1574,14 +1574,23 @@ class CallStore extends EventEmitter {
         LOG_P2P_CALL('p2pJoinCall currentCall', this.currentCall);
 
         const inputStream = await navigator.mediaDevices.getUserMedia({
+            // video: {
+            //     width: { min: 270, max: 270 },
+            //     height: { min: 480, max: 480},
+            // },
             video: true,
             audio: true
         });
         this.currentCall.inputStream = inputStream;
+
+        const inputVideo = document.getElementById('call-input-video');
+        if (inputVideo) {
+            inputVideo.srcObject = inputStream;
+        }
+
         inputStream.getTracks().forEach(t => {
             connection.addTrack(t, inputStream);
         });
-
         // this.p2pStartNegotiation(id);
     }
 
