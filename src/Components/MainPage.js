@@ -224,13 +224,13 @@ class MainPage extends React.Component {
                     {isChatDetailsVisible && <ChatInfo />}
                 </div>
                 <Actions/>
-                {instantViewContent && <InstantViewer {...instantViewContent} />}
-                {mediaViewerContent && <MediaViewer {...mediaViewerContent} />}
-                {profileMediaViewerContent && <ProfileMediaViewer {...profileMediaViewerContent} />}
-                {forwardInfo && <ForwardDialog {...forwardInfo} />}
-                {videoInfo && <PipPlayer {...videoInfo}/>}
-                {groupCallId && <GroupCall groupCallId={groupCallId}/>}
-                {callId && <Call callId={callId}/>}
+                {Boolean(instantViewContent) && <InstantViewer {...instantViewContent} />}
+                {Boolean(mediaViewerContent) && <MediaViewer {...mediaViewerContent} />}
+                {Boolean(profileMediaViewerContent) && <ProfileMediaViewer {...profileMediaViewerContent} />}
+                {Boolean(forwardInfo) && <ForwardDialog {...forwardInfo} />}
+                {Boolean(videoInfo) && <PipPlayer {...videoInfo}/>}
+                {Boolean(groupCallId) && <GroupCall groupCallId={groupCallId}/>}
+                {Boolean(callId) && <Call callId={callId}/>}
             </>
         );
     }

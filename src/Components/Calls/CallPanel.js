@@ -99,7 +99,9 @@ class CallPanel extends React.Component {
     };
 
     handleClose = () => {
-        closeGroupCallPanel();
+        const { callId } = this.props;
+
+        CallStore.p2pDiscardCall(callId, false, 0, false, 0);
     };
 
     handleShareScreen = () => {
@@ -236,8 +238,8 @@ class CallPanel extends React.Component {
                                         rippleVisible : 'group-call-participant-menu-item-ripple-visible'
                                     }
                                 }}
-                                onClick={this.handleShareScreen}>
-                                <ListItemText primary={screenSharing ? t('StopScreenSharing') : t('StartScreenSharing')} />
+                                onClick={this.handleFullScreen}>
+                                <ListItemText primary={fullScreen ? t('ExitFullScreen') : t('EnterFullScreen')} />
                             </MenuItem>
                             <MenuItem
                                 classes={{ root: 'group-call-participant-menu-item' }}
@@ -248,8 +250,8 @@ class CallPanel extends React.Component {
                                         rippleVisible : 'group-call-participant-menu-item-ripple-visible'
                                     }
                                 }}
-                                onClick={this.handleFullScreen}>
-                                <ListItemText primary={fullScreen ? t('ExitFullScreen') : t('EnterFullScreen')} />
+                                onClick={this.handleShareScreen}>
+                                <ListItemText primary={screenSharing ? t('StopScreenSharing') : t('StartScreenSharing')} />
                             </MenuItem>
                         </MenuList>
                     </Popover>
