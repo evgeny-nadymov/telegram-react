@@ -123,5 +123,5 @@ export const VERBOSITY_MIN = 0;
 export const VOICENOTE_MIN_RECORD_DURATION = 1000;
 export const USERNAME_LENGTH_MIN = 5;
 export const REPLACE_PREFIX = '/telegram-react';
-export const WASM_FILE_NAME = 'a4ff3d9d0e2ad771c306842ca53eae96.wasm';
+export const WASM_FILE_NAME = 'd4f672689d35963706041f5b8ac88641.wasm';
 export const WASM_FILE_HASH = WASM_FILE_NAME.replace('.wasm', '');
