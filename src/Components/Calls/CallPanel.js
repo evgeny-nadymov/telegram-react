@@ -10,17 +10,19 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
 import ListItemText from '@material-ui/core/ListItemText';
-import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
 import Popover from '@material-ui/core/Popover';
+import CallIcon from '@material-ui/icons/Call';
+import VideocamIcon from '@material-ui/icons/VideocamOutlined';
+import VideocamOffIcon from '@material-ui/icons/VideocamOffOutlined';
 import CallEndIcon from '../../Assets/Icons/CallEnd';
 import CloseIcon from '../../Assets/Icons/Close';
 import GroupCallPanelButtons from './GroupCallPanelButtons';
 import GroupCallSettings from './GroupCallSettings';
-import GroupCallSettingsButton from './GroupCallSettingsButton';
 import MenuIcon from '../../Assets/Icons/More';
-import { closeGroupCallPanel } from '../../Actions/Call';
+import MicIcon from '../../Assets/Icons/Mic';
+import MicOffIcon from '../../Assets/Icons/MicOff';
 import { getUserFullName } from '../../Utils/User';
 import { stopPropagation } from '../../Utils/Message';
 import CallStore from '../../Stores/CallStore';
@@ -38,23 +40,39 @@ class CallPanel extends React.Component {
             contextMenu: false,
             left: 0,
             top: 0,
-            fullScreen: false
+            fullScreen: false,
+            audioEnabled: true,
+            videoEnabled: true
         };
     }
 
     componentDidMount() {
         const callPanel = this.callPanelRef.current;
         if (callPanel) {
-            callPanel.addEventListener('fullscreenchange', this.handleFullScreenChange);
+            const prefixes = ['', 'moz', 'webkit', 'ms']
+            prefixes.forEach(x => {
+                callPanel.addEventListener(x + 'fullscreenchange', this.handleFullScreenChange);
+            });
         }
+
+        CallStore.on('updateCall', this.handleUpdateCall);
     }
 
     componentWillUnmount() {
         const callPanel = this.callPanelRef.current;
         if (callPanel) {
-            callPanel.removeEventListener('fullscreenchange', this.handleFullScreenChange);
+            const prefixes = ['', 'moz', 'webkit', 'ms']
+            prefixes.forEach(x => {
+                callPanel.removeEventListener(x + 'fullscreenchange', this.handleFullScreenChange);
+            });
         }
+
+        CallStore.off('updateCall', this.handleUpdateCall);
     }
+
+    handleUpdateCall = update => {
+        this.forceUpdate();
+    };
 
     handleFullScreenChange = () => {
         this.setState({
@@ -85,6 +103,8 @@ class CallPanel extends React.Component {
     };
 
     handleOpenSettings = async event => {
+        this.handleCloseContextMenu();
+
         CallStore.devices = await navigator.mediaDevices.enumerateDevices();
 
         this.setState({
@@ -183,16 +203,43 @@ class CallPanel extends React.Component {
         this.setState({ anchorEl: null });
     };
 
+    handleAudio = () => {
+        const { audioEnabled } = this.state;
+
+        if (audioEnabled) {
+            CallStore.p2pAudioEnabled(false);
+        } else {
+            CallStore.p2pAudioEnabled(true)
+        }
+
+        this.setState({
+            audioEnabled: !audioEnabled
+        });
+    };
+
+    handleVideo = () => {
+        const { videoEnabled } = this.state;
+
+        if (videoEnabled) {
+            CallStore.p2pVideoEnabled(false);
+        } else {
+            CallStore.p2pVideoEnabled(true)
+        }
+
+        this.setState({
+            videoEnabled: !videoEnabled
+        });
+    };
+
     render() {
         const { callId, t } = this.props;
-        const { openSettings, anchorEl, fullScreen } = this.state;
+        const { openSettings, anchorEl, fullScreen, audioEnabled, videoEnabled } = this.state;
         const { currentCall } = CallStore;
-        // if (!currentGroupCall) return null;
 
         const call = CallStore.p2pGet(callId);
         if (!call) return null;
 
-        const { user_id: userId } = call;
+        const { user_id: userId, is_outgoing, state } = call;
 
         let screenSharing = currentCall && Boolean(currentCall.screenStream);
 
@@ -238,6 +285,18 @@ class CallPanel extends React.Component {
                                         rippleVisible : 'group-call-participant-menu-item-ripple-visible'
                                     }
                                 }}
+                                onClick={this.handleOpenSettings}>
+                                <ListItemText primary={t('Settings')} />
+                            </MenuItem>
+                            <MenuItem
+                                classes={{ root: 'group-call-participant-menu-item' }}
+                                ListItemClasses={{ focusVisible: 'group-call-participant-menu-item-focus-visible' }}
+                                TouchRippleProps={{
+                                    classes : {
+                                        child : 'group-call-participant-menu-item-ripple-child',
+                                        rippleVisible : 'group-call-participant-menu-item-ripple-visible'
+                                    }
+                                }}
                                 onClick={this.handleFullScreen}>
                                 <ListItemText primary={fullScreen ? t('ExitFullScreen') : t('EnterFullScreen')} />
                             </MenuItem>
@@ -256,24 +315,17 @@ class CallPanel extends React.Component {
                         </MenuList>
                     </Popover>
                 </div>
-                <div className='call-panel-content scrollbars-hidden'>
+                <div className='call-panel-content scrollbars-hidden' onDoubleClick={this.handleFullScreen}>
                     <video id='call-output-video' autoPlay={true} muted={true}/>
                     <video id='call-input-video' autoPlay={true} muted={true}/>
                 </div>
-                <GroupCallPanelButtons>
-                    {/*<GroupCallMicButton/>*/}
+                <div className='group-call-panel-buttons'>
                     <div className='group-call-panel-button'>
-                        <GroupCallSettingsButton onClick={this.handleOpenSettings}/>
-                        <div className='group-call-panel-button-text'>
-                            {t('Settings')}
-                        </div>
-                    </div>
-                    <div className='group-call-panel-button'>
-                        <div className='group-call-panel-button-answer' onMouseDown={stopPropagation} onClick={this.handleAccept}>
-                            <CallEndIcon />
+                        <div className='group-call-settings-button' onMouseDown={stopPropagation} onClick={this.handleVideo}>
+                            {videoEnabled ? <VideocamIcon/> : <VideocamOffIcon/>}
                         </div>
                         <div className='group-call-panel-button-text'>
-                            {t('VoipAnswerCall')}
+                            {videoEnabled ? t('VoipStopVideo') : t('VoipStartVideo')}
                         </div>
                     </div>
                     <div className='group-call-panel-button'>
@@ -284,7 +336,25 @@ class CallPanel extends React.Component {
                             {t('VoipDeclineCall')}
                         </div>
                     </div>
-                </GroupCallPanelButtons>
+                    {!is_outgoing && state['@type'] === 'callStatePending' && (
+                        <div className='group-call-panel-button'>
+                            <div className='group-call-panel-button-answer' onMouseDown={stopPropagation} onClick={this.handleAccept}>
+                                <CallIcon />
+                            </div>
+                            <div className='group-call-panel-button-text'>
+                                {t('VoipAnswerCall')}
+                            </div>
+                        </div>
+                    )}
+                    <div className='group-call-panel-button'>
+                        <div className='group-call-settings-button' onMouseDown={stopPropagation} onClick={this.handleAudio}>
+                            {audioEnabled ? <MicIcon/> : <MicOffIcon/>}
+                        </div>
+                        <div className='group-call-panel-button-text'>
+                            {audioEnabled ? t('Mute') : t('Unmute')}
+                        </div>
+                    </div>
+                </div>
                 {openSettings && <GroupCallSettings callId={callId} onClose={this.handleCloseSettings}/>}
             </div>
         );
