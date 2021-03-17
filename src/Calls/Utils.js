@@ -7,6 +7,58 @@
 
 // changes ssrcs
 import CallStore, { LOG_CALL } from '../Stores/CallStore';
+import LStore from '../Stores/LocalizationStore';
+
+export function p2pIsCallReady(callId) {
+    const call = CallStore.p2pGet(callId);
+    if (!call) return false;
+
+    const { state } = call;
+    if (!state) return false;
+
+    return state && state['@type'] === 'callStateReady';
+}
+
+export function p2pGetCallStatus(callId) {
+    const call = CallStore.p2pGet(callId);
+    if (!call) return '';
+
+    const { state } = call;
+    if (!state) return '';
+
+    switch (state['@type']) {
+        case 'callStateDiscarded': {
+            return '';
+        }
+        case 'callStateError': {
+            return '';
+        }
+        case 'callStateExchangingKeys': {
+            return LStore.getString('VoipExchangingKeys');
+        }
+        case 'callStateHangingUp': {
+            return '';
+        }
+        case 'callStatePending': {
+            return '';
+        }
+        case 'callStateReady': {
+            return getCallEmojis(callId);
+        }
+    }
+
+    return '';
+}
+
+export function getCallEmojis(callId) {
+    const call = CallStore.p2pGet(callId);
+    if (!call) return '';
+
+    const { state } = call;
+    if (!state) return '';
+
+    return state.emojis ? state.emojis.join('') : '';
+}
 
 export function getTransport(joinResponse) {
     const { payload, candidates } = joinResponse;

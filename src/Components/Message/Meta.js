@@ -13,7 +13,7 @@ import PinIcon from '../../Assets/Icons/PinFilled';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import Status from './Status';
 import { albumHistoryEquals } from '../../Utils/Common';
-import { getDate, getDateHint, getViews } from '../../Utils/Message';
+import { getDate, getDateHint, getViews, isCallMessage } from '../../Utils/Message';
 import MessageStore from '../../Stores/MessageStore';
 import './Meta.css';
 
@@ -108,9 +108,10 @@ class Meta extends React.Component {
         const dateHintStr = getDateHint(date);
         const viewsStr = getViews(views);
 
+        const isCall = isCallMessage(chatId, messageId);
+
         return (
             <div className={classNames('meta', className)} style={style}>
-                {/*{messageId}*/}
                 <span>&ensp;</span>
                 {views > 0 && (
                     <>
@@ -132,7 +133,7 @@ class Meta extends React.Component {
                 <a onClick={onDateClick}>
                     <span title={dateHintStr}>{dateStr}</span>
                 </a>
-                {isOutgoing && <Status chatId={chatId} messageId={messageId} />}
+                {isOutgoing && !isCall && <Status chatId={chatId} messageId={messageId} />}
             </div>
         );
     }

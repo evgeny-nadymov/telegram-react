@@ -139,6 +139,7 @@ class MainMenuButton extends React.Component {
         this.handleMenuClose();
 
         const userId = getChatUserId(AppStore.getChatId());
+
         CallStore.p2pStartCall(userId, false);
     };
 

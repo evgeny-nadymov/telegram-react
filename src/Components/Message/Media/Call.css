@@ -5,8 +5,14 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.call-button {
-    padding: 7px;
+.call-button-root {
+    font-size: 32px;
+    padding: 8px;
+    color: var(--color-accent-main);
+}
+
+ .light .message-out .call-button-root {
+    color: var(--message-out-subtle-color);
 }
 
 .call-tile {
@@ -26,4 +32,27 @@
 
 .call .document-title {
     margin-top: 0;
+}
+
+.call .meta-text {
+    position: static;
+    display: inline;
+    font-size: inherit;
+    line-height: inherit;
+}
+
+.call-outgoing {
+    display: inline-block;
+    transform: rotate(-45deg);
+    color: #00B700;
+}
+
+.call-incoming {
+    display: inline-block;
+    transform: rotate(135deg);
+    color: #00B700;
+}
+
+.call-incoming-missed {
+    color: #ED5041;
 }

@@ -18,11 +18,11 @@ import VideocamIcon from '@material-ui/icons/VideocamOutlined';
 import VideocamOffIcon from '@material-ui/icons/VideocamOffOutlined';
 import CallEndIcon from '../../Assets/Icons/CallEnd';
 import CloseIcon from '../../Assets/Icons/Close';
-import GroupCallPanelButtons from './GroupCallPanelButtons';
 import GroupCallSettings from './GroupCallSettings';
 import MenuIcon from '../../Assets/Icons/More';
 import MicIcon from '../../Assets/Icons/Mic';
 import MicOffIcon from '../../Assets/Icons/MicOff';
+import { p2pGetCallStatus, p2pIsCallReady } from '../../Calls/Utils';
 import { getUserFullName } from '../../Utils/User';
 import { stopPropagation } from '../../Utils/Message';
 import CallStore from '../../Stores/CallStore';
@@ -251,7 +251,9 @@ class CallPanel extends React.Component {
                     </div>
                     <div className='group-call-panel-caption'>
                         <div className='group-call-title'>{getUserFullName(userId, null)}</div>
-                        {/*<GroupCallSubtitle groupCallId={groupCallId} participantsOnly={true}/>*/}
+                        <div className='group-call-join-panel-subtitle'>
+                            {p2pGetCallStatus(callId)}
+                        </div>
                     </div>
                     <div className='group-call-panel-caption-button' onMouseDown={stopPropagation} onClick={this.handleOpenContextMenu}>
                         <MenuIcon />
@@ -333,7 +335,7 @@ class CallPanel extends React.Component {
                             <CallEndIcon />
                         </div>
                         <div className='group-call-panel-button-text'>
-                            {t('VoipDeclineCall')}
+                            {(p2pIsCallReady(callId) || is_outgoing) ? t('VoipEndCall') : t('VoipDeclineCall')}
                         </div>
                     </div>
                     {!is_outgoing && state['@type'] === 'callStatePending' && (

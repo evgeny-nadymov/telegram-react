@@ -210,8 +210,6 @@ class MainPage extends React.Component {
             isSmallWidth
         } = this.state;
 
-        console.log('[p2p] mainPage.render', callId);
-
         return (
             <>
                 <div

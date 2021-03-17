@@ -12,7 +12,7 @@ import Poll from '../Components/Message/Media/Poll';
 import SafeLink from '../Components/Additional/SafeLink';
 import dateFormat from '../Utils/Date';
 import { searchChat, setMediaViewerContent } from '../Actions/Client';
-import { getChatTitle, isMeChat, isPrivateChat } from './Chat';
+import { getChatTitle, getChatUserId, isMeChat, isPrivateChat } from './Chat';
 import { openUser } from '../Actions/Client';
 import { getFitSize, getPhotoSize, getSize } from './Common';
 import { download, saveOrDownload, supportsStreaming } from './File';
@@ -23,6 +23,7 @@ import { getUserFullName, isBotUser, isMeUser } from './User';
 import { getBlockAudio } from './InstantView';
 import { LOCATION_HEIGHT, LOCATION_SCALE, LOCATION_WIDTH, LOCATION_ZOOM, PHOTO_DISPLAY_SIZE, PHOTO_SIZE, PHOTO_THUMBNAIL_SIZE, PLAYER_AUDIO_2X_MIN_DURATION } from '../Constants';
 import AppStore from '../Stores/ApplicationStore';
+import CallStore from '../Stores/CallStore';
 import ChatStore from '../Stores/ChatStore';
 import FileStore from '../Stores/FileStore';
 import LStore from '../Stores/LocalizationStore';
@@ -30,6 +31,16 @@ import MessageStore from '../Stores/MessageStore';
 import PlayerStore from '../Stores/PlayerStore';
 import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
+
+export function isCallMessage(chatId, messageId) {
+    const message = MessageStore.get(chatId, messageId);
+    if (!message) return false;
+
+    const { content } = message;
+    if (!content) return false;
+
+    return content && content['@type'] === 'messageCall';
+}
 
 export function isEmptySelection(selection) {
     // new line symbol
@@ -1242,6 +1253,19 @@ function openAudio(audio, message, fileCancel) {
     });
 }
 
+function openCall(message) {
+    if (!message) return;
+
+    const { chat_id, content } = message;
+    if (!content) return;
+    if (content['@type'] !== 'messageCall') return;
+
+    const { is_video } = content;
+
+    const userId = getChatUserId(chat_id);
+    CallStore.p2pStartCall(userId, is_video);
+}
+
 function openChatPhoto(photo, message, fileCancel) {
     if (!photo) return;
     if (!message) return;
@@ -1545,6 +1569,13 @@ function openMedia(chatId, messageId, fileCancel = true) {
             if (audio) {
                 // openDocument(audio, message, fileCancel);
                 openAudio(audio, message, fileCancel);
+            }
+
+            break;
+        }
+        case 'messageCall': {
+            if (message) {
+                openCall(message);
             }
 
             break;

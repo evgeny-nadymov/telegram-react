@@ -100,13 +100,24 @@ class CallStore extends EventEmitter {
                     if (call) {
                         switch (state['@type']) {
                             case 'callStateDiscarded': {
-                                // if (!is_outgoing) {
-                                    closeCallPanel();
-                                // }
+                                closeCallPanel();
                                 this.p2pHangUp(id);
                                 break;
                             }
                             case 'callStateError': {
+                                const { error } = state;
+                                if (error) {
+                                    const { code, message } = error;
+                                    if (code === 403 && message === 'USER_PRIVACY_RESTRICTED') {
+                                        const { user_id } = call;
+                                        showAlert({
+                                            title: LStore.getString('VoipFailed'),
+                                            message: LStore.replaceTags(LStore.formatString('CallNotAvailable', getUserFullName(user_id, null))),
+                                            ok: LStore.getString('OK')
+                                        });
+                                    }
+                                }
+
                                 closeCallPanel();
                                 this.p2pHangUp(id);
                                 break;
@@ -115,6 +126,7 @@ class CallStore extends EventEmitter {
                                 break;
                             }
                             case 'callStateHangingUp': {
+                                closeCallPanel();
                                 break;
                             }
                             case 'callStatePending': {
@@ -1430,13 +1442,28 @@ class CallStore extends EventEmitter {
     p2pStartCall(userId, isVideo) {
         LOG_P2P_CALL('p2pStartCall', userId, isVideo);
 
+        const fullInfo = UserStore.getFullInfo(userId);
+        if (!fullInfo) return;
+
+        const { can_be_called, has_private_calls, supports_video_calls } = fullInfo;
+        LOG_P2P_CALL('p2pStartCall fullInfo', fullInfo, can_be_called, has_private_calls, supports_video_calls);
+        // if (!can_be_called || has_private_calls) {
+        //     showAlert({
+        //         title: LStore.getString('VoipFailed'),
+        //         message: LStore.replaceTags(LStore.formatString('CallNotAvailable', getUserFullName(userId, null))),
+        //             // LStore.getString('CallNotAvailable'), getUserFullName(userId, null)),
+        //         ok: LStore.getString('OK')
+        //     });
+        //     return;
+        // }
+
         const protocol = this.p2pGetProtocol();
-        LOG_P2P_CALL('[tdlib] createCall', userId, protocol, isVideo);
+        LOG_P2P_CALL('[tdlib] createCall', userId, protocol, isVideo, supports_video_calls);
         TdLibController.send({
             '@type': 'createCall',
             user_id: userId,
             protocol,
-            is_video: isVideo
+            is_video: isVideo && supports_video_calls
         });
     }
 

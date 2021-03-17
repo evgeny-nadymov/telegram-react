@@ -613,7 +613,7 @@ export function getMedia(message, openMedia, options = {}) {
                     messageId={id}
                     call={content}
                     openMedia={openMedia}
-                    meta={inlineMeta}
+                    meta={meta}
                 />
             );
         case 'messageContact':

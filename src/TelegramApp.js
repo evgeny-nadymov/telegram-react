@@ -29,6 +29,7 @@ import KeyboardManager, { KeyboardHandler } from './Components/Additional/Keyboa
 import { openChatList, openPinnedChat } from './Actions/Chat';
 import { modalManager } from './Utils/Modal';
 import { clearSelection, editMessage, replyMessage, searchChat } from './Actions/Client';
+import { isSafari } from './Utils/Common';
 import { OPTIMIZATIONS_FIRST_START, STORAGE_REGISTER_KEY, STORAGE_REGISTER_TEST_KEY } from './Constants';
 import UserStore from './Stores/UserStore';
 import AppStore from './Stores/ApplicationStore';
@@ -419,6 +420,22 @@ window.history.pushState(null, null, window.location.href);
 window.onpopstate = function() {
     window.history.go(1);
 };
+
+async function unlockAudio() {
+    try {
+        const sound = new Audio('sounds/sound_a.mp3');
+        sound.autoplay = true;
+        sound.pause();
+    } finally {
+        document.body.removeEventListener('click', unlockAudio)
+        document.body.removeEventListener('touchstart', unlockAudio)
+    }
+}
+
+// if (isSafari()) {
+    document.body.addEventListener('click', unlockAudio);
+    document.body.addEventListener('touchstart', unlockAudio);
+// }
 
 const enhance = compose(
     withLanguage,

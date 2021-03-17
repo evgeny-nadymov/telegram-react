@@ -453,6 +453,8 @@ class Message extends Component {
                 content['@type'] === 'messageVideo' ||
                 content['@type'] === 'messagePhoto' ||
                 content['@type'] === 'messageInvoice' && content.photo) || reply_markup && reply_markup['@type'] === 'replyMarkupInlineKeyboard';
+        const showMeta = withBubble && content['@type'] !== 'messageCall';
+
 
         // console.log('[p] m.render id=' + message.id);
 
@@ -537,7 +539,7 @@ class Message extends Component {
                                             meta={inlineMeta}
                                         />
                                     )}
-                                    {withBubble && meta}
+                                    {showMeta && meta}
                                 </div>
                                 {reply_markup && (
                                     <ReplyMarkup
