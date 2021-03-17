@@ -99,7 +99,7 @@ class CallPanel extends React.Component {
         const { callId } = this.props;
         if (!callId) return;
 
-        await CallStore.p2pDiscardCall(callId, false, 0, false, 0);
+        await CallStore.p2pHangUp(callId, true);
     };
 
     handleOpenSettings = async event => {
@@ -121,7 +121,7 @@ class CallPanel extends React.Component {
     handleClose = () => {
         const { callId } = this.props;
 
-        CallStore.p2pDiscardCall(callId, false, 0, false, 0);
+        CallStore.p2pHangUp(callId, true);
     };
 
     handleShareScreen = () => {
