@@ -67,6 +67,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    background: transparent;
 }
 
 .group-call-panel-caption-button {
@@ -103,7 +104,7 @@
     flex: 1 1 auto;
     overflow-y: hidden;
     margin: 0 16px;
-    border-radius: 5px;
+    /*border-radius: 5px;*/
     z-index: 1;
     position: relative;
     display: flex;

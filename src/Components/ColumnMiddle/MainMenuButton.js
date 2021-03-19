@@ -12,12 +12,13 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
+import ReportOutlinedIcon from '@material-ui/icons/ReportOutlined';
+import CallOutlinedIcon from '@material-ui/icons/CallOutlined';
 import BlockIcon from '../../Assets/Icons/Block';
 import BroomIcon from '../../Assets/Icons/Broom';
 import DeleteIcon from '../../Assets/Icons/Delete';
 import GroupIcon from '../../Assets/Icons/Group';
 import MoreVertIcon from '../../Assets/Icons/More';
-import ReportOutlinedIcon from '@material-ui/icons/ReportOutlined';
 import PhoneIcon from '../../Assets/Icons/Phone';
 import UnpinIcon from '../../Assets/Icons/PinOff';
 import UserIcon from '../../Assets/Icons/User';
@@ -198,7 +199,7 @@ class MainMenuButton extends React.Component {
                     { CallStore.p2pCallsEnabled && called && (
                         <MenuItem onClick={this.handleStartP2PCall}>
                             <ListItemIcon>
-                                <PhoneIcon />
+                                <CallOutlinedIcon />
                             </ListItemIcon>
                             <ListItemText primary={t('Call')} />
                         </MenuItem>

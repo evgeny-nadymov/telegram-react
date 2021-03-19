@@ -249,7 +249,7 @@ class CallPanel extends React.Component {
                     <div className='group-call-panel-caption-button' onMouseDown={stopPropagation} onClick={this.handleClose}>
                         <CloseIcon />
                     </div>
-                    <div className='group-call-panel-caption'>
+                    <div className='group-call-panel-caption' onMouseDown={stopPropagation} onClick={stopPropagation}>
                         <div className='group-call-title'>{getUserFullName(userId, null)}</div>
                         <div className='group-call-join-panel-subtitle'>
                             {p2pGetCallStatus(callId)}
