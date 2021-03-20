@@ -1,0 +1,30 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.call-panel-microphone-hint {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    bottom: 182px;
+    position: absolute;
+    left: 0;
+    right: 0;
+}
+
+.call-panel-microphone-hint-wrapper {
+    min-height: 38px;
+    border-radius: 19px;
+    background: #00000077;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 12px;
+}
+
+.call-panel-microphone-hint-text {
+    margin-left: 12px;
+}

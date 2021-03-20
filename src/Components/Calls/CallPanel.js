@@ -26,8 +26,9 @@ import { p2pGetCallStatus, p2pIsCallReady } from '../../Calls/Utils';
 import { getUserFullName } from '../../Utils/User';
 import { stopPropagation } from '../../Utils/Message';
 import CallStore from '../../Stores/CallStore';
+import LStore from '../../Stores/LocalizationStore';
 import UserStore from '../../Stores/UserStore';
-import './GroupCallPanel.css';
+import './CallPanel.css';
 
 class CallPanel extends React.Component {
     constructor(props) {
@@ -42,7 +43,10 @@ class CallPanel extends React.Component {
             top: 0,
             fullScreen: false,
             audioEnabled: true,
-            videoEnabled: true
+            videoEnabled: true,
+
+            otherAudioEnabled: true,
+            otherVideoEnabled: true
         };
     }
 
@@ -56,6 +60,7 @@ class CallPanel extends React.Component {
         }
 
         CallStore.on('updateCall', this.handleUpdateCall);
+        CallStore.on('clientUpdateCallMediaIsMuted', this.onClientUpdateCallMediaIsMuted);
     }
 
     componentWillUnmount() {
@@ -68,6 +73,23 @@ class CallPanel extends React.Component {
         }
 
         CallStore.off('updateCall', this.handleUpdateCall);
+        CallStore.off('clientUpdateCallMediaIsMuted', this.onClientUpdateCallMediaIsMuted);
+    }
+
+    onClientUpdateCallMediaIsMuted = update => {
+        const { callId: currentCallId } = this.props;
+        const { callId, kind, isMuted } = update;
+        if (callId !== currentCallId) return;
+
+        if (kind === 'audio') {
+            this.setState({
+                otherAudioEnabled: !isMuted
+            });
+        } else if (kind === 'video') {
+            this.setState({
+                otherVideoEnabled: !isMuted
+            });
+        }
     }
 
     handleUpdateCall = update => {
@@ -233,7 +255,7 @@ class CallPanel extends React.Component {
 
     render() {
         const { callId, t } = this.props;
-        const { openSettings, anchorEl, fullScreen, audioEnabled, videoEnabled } = this.state;
+        const { openSettings, anchorEl, fullScreen, audioEnabled, videoEnabled, otherAudioEnabled, otherVideoEnabled } = this.state;
         const { currentCall } = CallStore;
 
         const call = CallStore.p2pGet(callId);
@@ -321,6 +343,16 @@ class CallPanel extends React.Component {
                     <video id='call-output-video' autoPlay={true} muted={true}/>
                     <video id='call-input-video' autoPlay={true} muted={true}/>
                 </div>
+                { !otherAudioEnabled && (
+                    <div className='call-panel-microphone-hint'>
+                        <div className='call-panel-microphone-hint-wrapper'>
+                            <MicOffIcon/>
+                            <div className='call-panel-microphone-hint-text'>
+                                {LStore.formatString('VoipUserMicrophoneIsOff', getUserFullName(userId, null))}
+                            </div>
+                        </div>
+                    </div>
+                )}
                 <div className='group-call-panel-buttons'>
                     <div className='group-call-panel-button'>
                         <div className='group-call-settings-button' onMouseDown={stopPropagation} onClick={this.handleVideo}>

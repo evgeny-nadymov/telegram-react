@@ -331,6 +331,10 @@ class CallStore extends EventEmitter {
                 this.emit('clientUpdateCallPanel', update);
                 break;
             }
+            case 'clientUpdateCallMediaIsMuted': {
+                this.emit('clientUpdateCallMediaIsMuted', update);
+                break;
+            }
             default:
                 break;
         }
@@ -1871,7 +1875,29 @@ class CallStore extends EventEmitter {
                 }
                 break;
             }
+            case 'media': {
+                const { kind, isMuted } = signalingData;
+                if (kind === 'audio') {
+                    currentCall.audioIsMuted = isMuted;
+                } else if (kind === 'video') {
+                    currentCall.videoIsMuted = isMuted;
+                }
+
+                TdLibController.clientUpdate({
+                    '@type': 'clientUpdateCallMediaIsMuted',
+                    callId,
+                    kind,
+                    isMuted
+                });
+
+                break;
+            }
         }
+    }
+
+    p2pSendMediaIsMuted(callId, kind, isMuted) {
+        LOG_P2P_CALL('p2pSendMediaIsMuted', callId, kind, isMuted);
+        this.p2pSendCallSignalingData(callId, JSON.stringify({ type: 'media', kind, isMuted }));
     }
 
     p2pSendIceCandidate(callId, candidate) {
@@ -2030,7 +2056,7 @@ class CallStore extends EventEmitter {
         const { currentCall } = this;
         if (!currentCall) return;
 
-        const { connection } = currentCall;
+        const { connection, callId } = currentCall;
         if (!connection) return;
 
         const senders = connection.getSenders();
@@ -2040,13 +2066,15 @@ class CallStore extends EventEmitter {
                 track.enabled = enabled;
             }
         });
+
+        this.p2pSendMediaIsMuted(callId, 'audio', !enabled);
     }
 
     p2pVideoEnabled(enabled) {
         const { currentCall } = this;
         if (!currentCall) return;
 
-        const { connection } = currentCall;
+        const { connection, callId } = currentCall;
         if (!connection) return;
 
         const senders = connection.getSenders();
@@ -2056,6 +2084,8 @@ class CallStore extends EventEmitter {
                 track.enabled = enabled;
             }
         });
+
+        this.p2pSendMediaIsMuted(callId, 'video', !enabled);
     }
 }
 
