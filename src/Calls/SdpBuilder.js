@@ -57,7 +57,7 @@ export class SdpBuilder {
 
     addHeader(sessionId, transport, ssrcs) {
         this.add("v=0"); // version
-        this.add(`o=- ${sessionId} 2 IN IP4 0.0.0.0`); // sessionId, 2=sesionVersion
+        this.add(`o=- ${sessionId} 2 IN IP4 0.0.0.0`); // sessionId, 2=sessionVersion
         this.add("s=-"); // name of the session
         // this.add("c=IN IP4 0.0.0.0");
         this.add("t=0 0"); // time when session is valid

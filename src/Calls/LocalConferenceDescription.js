@@ -33,7 +33,7 @@ export default class LocalConferenceDescription {
             {
                 sessionId: this.#sessionId,
                 transport: this.#transport,
-                ssrcs: this.#ssrcs,
+                ssrcs: this.#ssrcs
             },
             isAnswer
         );

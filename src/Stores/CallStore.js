@@ -13,6 +13,7 @@ import { getUserFullName } from '../Utils/User';
 import { fromTelegramSource, getStream, getTransport, parseSdp, toTelegramSource } from '../Calls/Utils';
 import { showAlert, showLeaveVoiceChatAlert } from '../Actions/Client';
 import { throttle } from '../Utils/Common';
+import { p2pParseSdp, P2PSdpBuilder } from '../Calls/P2P/P2PSdpBuilder';
 import { GROUP_CALL_AMPLITUDE_ANALYSE_INTERVAL_MS, GROUP_CALL_PARTICIPANTS_LOAD_LIMIT } from '../Constants';
 import AppStore from './ApplicationStore';
 import LStore from './LocalizationStore';
@@ -20,6 +21,7 @@ import UserStore from './UserStore';
 import TdLibController from '../Controllers/TdLibController';
 
 const JOIN_TRACKS = true;
+const UNIFY_SDP = false;
 
 export function LOG_CALL(str, ...data) {
     // return;
@@ -1790,7 +1792,7 @@ class CallStore extends EventEmitter {
         });
 
         await connection.setLocalDescription(offer);
-        this.p2pSendOffer(callId, offer);
+        this.p2pSendSdp(callId, offer);
     };
 
     p2pAppendInputStream(inputStream) {
@@ -1841,7 +1843,17 @@ class CallStore extends EventEmitter {
         switch (type) {
             case 'answer':
             case 'offer':{
-                await connection.setRemoteDescription(signalingData);
+                let description = signalingData;
+                if (UNIFY_SDP) {
+                    description = {
+                        type,
+                        sdp: type === 'offer' ?
+                            P2PSdpBuilder.generateOffer(signalingData) :
+                            P2PSdpBuilder.generateAnswer(signalingData)
+                    }
+                }
+
+                await connection.setRemoteDescription(description);
                 if (currentCall.candidates) {
                     currentCall.candidates.forEach(x => {
                         connection.addIceCandidate(x);
@@ -1859,7 +1871,7 @@ class CallStore extends EventEmitter {
                         this.p2pAppendInputStream(inputStream);
                     }
 
-                    this.p2pSendAnswer(callId, answer);
+                    this.p2pSendSdp(callId, answer);
                 }
                 break;
             }
@@ -1905,21 +1917,18 @@ class CallStore extends EventEmitter {
         this.p2pSendCallSignalingData(callId, JSON.stringify({ type: 'candidate', data: candidate.toJSON() }));
     }
 
-    p2pSendDescription(callId, description) {
-        LOG_P2P_CALL('p2pSendDescription', callId, description);
-        this.p2pSendCallSignalingData(callId, JSON.stringify(description));
-    }
+    p2pSendSdp(callId, sdpData) {
+        LOG_P2P_CALL('p2pSendSdp', callId, sdpData);
+        if (UNIFY_SDP) {
+            const { type, sdp } = sdpData;
+            const sdpInfo = p2pParseSdp(sdp);
+            sdpInfo.type = type;
+            sdpInfo.sdp = sdp;
 
-    p2pSendOffer(callId, offer) {
-        LOG_P2P_CALL('p2pSendOffer', callId, offer);
-        this.p2pSendCallSignalingData(callId, JSON.stringify(offer));
-        // this.p2pSendCallSignalingData(callId, JSON.stringify({ type: 'offer', data: offer }));
-    }
-
-    p2pSendAnswer(callId, answer) {
-        LOG_P2P_CALL('p2pSendAnswer', callId, answer);
-        this.p2pSendCallSignalingData(callId, JSON.stringify(answer));
-        // this.p2pSendCallSignalingData(callId, JSON.stringify({ type: 'answer', data: answer }));
+            this.p2pSendCallSignalingData(callId, JSON.stringify(sdpInfo));
+        } else {
+            this.p2pSendCallSignalingData(callId, JSON.stringify(sdpData));
+        }
     }
 
     p2pHangUp(callId, discard = false) {
