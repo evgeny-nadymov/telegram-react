@@ -22,12 +22,27 @@ a=fingerprint:${hash} ${fingerprint}`;
         sdp += `
 a=group:BUNDLE ${media.map(x => x.mid).join(' ')}
 a=extmap-allow-mixed
-a=msid-semantic: WMS`;
+a=msid-semantic: WMS *`;
         const streamName = 'stream' + media.map(x => x.ssrc).join('_');
         for (let i = 0; i < media.length; i++) {
             const m = media[i];
             const { type, ssrc, ssrcGroup, types, ufrag, pwd, hash, fingerprint, setup, dir, mid, extmap } = m;
             switch (type) {
+                case 'application': {
+                    const { port, maxSize } = m;
+                    sdp += `
+m=application 9 UDP/DTLS/SCTP webrtc-datachannel
+c=IN IP4 0.0.0.0
+a=ice-ufrag:${ufrag}
+a=ice-pwd:${pwd}
+a=ice-options:trickle
+a=fingerprint:${hash} ${fingerprint}
+a=setup:${setup}
+a=mid:${mid}
+a=sctp-port:${port}
+a=max-message-size:${maxSize}`;
+                    break;
+                }
                 case 'audio': {
                     sdp += `
 m=audio 56930 UDP/TLS/RTP/SAVPF ${types.map(x => x.id).join(' ')}
@@ -104,12 +119,27 @@ a=fingerprint:${hash} ${fingerprint}`;
         sdp += `
 a=group:BUNDLE ${media.map(x => x.mid).join(' ')}
 a=extmap-allow-mixed
-a=msid-semantic: WMS`;
+a=msid-semantic: WMS *`;
         const streamName = 'stream' + media.map(x => x.ssrc).join('_');
         for (let i = 0; i < media.length; i++) {
             const m = media[i];
             const { type, mid, ssrc, ssrcGroup, types, ufrag, pwd, hash, fingerprint, setup, dir, extmap } = m;
             switch (type) {
+                case 'application': {
+                    const { port, maxSize } = m;
+                    sdp += `
+m=application 9 UDP/DTLS/SCTP webrtc-datachannel
+c=IN IP4 0.0.0.0
+a=ice-ufrag:${ufrag}
+a=ice-pwd:${pwd}
+a=ice-options:trickle
+a=fingerprint:${hash} ${fingerprint}
+a=setup:${setup}
+a=mid:${mid}
+a=sctp-port:${port}
+a=max-message-size:${maxSize}`;
+                    break;
+                }
                 case 'audio': {
                     sdp += `
 m=audio 56930 UDP/TLS/RTP/SAVPF ${types.map(x => x.id).join(' ')}

@@ -27,6 +27,20 @@ a=msid-semantic:WMS *`;
             const m = media[i];
             const { type, mid, ssrc, ssrcGroup, types, ufrag, pwd, hash, fingerprint, setup, dir, extmap } = m;
             switch (type) {
+                case 'application': {
+                    const { port, maxSize } = m;
+                    sdp += `
+m=application 9 UDP/DTLS/SCTP webrtc-datachannel
+c=IN IP4 0.0.0.0
+a=ice-ufrag:${ufrag}
+a=ice-pwd:${pwd}
+a=ice-options:trickle
+a=setup:${setup}
+a=mid:${mid}
+a=sctp-port:${port}
+a=max-message-size:${maxSize}`;
+                    break;
+                }
                 case 'audio': {
                     sdp += `
 m=audio 9 UDP/TLS/RTP/SAVPF ${types.map(x => x.id).join(' ')}
@@ -95,6 +109,20 @@ a=msid-semantic:WMS *`;
             const m = media[i];
             const { type, mid, ssrc, ssrcGroup, types, ufrag, pwd, hash, fingerprint, setup, dir, extmap } = m;
             switch (type) {
+                case 'application': {
+                    const { port, maxSize } = m;
+                    sdp += `
+m=application 9 UDP/DTLS/SCTP webrtc-datachannel
+c=IN IP4 0.0.0.0
+a=ice-ufrag:${ufrag}
+a=ice-pwd:${pwd}
+a=ice-options:trickle
+a=setup:${setup}
+a=mid:${mid}
+a=sctp-port:${port}
+a=max-message-size:${maxSize}`;
+                    break;
+                }
                 case 'audio': {
                     sdp += `
 m=audio 9 UDP/TLS/RTP/SAVPF ${types.map(x => x.id).join(' ')}
