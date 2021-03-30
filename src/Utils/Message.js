@@ -1256,6 +1256,7 @@ function openAudio(audio, message, fileCancel) {
 function openCall(message) {
     if (!message) return;
 
+    if (!CallStore.p2pCallsEnabled) return;
     const { chat_id, content } = message;
     if (!content) return;
     if (content['@type'] !== 'messageCall') return;

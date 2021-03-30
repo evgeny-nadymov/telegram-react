@@ -21,7 +21,7 @@ import UserStore from './UserStore';
 import TdLibController from '../Controllers/TdLibController';
 
 const JOIN_TRACKS = true;
-const UNIFY_SDP = false;
+const UNIFY_SDP = true;
 
 export function LOG_CALL(str, ...data) {
     // return;
@@ -1839,7 +1839,7 @@ class CallStore extends EventEmitter {
 
         const { is_outgoing } = call;
 
-        const { type, data } = signalingData;
+        const { type } = signalingData;
         switch (type) {
             case 'answer':
             case 'offer':{
@@ -1876,13 +1876,14 @@ class CallStore extends EventEmitter {
                 break;
             }
             case 'candidate': {
-                const candidate = new RTCIceCandidate(data);
-                if (candidate.candidate) {
+                const { candidate, sdpMLineIndex, sdpMid } = signalingData;
+                if (candidate) {
+                    const iceCandidate = new RTCIceCandidate({ candidate, sdpMLineIndex, sdpMid });
                     if (!connection.remoteDescription) {
                         currentCall.candidates = currentCall.candidates || [];
-                        currentCall.candidates.push(candidate);
+                        currentCall.candidates.push(iceCandidate);
                     } else {
-                        await connection.addIceCandidate(candidate);
+                        await connection.addIceCandidate(iceCandidate);
                     }
                 }
                 break;
@@ -1912,9 +1913,10 @@ class CallStore extends EventEmitter {
         this.p2pSendCallSignalingData(callId, JSON.stringify({ type: 'media', kind, isMuted }));
     }
 
-    p2pSendIceCandidate(callId, candidate) {
-        LOG_P2P_CALL('p2pSendIceCandidate', callId, candidate);
-        this.p2pSendCallSignalingData(callId, JSON.stringify({ type: 'candidate', data: candidate.toJSON() }));
+    p2pSendIceCandidate(callId, iceCandidate) {
+        LOG_P2P_CALL('p2pSendIceCandidate', callId, iceCandidate);
+        const { candidate, sdpMLineIndex, sdpMid } = iceCandidate;
+        this.p2pSendCallSignalingData(callId, JSON.stringify({ type: 'candidate', candidate, sdpMLineIndex, sdpMid }));
     }
 
     p2pSendSdp(callId, sdpData) {
@@ -1923,7 +1925,7 @@ class CallStore extends EventEmitter {
             const { type, sdp } = sdpData;
             const sdpInfo = p2pParseSdp(sdp);
             sdpInfo.type = type;
-            sdpInfo.sdp = sdp;
+            // sdpInfo.sdp = sdp;
 
             this.p2pSendCallSignalingData(callId, JSON.stringify(sdpInfo));
         } else {
