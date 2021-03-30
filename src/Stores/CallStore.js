@@ -13,7 +13,7 @@ import { getUserFullName } from '../Utils/User';
 import { fromTelegramSource, getStream, getTransport, parseSdp, toTelegramSource } from '../Calls/Utils';
 import { showAlert, showLeaveVoiceChatAlert } from '../Actions/Client';
 import { throttle } from '../Utils/Common';
-import { p2pParseSdp, P2PSdpBuilder } from '../Calls/P2P/P2PSdpBuilder';
+import { p2pParseCandidate, p2pParseSdp, P2PSdpBuilder } from '../Calls/P2P/P2PSdpBuilder';
 import { GROUP_CALL_AMPLITUDE_ANALYSE_INTERVAL_MS, GROUP_CALL_PARTICIPANTS_LOAD_LIMIT } from '../Constants';
 import AppStore from './ApplicationStore';
 import LStore from './LocalizationStore';
@@ -22,6 +22,7 @@ import TdLibController from '../Controllers/TdLibController';
 
 const JOIN_TRACKS = true;
 const UNIFY_SDP = true;
+const UNIFY_CANDIDATE = true;
 
 export function LOG_CALL(str, ...data) {
     // return;
@@ -1856,6 +1857,7 @@ class CallStore extends EventEmitter {
                 await connection.setRemoteDescription(description);
                 if (currentCall.candidates) {
                     currentCall.candidates.forEach(x => {
+                        LOG_P2P_CALL('[candidate] add postpone', x);
                         connection.addIceCandidate(x);
                     });
                     currentCall.candidates = [];
@@ -1876,13 +1878,20 @@ class CallStore extends EventEmitter {
                 break;
             }
             case 'candidate': {
-                const { candidate, sdpMLineIndex, sdpMid } = signalingData;
+                let candidate = signalingData;
+                if (UNIFY_CANDIDATE) {
+                    candidate = P2PSdpBuilder.generateCandidate(candidate.candidate);
+                    candidate.sdpMLineIndex = signalingData.sdpMLineIndex;
+                    candidate.sdpMid = signalingData.sdpMid;
+                }
                 if (candidate) {
-                    const iceCandidate = new RTCIceCandidate({ candidate, sdpMLineIndex, sdpMid });
+                    const iceCandidate = new RTCIceCandidate(candidate);
                     if (!connection.remoteDescription) {
                         currentCall.candidates = currentCall.candidates || [];
+                        LOG_P2P_CALL('[candidate] postpone', iceCandidate);
                         currentCall.candidates.push(iceCandidate);
                     } else {
+                        LOG_P2P_CALL('[candidate] add', iceCandidate);
                         await connection.addIceCandidate(iceCandidate);
                     }
                 }
@@ -1915,8 +1924,14 @@ class CallStore extends EventEmitter {
 
     p2pSendIceCandidate(callId, iceCandidate) {
         LOG_P2P_CALL('p2pSendIceCandidate', callId, iceCandidate);
-        const { candidate, sdpMLineIndex, sdpMid } = iceCandidate;
-        this.p2pSendCallSignalingData(callId, JSON.stringify({ type: 'candidate', candidate, sdpMLineIndex, sdpMid }));
+        if (UNIFY_CANDIDATE) {
+            let { candidate, sdpMLineIndex, sdpMid } = iceCandidate;
+            candidate = p2pParseCandidate(candidate);
+            this.p2pSendCallSignalingData(callId, JSON.stringify({ type: 'candidate', candidate, sdpMLineIndex, sdpMid }));
+        } else {
+            const { candidate, sdpMLineIndex, sdpMid } = iceCandidate;
+            this.p2pSendCallSignalingData(callId, JSON.stringify({ type: 'candidate', candidate, sdpMLineIndex, sdpMid }));
+        }
     }
 
     p2pSendSdp(callId, sdpData) {

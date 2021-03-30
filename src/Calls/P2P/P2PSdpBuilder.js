@@ -9,6 +9,66 @@ import { ChromeP2PSdpBuilder } from './ChromeP2PSdpBuilder';
 import { FirefoxP2PSdpBuilder } from './FirefoxP2PSdpBuilder';
 import { SafariP2PSdpBuilder } from './SafariP2PSdpBuilder';
 
+export function p2pParseCandidate(candidate) {
+    if (!candidate) {
+        return null;
+    }
+    if (!candidate.startsWith('candidate:')) {
+        return null;
+    }
+
+    candidate = candidate.substr('candidate:'.length);
+
+    const [ foundation, component, protocol, priority, ip, port, ...other ] = candidate.split(' ');
+    const c = {
+        foundation,
+        component,
+        protocol,
+        priority,
+        ip,
+        port
+    };
+
+    for (let i = 0; i < other.length; i += 2) {
+        switch (other[i]) {
+            case 'typ': {
+                c.type = other[i + 1];
+                break;
+            }
+            case 'rel-addr': {
+                c.relAddr = other[i + 1];
+                break;
+            }
+            case 'rel-port': {
+                c.relPort = other[i + 1];
+                break;
+            }
+            case 'generation': {
+                c.generation = other[i + 1];
+                break;
+            }
+            case 'tcptype': {
+                c.tcpType = other[i + 1];
+                break;
+            }
+            case 'network-id': {
+                c.network = other[i + 1];
+                break;
+            }
+            case 'network-cost': {
+                c.networkCost = other[i + 1];
+                break;
+            }
+            case 'ufrag': {
+                c.ufrag = other[i + 1];
+                break;
+            }
+        }
+    }
+
+    return c;
+}
+
 export function p2pParseSdp(sdp) {
     const lines = sdp.split('\r\n');
     const lookup = (prefix, force = true, lineFrom = 0, lineTo = Number.MAX_VALUE) => {
@@ -101,6 +161,18 @@ export function p2pParseSdp(sdp) {
             extmap,
             types
         }
+
+        if (media.type === 'application') {
+            const port = lookup('a=sctp-port:', true, mediaIndex, nextMediaIndex);
+            if (port) {
+                media.port = parseInt(port);
+            }
+            const maxSize = lookup('a=max-message-size:', true, mediaIndex, nextMediaIndex);
+            if (maxSize) {
+                media.maxSize = parseInt(maxSize);
+            }
+        }
+
         let fingerprint = lookup('a=fingerprint:', false, mediaIndex, nextMediaIndex);
         if (fingerprint) {
             media.hash = fingerprint.split(' ')[0];
@@ -255,6 +327,43 @@ a=ssrc:${ssrc} label:${type}${ssrc}`;
 }
 
 export class P2PSdpBuilder {
+    static generateCandidate(info) {
+        if (!info) return null;
+
+        const { sdpMLineIndex, sdpMid, foundation, component, protocol, priority, ip, port, type, relAddr, relPort, generation, tcpType, network, networkCost, ufrag } = info;
+        let candidate = `candidate:${foundation} ${component} ${protocol} ${priority} ${ip} ${port}`;
+        const attrs = []
+        if (type) {
+            attrs.push(`typ ${type}`);
+        }
+        if (relAddr) {
+            attrs.push(`rel-addr ${relAddr}`);
+        }
+        if (relPort) {
+            attrs.push(`rel-port ${relPort}`);
+        }
+        if (generation) {
+            attrs.push(`generation ${generation}`);
+        }
+        if (tcpType) {
+            attrs.push(`tcptype ${tcpType}`);
+        }
+        if (ufrag) {
+            attrs.push(`ufrag ${ufrag}`);
+        }
+        if (network) {
+            attrs.push(`network-id ${network}`);
+        }
+        if (networkCost) {
+            attrs.push(`network-cost ${networkCost}`);
+        }
+        if (attrs.length > 0) {
+            candidate += ` ${attrs.join(' ')}`;
+        }
+
+        return { candidate, sdpMid, sdpMLineIndex };
+    }
+
     static generateOffer(info) {
         if (isFirefox()) {
             return FirefoxP2PSdpBuilder.generateOffer(info);
