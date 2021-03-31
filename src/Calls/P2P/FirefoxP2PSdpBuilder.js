@@ -9,14 +9,18 @@ import {addExtmap, addPayloadTypes, addSsrc} from './P2PSdpBuilder';
 
 export class FirefoxP2PSdpBuilder {
     static generateOffer(info) {
-        const { sessionId, hash, fingerprint, media } = info;
+        const { sessionId, fingerprints, media } = info;
         let sdp = `v=0
 o=- ${sessionId} 0 IN IP4 0.0.0.0
 s=-
 t=0 0`;
-        if (hash && fingerprint) {
-            sdp += `
-a=fingerprint:${hash} ${fingerprint}`;
+        if (fingerprints) {
+            fingerprints.forEach(x => {
+                const { hash, fingerprint, setup } = x;
+                sdp += `
+a=fingerprint:${hash} ${fingerprint}
+a=setup:${setup}`;
+            });
         }
         sdp += `
 a=group:BUNDLE ${media.map(x => x.mid).join(' ')}
@@ -25,7 +29,7 @@ a=msid-semantic:WMS *`;
         const streamName = 'stream' + media.map(x => x.ssrc).join('_');
         for (let i = 0; i < media.length; i++) {
             const m = media[i];
-            const { type, mid, ssrc, ssrcGroup, types, ufrag, pwd, hash, fingerprint, setup, dir, extmap } = m;
+            const { type, mid, ssrc, ssrcGroup, types, ufrag, pwd, dir, extmap } = m;
             switch (type) {
                 case 'application': {
                     const { port, maxSize } = m;
@@ -35,14 +39,9 @@ c=IN IP4 0.0.0.0
 a=ice-ufrag:${ufrag}
 a=ice-pwd:${pwd}
 a=ice-options:trickle
-a=setup:${setup}
 a=mid:${mid}
 a=sctp-port:${port}
 a=max-message-size:${maxSize}`;
-                    if (hash && fingerprint) {
-                        sdp += `
-a=fingerprint:${hash} ${fingerprint}`;
-                    }
                     break;
                 }
                 case 'audio': {
@@ -51,12 +50,7 @@ m=audio 9 UDP/TLS/RTP/SAVPF ${types.map(x => x.id).join(' ')}
 c=IN IP4 0.0.0.0
 a=ice-ufrag:${ufrag}
 a=ice-pwd:${pwd}
-a=setup:${setup}
 a=mid:${mid}`;
-                    if (hash && fingerprint) {
-                        sdp += `
-a=fingerprint:${hash} ${fingerprint}`;
-                    }
                     if (dir) {
                         sdp += `
 a=${dir}`;
@@ -75,12 +69,7 @@ m=video 9 UDP/TLS/RTP/SAVPF ${types.map(x => x.id).join(' ')}
 c=IN IP4 0.0.0.0
 a=ice-ufrag:${ufrag}
 a=ice-pwd:${pwd}
-a=setup:${setup}
 a=mid:${mid}`;
-                    if (hash && fingerprint) {
-                        sdp += `
-a=fingerprint:${hash} ${fingerprint}`;
-                    }
                     if (dir) {
                         sdp += `
 a=${dir}`;
@@ -103,14 +92,18 @@ a=rtcp-rsize`;
     }
 
     static generateAnswer(info) {
-        const { sessionId, hash, fingerprint, media } = info;
+        const { sessionId, fingerprints, media } = info;
         let sdp = `v=0
 o=- ${sessionId} 0 IN IP4 0.0.0.0
 s=-
 t=0 0`;
-        if ( hash && fingerprint) {
-            sdp += `
-a=fingerprint:${hash} ${fingerprint}`;
+        if (fingerprints) {
+            fingerprints.forEach(x => {
+                const { hash, fingerprint, setup } = x;
+                sdp += `
+a=fingerprint:${hash} ${fingerprint}
+a=setup:${setup}`;
+            });
         }
         sdp += `
 a=group:BUNDLE ${media.map(x => x.mid).join(' ')}
@@ -119,7 +112,7 @@ a=msid-semantic:WMS *`;
         const streamName = 'stream' + media.map(x => x.ssrc).join('_');
         for (let i = 0; i < media.length; i++) {
             const m = media[i];
-            const { type, mid, ssrc, ssrcGroup, types, ufrag, pwd, hash, fingerprint, setup, dir, extmap } = m;
+            const { type, mid, ssrc, ssrcGroup, types, ufrag, pwd, dir, extmap } = m;
             switch (type) {
                 case 'application': {
                     const { port, maxSize } = m;
@@ -129,14 +122,9 @@ c=IN IP4 0.0.0.0
 a=ice-ufrag:${ufrag}
 a=ice-pwd:${pwd}
 a=ice-options:trickle
-a=setup:${setup}
 a=mid:${mid}
 a=sctp-port:${port}
 a=max-message-size:${maxSize}`;
-                    if (hash && fingerprint) {
-                        sdp += `
-a=fingerprint:${hash} ${fingerprint}`;
-                    }
                     break;
                 }
                 case 'audio': {
@@ -145,12 +133,7 @@ m=audio 9 UDP/TLS/RTP/SAVPF ${types.map(x => x.id).join(' ')}
 c=IN IP4 0.0.0.0
 a=ice-ufrag:${ufrag}
 a=ice-pwd:${pwd}
-a=setup:${setup}
 a=mid:${mid}`;
-                    if (hash && fingerprint) {
-                        sdp += `
-a=fingerprint:${hash} ${fingerprint}`;
-                    }
                     if (dir) {
                         sdp += `
 a=${dir}`;
@@ -169,12 +152,7 @@ m=video 9 UDP/TLS/RTP/SAVPF ${types.map(x => x.id).join(' ')}
 c=IN IP4 0.0.0.0
 a=ice-ufrag:${ufrag}
 a=ice-pwd:${pwd}
-a=setup:${setup}
 a=mid:${mid}`;
-                    if (hash && fingerprint) {
-                        sdp += `
-a=fingerprint:${hash} ${fingerprint}`;
-                    }
                     if (dir) {
                         sdp += `
 a=${dir}`;

@@ -134,16 +134,20 @@ export function p2pParseSdp(sdp) {
 
     const info = {
         sessionId: lookup('o=').split(' ')[1],
-        hash: null,
-        fingerprint: null,
+        fingerprints: [],
         media: []
     };
 
     let mediaIndex = findIndex('m=');
-    let fingerprint = lookup('a=fingerprint:', false, 0, mediaIndex);
-    if (fingerprint) {
-        info.hash = fingerprint.split(' ')[0];
-        info.fingerprint = fingerprint.split(' ')[1];
+    const fingerprint = lookup('a=fingerprint:', false);
+    const setup = lookup('a=setup:', false);
+    if (fingerprint && setup) {
+        info.fingerprints.push({
+            hash: fingerprint.split(' ')[0],
+            fingerprint: fingerprint.split(' ')[1],
+            setup
+        });
+
     }
 
     while (mediaIndex !== -1) {
@@ -154,7 +158,7 @@ export function p2pParseSdp(sdp) {
         const media = {
             type: lookup('m=', true, mediaIndex, nextMediaIndex).split(' ')[0],
             mid: lookup('a=mid:', true, mediaIndex, nextMediaIndex),
-            setup: lookup('a=setup:', true, mediaIndex, nextMediaIndex),
+            // setup: lookup('a=setup:', true, mediaIndex, nextMediaIndex),
             dir: findDirection(mediaIndex, nextMediaIndex),
             pwd: lookup('a=ice-pwd:', true, mediaIndex, nextMediaIndex),
             ufrag: lookup('a=ice-ufrag:', true, mediaIndex, nextMediaIndex),
@@ -171,17 +175,6 @@ export function p2pParseSdp(sdp) {
             if (maxSize) {
                 media.maxSize = parseInt(maxSize);
             }
-        }
-
-        let fingerprint = lookup('a=fingerprint:', false, mediaIndex, nextMediaIndex);
-        if (fingerprint) {
-            media.hash = fingerprint.split(' ')[0];
-            media.fingerprint = fingerprint.split(' ')[1];
-            // media.fingerprints = [{
-            //     hash: fingerprint.split(' ')[0],
-            //     fingerprint: fingerprint.split(' ')[1],
-            //     setup: lookup('a=setup:', true, mediaIndex, nextMediaIndex)
-            // }];
         }
 
         const lineTo = nextMediaIndex === -1 ? lines.length : nextMediaIndex;
