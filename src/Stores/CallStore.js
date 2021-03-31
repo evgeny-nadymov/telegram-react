@@ -1906,7 +1906,7 @@ class CallStore extends EventEmitter {
                             P2PSdpBuilder.generateAnswer(data)
                     }
                 }
-
+                LOG_P2P_CALL('[generate] ', data, description.type, description.sdp);
                 await connection.setRemoteDescription(description);
                 if (currentCall.candidates) {
                     currentCall.candidates.forEach(x => {

@@ -36,11 +36,14 @@ c=IN IP4 0.0.0.0
 a=ice-ufrag:${ufrag}
 a=ice-pwd:${pwd}
 a=ice-options:trickle
-a=fingerprint:${hash} ${fingerprint}
 a=setup:${setup}
 a=mid:${mid}
 a=sctp-port:${port}
 a=max-message-size:${maxSize}`;
+                    if (hash && fingerprint) {
+                        sdp += `
+a=fingerprint:${hash} ${fingerprint}`;
+                    }
                     break;
                 }
                 case 'audio': {
@@ -51,9 +54,12 @@ a=rtcp:9 IN IP4 0.0.0.0
 a=ice-ufrag:${ufrag}
 a=ice-pwd:${pwd}
 a=ice-options:trickle
-a=fingerprint:${hash} ${fingerprint}
 a=setup:${setup}
 a=mid:${mid}`;
+                    if (hash && fingerprint) {
+                        sdp += `
+a=fingerprint:${hash} ${fingerprint}`;
+                    }
                     sdp += addExtmap(extmap);
                     if (dir) {
                         sdp += `
@@ -78,9 +84,12 @@ a=rtcp:9 IN IP4 0.0.0.0
 a=ice-ufrag:${ufrag}
 a=ice-pwd:${pwd}
 a=ice-options:trickle
-a=fingerprint:${hash} ${fingerprint}
 a=setup:${setup}
 a=mid:${mid}`;
+                    if (hash && fingerprint) {
+                        sdp += `
+a=fingerprint:${hash} ${fingerprint}`;
+                    }
                     sdp += addExtmap(extmap);
                     if (dir) {
                         sdp += `
@@ -133,11 +142,14 @@ c=IN IP4 0.0.0.0
 a=ice-ufrag:${ufrag}
 a=ice-pwd:${pwd}
 a=ice-options:trickle
-a=fingerprint:${hash} ${fingerprint}
 a=setup:${setup}
 a=mid:${mid}
 a=sctp-port:${port}
 a=max-message-size:${maxSize}`;
+                    if (hash && fingerprint) {
+                        sdp += `
+a=fingerprint:${hash} ${fingerprint}`;
+                    }
                     break;
                 }
                 case 'audio': {
@@ -148,9 +160,12 @@ a=rtcp:9 IN IP4 0.0.0.0
 a=ice-ufrag:${ufrag}
 a=ice-pwd:${pwd}
 a=ice-options:trickle
-a=fingerprint:${hash} ${fingerprint}
 a=setup:${setup}
 a=mid:${mid}`;
+                    if (hash && fingerprint) {
+                        sdp += `
+a=fingerprint:${hash} ${fingerprint}`;
+                    }
                     sdp += addExtmap(extmap);
                     if (dir) {
                         sdp += `
@@ -174,9 +189,12 @@ a=rtcp:9 IN IP4 0.0.0.0
 a=ice-ufrag:${ufrag}
 a=ice-pwd:${pwd}
 a=ice-options:trickle
-a=fingerprint:${hash} ${fingerprint}
 a=setup:${setup}
 a=mid:${mid}`;
+                    if (hash && fingerprint) {
+                        sdp += `
+a=fingerprint:${hash} ${fingerprint}`;
+                    }
                     sdp += addExtmap(extmap);
                     if (dir) {
                         sdp += `

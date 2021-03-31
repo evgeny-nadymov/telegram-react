@@ -14,7 +14,7 @@ export class FirefoxP2PSdpBuilder {
 o=- ${sessionId} 0 IN IP4 0.0.0.0
 s=-
 t=0 0`;
-        if ( hash && fingerprint) {
+        if (hash && fingerprint) {
             sdp += `
 a=fingerprint:${hash} ${fingerprint}`;
         }
@@ -39,6 +39,10 @@ a=setup:${setup}
 a=mid:${mid}
 a=sctp-port:${port}
 a=max-message-size:${maxSize}`;
+                    if (hash && fingerprint) {
+                        sdp += `
+a=fingerprint:${hash} ${fingerprint}`;
+                    }
                     break;
                 }
                 case 'audio': {
@@ -49,6 +53,10 @@ a=ice-ufrag:${ufrag}
 a=ice-pwd:${pwd}
 a=setup:${setup}
 a=mid:${mid}`;
+                    if (hash && fingerprint) {
+                        sdp += `
+a=fingerprint:${hash} ${fingerprint}`;
+                    }
                     if (dir) {
                         sdp += `
 a=${dir}`;
@@ -69,6 +77,10 @@ a=ice-ufrag:${ufrag}
 a=ice-pwd:${pwd}
 a=setup:${setup}
 a=mid:${mid}`;
+                    if (hash && fingerprint) {
+                        sdp += `
+a=fingerprint:${hash} ${fingerprint}`;
+                    }
                     if (dir) {
                         sdp += `
 a=${dir}`;
@@ -121,6 +133,10 @@ a=setup:${setup}
 a=mid:${mid}
 a=sctp-port:${port}
 a=max-message-size:${maxSize}`;
+                    if (hash && fingerprint) {
+                        sdp += `
+a=fingerprint:${hash} ${fingerprint}`;
+                    }
                     break;
                 }
                 case 'audio': {
@@ -131,6 +147,10 @@ a=ice-ufrag:${ufrag}
 a=ice-pwd:${pwd}
 a=setup:${setup}
 a=mid:${mid}`;
+                    if (hash && fingerprint) {
+                        sdp += `
+a=fingerprint:${hash} ${fingerprint}`;
+                    }
                     if (dir) {
                         sdp += `
 a=${dir}`;
@@ -151,6 +171,10 @@ a=ice-ufrag:${ufrag}
 a=ice-pwd:${pwd}
 a=setup:${setup}
 a=mid:${mid}`;
+                    if (hash && fingerprint) {
+                        sdp += `
+a=fingerprint:${hash} ${fingerprint}`;
+                    }
                     if (dir) {
                         sdp += `
 a=${dir}`;
