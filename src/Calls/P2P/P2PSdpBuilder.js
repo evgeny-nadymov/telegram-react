@@ -35,11 +35,11 @@ export function p2pParseCandidate(candidate) {
                 c.type = other[i + 1];
                 break;
             }
-            case 'rel-addr': {
+            case 'raddr': {
                 c.relAddr = other[i + 1];
                 break;
             }
-            case 'rel-port': {
+            case 'rport': {
                 c.relPort = other[i + 1];
                 break;
             }
@@ -336,10 +336,10 @@ export class P2PSdpBuilder {
             attrs.push(`typ ${type}`);
         }
         if (relAddr) {
-            attrs.push(`rel-addr ${relAddr}`);
+            attrs.push(`raddr ${relAddr}`);
         }
         if (relPort) {
-            attrs.push(`rel-port ${relPort}`);
+            attrs.push(`rport ${relPort}`);
         }
         if (generation) {
             attrs.push(`generation ${generation}`);

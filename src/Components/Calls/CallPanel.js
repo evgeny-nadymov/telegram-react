@@ -22,6 +22,7 @@ import GroupCallSettings from './GroupCallSettings';
 import MenuIcon from '../../Assets/Icons/More';
 import MicIcon from '../../Assets/Icons/Mic';
 import MicOffIcon from '../../Assets/Icons/MicOff';
+import { closeCallPanel } from '../../Actions/Call';
 import { p2pGetCallStatus, p2pIsCallReady } from '../../Calls/Utils';
 import { getUserFullName } from '../../Utils/User';
 import { stopPropagation } from '../../Utils/Message';
@@ -29,7 +30,6 @@ import CallStore from '../../Stores/CallStore';
 import LStore from '../../Stores/LocalizationStore';
 import UserStore from '../../Stores/UserStore';
 import './CallPanel.css';
-import { closeCallPanel } from '../../Actions/Call';
 
 class CallPanel extends React.Component {
     constructor(props) {
@@ -117,7 +117,9 @@ class CallPanel extends React.Component {
     };
 
     handleDiscard = async event => {
-        event.stopPropagation();
+        if (event) {
+            event.stopPropagation();
+        }
 
         const { callId } = this.props;
         if (!callId) return;
@@ -145,9 +147,7 @@ class CallPanel extends React.Component {
     };
 
     handleClose = () => {
-        const { callId } = this.props;
-
-        CallStore.p2pHangUp(callId, true);
+        this.handleDiscard(null);
     };
 
     handleShareScreen = () => {
