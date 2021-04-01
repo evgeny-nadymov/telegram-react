@@ -126,14 +126,17 @@ export function p2pParseSdp(sdp) {
     if (pwdIndex === -1 && ufragIndex === -1) {
         return {
             sessionId: lookup('o=').split(' ')[1],
-            hash: null,
-            fingerprint: null,
+            ufrag: null,
+            pwd: null,
+            fingerprints: [],
             media: []
         };
     }
 
     const info = {
         sessionId: lookup('o=').split(' ')[1],
+        ufrag: null,
+        pwd: null,
         fingerprints: [],
         media: []
     };
@@ -147,7 +150,13 @@ export function p2pParseSdp(sdp) {
             fingerprint: fingerprint.split(' ')[1],
             setup
         });
+    }
 
+    const ufrag = lookup('a=ice-ufrag:', false);
+    const pwd = lookup('a=ice-pwd:', false);
+    if (ufrag && pwd) {
+        info.ufrag = ufrag;
+        info.pwd = pwd;
     }
 
     while (mediaIndex !== -1) {
@@ -158,10 +167,7 @@ export function p2pParseSdp(sdp) {
         const media = {
             type: lookup('m=', true, mediaIndex, nextMediaIndex).split(' ')[0],
             mid: lookup('a=mid:', true, mediaIndex, nextMediaIndex),
-            // setup: lookup('a=setup:', true, mediaIndex, nextMediaIndex),
             dir: findDirection(mediaIndex, nextMediaIndex),
-            pwd: lookup('a=ice-pwd:', true, mediaIndex, nextMediaIndex),
-            ufrag: lookup('a=ice-ufrag:', true, mediaIndex, nextMediaIndex),
             extmap,
             types
         }

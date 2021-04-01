@@ -9,7 +9,7 @@ import { addExtmap, addPayloadTypes, addSsrc } from './P2PSdpBuilder';
 
 export class SafariP2PSdpBuilder {
     static generateOffer(info) {
-        const { sessionId, fingerprints, media } = info;
+        const { sessionId, fingerprints, ufrag, pwd, media } = info;
         if (!media.length) {
             return `v=0
 o=- ${sessionId} 2 IN IP4 127.0.0.1
@@ -31,6 +31,12 @@ a=fingerprint:${hash} ${fingerprint}
 a=setup:${setup}`;
             });
         }
+        if (ufrag && pwd) {
+            sdp += `
+a=ice-ufrag:${ufrag}
+a=ice-pwd:${pwd}`;
+        }
+
         sdp += `
 a=group:BUNDLE ${media.map(x => x.mid).join(' ')}
 a=extmap-allow-mixed
@@ -45,8 +51,6 @@ a=msid-semantic: WMS *`;
                     sdp += `
 m=application 9 UDP/DTLS/SCTP webrtc-datachannel
 c=IN IP4 0.0.0.0
-a=ice-ufrag:${ufrag}
-a=ice-pwd:${pwd}
 a=ice-options:trickle
 a=mid:${mid}
 a=sctp-port:${port}
@@ -58,8 +62,6 @@ a=max-message-size:${maxSize}`;
 m=audio 9 UDP/TLS/RTP/SAVPF ${types.map(x => x.id).join(' ')}
 c=IN IP4 0.0.0.0
 a=rtcp:9 IN IP4 0.0.0.0
-a=ice-ufrag:${ufrag}
-a=ice-pwd:${pwd}
 a=ice-options:trickle
 a=mid:${mid}`;
                     sdp += addExtmap(extmap);
@@ -83,8 +85,6 @@ a=rtcp-mux`;
 m=video 9 UDP/TLS/RTP/SAVPF ${types.map(x => x.id).join(' ')}
 c=IN IP4 0.0.0.0
 a=rtcp:9 IN IP4 0.0.0.0
-a=ice-ufrag:${ufrag}
-a=ice-pwd:${pwd}
 a=ice-options:trickle
 a=mid:${mid}`;
                     sdp += addExtmap(extmap);
@@ -113,7 +113,7 @@ a=rtcp-rsize`;
     }
 
     static generateAnswer(info) {
-        const { sessionId, fingerprints, media } = info;
+        const { sessionId, fingerprints, ufrag, pwd, media } = info;
         if (!media.length) {
             return `v=0
 o=- ${sessionId} 2 IN IP4 127.0.0.1
@@ -135,6 +135,12 @@ a=fingerprint:${hash} ${fingerprint}
 a=setup:${setup}`;
             });
         }
+        if (ufrag && pwd) {
+            sdp += `
+a=ice-ufrag:${ufrag}
+a=ice-pwd:${pwd}`;
+        }
+
         sdp += `
 a=group:BUNDLE ${media.map(x => x.mid).join(' ')}
 a=extmap-allow-mixed
@@ -149,8 +155,6 @@ a=msid-semantic: WMS *`;
                     sdp += `
 m=application 9 UDP/DTLS/SCTP webrtc-datachannel
 c=IN IP4 0.0.0.0
-a=ice-ufrag:${ufrag}
-a=ice-pwd:${pwd}
 a=ice-options:trickle
 a=mid:${mid}
 a=sctp-port:${port}
@@ -162,8 +166,6 @@ a=max-message-size:${maxSize}`;
 m=audio 9 UDP/TLS/RTP/SAVPF ${types.map(x => x.id).join(' ')}
 c=IN IP4 0.0.0.0
 a=rtcp:9 IN IP4 0.0.0.0
-a=ice-ufrag:${ufrag}
-a=ice-pwd:${pwd}
 a=ice-options:trickle
 a=mid:${mid}`;
                     sdp += addExtmap(extmap);
@@ -187,8 +189,6 @@ a=rtcp-mux`;
 m=video 9 UDP/TLS/RTP/SAVPF ${types.map(x => x.id).join(' ')}
 c=IN IP4 0.0.0.0
 a=rtcp:9 IN IP4 0.0.0.0
-a=ice-ufrag:${ufrag}
-a=ice-pwd:${pwd}
 a=ice-options:trickle
 a=mid:${mid}`;
                     sdp += addExtmap(extmap);

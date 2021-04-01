@@ -2019,6 +2019,7 @@ class CallStore extends EventEmitter {
     p2pHangUp(callId, discard = false) {
         const { currentCall } = this;
         LOG_P2P_CALL('hangUp', callId, currentCall);
+
         if (currentCall && currentCall.callId === callId) {
             const { connection, inputStream, outputStream, screenStream } = currentCall;
             this.p2pCloseConnectionAndStream(connection, inputStream, outputStream, screenStream);
@@ -2033,7 +2034,7 @@ class CallStore extends EventEmitter {
                 call_id: callId,
                 is_disconnected: false,
                 duration: 0,
-                is_video: false,
+                is_video: true,
                 connection_id: 0
             });
         }

@@ -29,6 +29,7 @@ import CallStore from '../../Stores/CallStore';
 import LStore from '../../Stores/LocalizationStore';
 import UserStore from '../../Stores/UserStore';
 import './CallPanel.css';
+import { closeCallPanel } from '../../Actions/Call';
 
 class CallPanel extends React.Component {
     constructor(props) {
@@ -121,7 +122,10 @@ class CallPanel extends React.Component {
         const { callId } = this.props;
         if (!callId) return;
 
-        await CallStore.p2pHangUp(callId, true);
+        closeCallPanel();
+        setTimeout(() => {
+            CallStore.p2pHangUp(callId, true);
+        }, 100);
     };
 
     handleOpenSettings = async event => {
