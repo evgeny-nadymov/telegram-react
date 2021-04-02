@@ -21,7 +21,7 @@ import UserStore from './UserStore';
 import TdLibController from '../Controllers/TdLibController';
 
 const JOIN_TRACKS = true;
-const UNIFY_SDP = false;
+const UNIFY_SDP = true;
 const UNIFY_CANDIDATE = true;
 const DATACHANNEL = true;
 
