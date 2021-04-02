@@ -36,7 +36,7 @@ a=msid-semantic: WMS *`;
         const streamName = 'stream' + media.map(x => x.ssrc).join('_');
         for (let i = 0; i < media.length; i++) {
             const m = media[i];
-            const { type, ssrc, ssrcGroup, types, ufrag, pwd, dir, mid, extmap } = m;
+            const { type, ssrc, ssrcGroup, types, dir, mid, extmap } = m;
             switch (type) {
                 case 'application': {
                     const { port, maxSize } = m;
@@ -131,7 +131,7 @@ a=msid-semantic: WMS *`;
         const streamName = 'stream' + media.map(x => x.ssrc).join('_');
         for (let i = 0; i < media.length; i++) {
             const m = media[i];
-            const { type, mid, ssrc, ssrcGroup, types, ufrag, pwd, dir, extmap } = m;
+            const { type, mid, ssrc, ssrcGroup, types, dir, extmap } = m;
             switch (type) {
                 case 'application': {
                     const { port, maxSize } = m;

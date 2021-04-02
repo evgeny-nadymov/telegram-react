@@ -25,6 +25,7 @@ const UNIFY_SDP = true;
 const UNIFY_CANDIDATE = true;
 const DATACHANNEL = true;
 const TG_CALLS = true;
+const TG_CALLS_MEDIA_STATE = true;
 
 export function LOG_CALL(str, ...data) {
     // return;
@@ -338,6 +339,14 @@ class CallStore extends EventEmitter {
             }
             case 'clientUpdateCallMediaIsMuted': {
                 this.emit('clientUpdateCallMediaIsMuted', update);
+                break;
+            }
+            case 'clientUpdateCallMediaState': {
+                this.emit('clientUpdateCallMediaState', update);
+                break;
+            }
+            case 'clientUpdateCallMediaActive': {
+                this.emit('clientUpdateCallMediaActive', update);
                 break;
             }
             default:
@@ -1845,7 +1854,7 @@ class CallStore extends EventEmitter {
 
         const { callId } = currentCall;
 
-        const { type } = data;
+        const type = TG_CALLS_MEDIA_STATE ? data['@type'] || data.type : data.type;
         switch (type) {
             case 'media': {
                 const { kind, isMuted } = data;
@@ -1862,6 +1871,18 @@ class CallStore extends EventEmitter {
                     isMuted
                 });
 
+                break;
+            }
+            case 'MediaState': {
+                const { muted, videoState, lowBattery } = data;
+
+                TdLibController.clientUpdate({
+                    '@type': 'clientUpdateCallMediaState',
+                    callId,
+                    muted,
+                    videoState,
+                    lowBattery
+                });
                 break;
             }
         }
@@ -1907,7 +1928,7 @@ class CallStore extends EventEmitter {
                             P2PSdpBuilder.generateAnswer(data)
                     }
                 }
-                LOG_P2P_CALL('[generate] ', data, description.type, description.sdp);
+                // LOG_P2P_CALL('[generate] ', data, description.type, description.sdp);
                 await connection.setRemoteDescription(description);
                 if (currentCall.candidates) {
                     currentCall.candidates.forEach(x => {
@@ -1949,6 +1970,36 @@ class CallStore extends EventEmitter {
                         await connection.addIceCandidate(iceCandidate);
                     }
                 }
+                break;
+            }
+            case 'InitialSetup': {
+                let description = data;
+                if (UNIFY_SDP) {
+                    description = {
+                        type,
+                        sdp: P2PSdpBuilder.generateOffer(data)
+                    }
+                }
+
+                await connection.setRemoteDescription(description);
+                if (currentCall.candidates) {
+                    currentCall.candidates.forEach(x => {
+                        LOG_P2P_CALL('[candidate] add postpone', x);
+                        connection.addIceCandidate(x);
+                    });
+                    currentCall.candidates = [];
+                }
+
+                const answer = await connection.createAnswer();
+                await connection.setLocalDescription(answer);
+
+                LOG_P2P_CALL('2 try invoke p2pAppendInputStream', inputStream, is_outgoing);
+                const { inputStream } = currentCall;
+                if (inputStream && !is_outgoing) {
+                    this.p2pAppendInputStream(inputStream);
+                }
+
+                // this.p2pSendSdp(callId, answer);
                 break;
             }
             case 'Candidates': {
@@ -2015,6 +2066,12 @@ class CallStore extends EventEmitter {
         } else {
             this.p2pSendCallSignalingData(callId, JSON.stringify({ type: 'media', kind, isMuted }));
         }
+    }
+
+    p2pSendMediaState(callId, muted, videoState, lowBattery) {
+        LOG_P2P_CALL('p2pSendMediaState', callId, muted, videoState, lowBattery);
+
+        this.p2pSendDataChannelData(JSON.stringify({ '@type': 'MediaState', lowBattery, muted, videoState }));
     }
 
     p2pSendIceCandidate(callId, iceCandidate) {
@@ -2199,15 +2256,23 @@ class CallStore extends EventEmitter {
         const { connection, callId } = currentCall;
         if (!connection) return;
 
+        let videoEnabled = false;
         const senders = connection.getSenders();
         senders.forEach(x => {
             const { track } = x;
             if (track && track.kind === 'audio') {
                 track.enabled = enabled;
             }
+            if (track && track.kind === 'video' && track.enabled) {
+                videoEnabled = true;
+            }
         });
 
-        this.p2pSendMediaIsMuted(callId, 'audio', !enabled);
+        if (TG_CALLS_MEDIA_STATE) {
+            this.p2pSendMediaState(callId, !enabled, videoEnabled ? 'active' : 'inactive', false);
+        } else {
+            this.p2pSendMediaIsMuted(callId, 'audio', !enabled);
+        }
     }
 
     p2pVideoEnabled(enabled) {
@@ -2217,15 +2282,23 @@ class CallStore extends EventEmitter {
         const { connection, callId } = currentCall;
         if (!connection) return;
 
+        let audioEnabled = false;
         const senders = connection.getSenders();
         senders.forEach(x => {
             const { track } = x;
             if (track && track.kind === 'video') {
                 track.enabled = enabled;
             }
+            if (track && track.kind === 'audio' && track.enabled) {
+                audioEnabled = true;
+            }
         });
 
-        this.p2pSendMediaIsMuted(callId, 'video', !enabled);
+        if (TG_CALLS_MEDIA_STATE) {
+            this.p2pSendMediaState(callId, !audioEnabled, enabled ? 'active' : 'inactive', false);
+        } else {
+            this.p2pSendMediaIsMuted(callId, 'video', !enabled);
+        }
     }
 }
 

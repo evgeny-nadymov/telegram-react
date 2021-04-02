@@ -52,7 +52,7 @@ export function p2pParseCandidate(candidate) {
                 break;
             }
             case 'network-id': {
-                c.network = other[i + 1];
+                c.networkId = other[i + 1];
                 break;
             }
             case 'network-cost': {
@@ -60,7 +60,7 @@ export function p2pParseCandidate(candidate) {
                 break;
             }
             case 'ufrag': {
-                c.ufrag = other[i + 1];
+                c.username = other[i + 1];
                 break;
             }
         }
@@ -329,7 +329,7 @@ export class P2PSdpBuilder {
     static generateCandidate(info) {
         if (!info) return null;
 
-        const { sdpMLineIndex, sdpMid, foundation, component, protocol, priority, ip, port, type, relAddr, relPort, generation, tcpType, network, networkCost, ufrag } = info;
+        const { sdpMLineIndex, sdpMid, foundation, component, protocol, priority, ip, port, type, relAddr, relPort, generation, tcpType, networkId, networkCost, username } = info;
         let candidate = `candidate:${foundation} ${component} ${protocol} ${priority} ${ip} ${port}`;
         const attrs = []
         if (type) {
@@ -347,11 +347,11 @@ export class P2PSdpBuilder {
         if (tcpType) {
             attrs.push(`tcptype ${tcpType}`);
         }
-        if (ufrag) {
-            attrs.push(`ufrag ${ufrag}`);
+        if (username) {
+            attrs.push(`ufrag ${username}`);
         }
-        if (network) {
-            attrs.push(`network-id ${network}`);
+        if (networkId) {
+            attrs.push(`network-id ${networkId}`);
         }
         if (networkCost) {
             attrs.push(`network-cost ${networkCost}`);

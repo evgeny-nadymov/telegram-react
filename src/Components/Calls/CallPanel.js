@@ -62,6 +62,7 @@ class CallPanel extends React.Component {
 
         CallStore.on('updateCall', this.handleUpdateCall);
         CallStore.on('clientUpdateCallMediaIsMuted', this.onClientUpdateCallMediaIsMuted);
+        CallStore.on('clientUpdateCallMediaState', this.onClientUpdateCallMediaState);
     }
 
     componentWillUnmount() {
@@ -75,7 +76,19 @@ class CallPanel extends React.Component {
 
         CallStore.off('updateCall', this.handleUpdateCall);
         CallStore.off('clientUpdateCallMediaIsMuted', this.onClientUpdateCallMediaIsMuted);
+        CallStore.off('clientUpdateCallMediaState', this.onClientUpdateCallMediaState);
     }
+
+    onClientUpdateCallMediaState = update => {
+        const { callId: currentCallId } = this.props;
+        const { callId, muted, videoState, lowBattery } = update;
+        if (callId !== currentCallId) return;
+
+        this.setState({
+            otherAudioEnabled: !muted,
+            otherVideoEnabled: videoState === 'active'
+        });
+    };
 
     onClientUpdateCallMediaIsMuted = update => {
         const { callId: currentCallId } = this.props;
