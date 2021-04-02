@@ -238,7 +238,21 @@ export function p2pParseSdp(sdp) {
             }]
         }
 
-        info.media.push(media);
+        switch (media.type) {
+            case 'application': {
+                info.application = media;
+                break;
+            }
+            case 'audio': {
+                info.audio = media;
+                break;
+            }
+            case 'video': {
+                info.video = media;
+                break;
+            }
+        }
+        // info.media.push(media);
 
         mediaIndex = nextMediaIndex;
     }
@@ -257,6 +271,7 @@ function isSafari() {
 
 export function addExtmap(extmap) {
     let sdp = '';
+    return sdp;
 
     for (let j = 0; j < extmap.length; j++) {
         const ext = extmap[j];

@@ -26,6 +26,7 @@ const UNIFY_CANDIDATE = true;
 const DATACHANNEL = true;
 const TG_CALLS = true;
 const TG_CALLS_MEDIA_STATE = true;
+const TG_CALLS_SDP = true;
 
 export function LOG_CALL(str, ...data) {
     // return;
@@ -1784,14 +1785,17 @@ class CallStore extends EventEmitter {
         if (inputVideo) {
             inputVideo.srcObject = inputStream;
         }
-
-        if (is_outgoing) {
+        if (TG_CALLS_SDP) {
             this.p2pAppendInputStream(inputStream);
-            // this.p2pStartNegotiation(id);
         } else {
-            LOG_P2P_CALL('try invoke p2pAppendInputStream', connection.localDescription, connection.remoteDescription);
-            if (connection.localDescription && connection.remoteDescription) {
+            if (is_outgoing) {
                 this.p2pAppendInputStream(inputStream);
+                // this.p2pStartNegotiation(id);
+            } else {
+                LOG_P2P_CALL('try invoke p2pAppendInputStream', connection.localDescription, connection.remoteDescription);
+                if (connection.localDescription && connection.remoteDescription) {
+                    this.p2pAppendInputStream(inputStream);
+                }
             }
         }
     }
@@ -1817,8 +1821,26 @@ class CallStore extends EventEmitter {
             offerToReceiveVideo: true
         });
 
+        console.log('[sdp] local', offer.sdp);
         await connection.setLocalDescription(offer);
-        this.p2pSendSdp(callId, offer);
+        if (TG_CALLS_SDP) {
+            const initialSetup = p2pParseSdp(offer.sdp);
+            initialSetup['@type'] = 'InitialSetup';
+            this.p2pSendInitialSetup(callId, initialSetup);
+            if (currentCall.answer) {
+                await connection.setRemoteDescription(currentCall.answer);
+                currentCall.answer = null;
+                if (currentCall.candidates) {
+                    currentCall.candidates.forEach(x => {
+                        LOG_P2P_CALL('[candidate] add postpone', x);
+                        connection.addIceCandidate(x);
+                    });
+                    currentCall.candidates = [];
+                }
+            }
+        } else {
+            this.p2pSendSdp(callId, offer);
+        }
     };
 
     p2pAppendInputStream(inputStream) {
@@ -1973,31 +1995,49 @@ class CallStore extends EventEmitter {
                 break;
             }
             case 'InitialSetup': {
+                console.log('[sdp] InitialSetup');
                 let description = data;
                 if (UNIFY_SDP) {
+                    const { fingerprints } = description;
+                    if (fingerprints) {
+                        fingerprints.forEach(x => {
+                            if (is_outgoing) {
+                                x.setup = 'active';
+                            } else {
+                                x.setup = 'passive';
+                            }
+                        })
+                    }
                     description = {
-                        type,
-                        sdp: P2PSdpBuilder.generateOffer(data)
+                        type: 'answer',
+                        sdp: P2PSdpBuilder.generateAnswer(data)
                     }
                 }
 
-                await connection.setRemoteDescription(description);
-                if (currentCall.candidates) {
-                    currentCall.candidates.forEach(x => {
-                        LOG_P2P_CALL('[candidate] add postpone', x);
-                        connection.addIceCandidate(x);
-                    });
-                    currentCall.candidates = [];
+                console.log('[sdp] remote', description.sdp);
+                if (connection.localDescription) {
+                    await connection.setRemoteDescription(description);
+                    if (currentCall.candidates) {
+                        currentCall.candidates.forEach(x => {
+                            LOG_P2P_CALL('[candidate] add postpone', x);
+                            connection.addIceCandidate(x);
+                        });
+                        currentCall.candidates = [];
+                    }
+                } else {
+                    currentCall.answer = description;
                 }
 
-                const answer = await connection.createAnswer();
-                await connection.setLocalDescription(answer);
 
-                LOG_P2P_CALL('2 try invoke p2pAppendInputStream', inputStream, is_outgoing);
-                const { inputStream } = currentCall;
-                if (inputStream && !is_outgoing) {
-                    this.p2pAppendInputStream(inputStream);
-                }
+
+                // const answer = await connection.createAnswer();
+                // await connection.setLocalDescription(answer);
+                //
+                // LOG_P2P_CALL('2 try invoke p2pAppendInputStream', inputStream, is_outgoing);
+                // const { inputStream } = currentCall;
+                // if (inputStream && !is_outgoing) {
+                //     this.p2pAppendInputStream(inputStream);
+                // }
 
                 // this.p2pSendSdp(callId, answer);
                 break;
@@ -2094,6 +2134,12 @@ class CallStore extends EventEmitter {
             const { candidate, sdpMLineIndex, sdpMid } = iceCandidate;
             this.p2pSendCallSignalingData(callId, JSON.stringify({ type: 'candidate', candidate, sdpMLineIndex, sdpMid }));
         }
+    }
+
+    p2pSendInitialSetup(callId, initialSetup) {
+        LOG_P2P_CALL('p2pSendInitialSetup', callId, initialSetup);
+
+        this.p2pSendCallSignalingData(callId, JSON.stringify(initialSetup));
     }
 
     p2pSendSdp(callId, sdpData) {

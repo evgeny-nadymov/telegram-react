@@ -9,7 +9,11 @@ import {addExtmap, addPayloadTypes, addSsrc} from './P2PSdpBuilder';
 
 export class ChromeP2PSdpBuilder {
     static generateOffer(info) {
-        const { sessionId, fingerprints, ufrag, pwd, media } = info;
+        const { sessionId, fingerprints, ufrag, pwd, audio, video, application } = info;
+        const media = [];
+        media.push(audio);
+        media.push(video);
+        media.push(application);
 
         let sdp = `v=0
 o=- ${sessionId} 2 IN IP4 127.0.0.1
@@ -44,7 +48,7 @@ a=msid-semantic: WMS *`;
 m=application 9 UDP/DTLS/SCTP webrtc-datachannel
 c=IN IP4 0.0.0.0
 a=ice-options:trickle
-a=mid:${mid}
+a=mid:${i}
 a=sctp-port:${port}
 a=max-message-size:${maxSize}`;
                     break;
@@ -55,7 +59,7 @@ m=audio 56930 UDP/TLS/RTP/SAVPF ${payloadTypes.map(x => x.id).join(' ')}
 c=IN IP4 0.0.0.0
 a=rtcp:9 IN IP4 0.0.0.0
 a=ice-options:trickle
-a=mid:${mid}`;
+a=mid:${i}`;
                     sdp += addExtmap(rtpExtensions);
                     if (dir) {
                         sdp += `
@@ -78,7 +82,7 @@ m=video 61986 UDP/TLS/RTP/SAVPF ${payloadTypes.map(x => x.id).join(' ')}
 c=IN IP4 0.0.0.0
 a=rtcp:9 IN IP4 0.0.0.0
 a=ice-options:trickle
-a=mid:${mid}`;
+a=mid:${i}`;
                     sdp += addExtmap(rtpExtensions);
                     if (dir) {
                         sdp += `
@@ -104,7 +108,11 @@ a=rtcp-rsize`;
     }
 
     static generateAnswer(info) {
-        const { sessionId, fingerprints, ufrag, pwd, media } = info;
+        const { sessionId, fingerprints, ufrag, pwd, audio, video, application } = info;
+        const media = [];
+        media.push(audio);
+        media.push(video);
+        media.push(application);
 
         let sdp = `v=0
 o=- ${sessionId} 2 IN IP4 127.0.0.1
@@ -139,7 +147,7 @@ a=msid-semantic: WMS *`;
 m=application 9 UDP/DTLS/SCTP webrtc-datachannel
 c=IN IP4 0.0.0.0
 a=ice-options:trickle
-a=mid:${mid}
+a=mid:${i}
 a=sctp-port:${port}
 a=max-message-size:${maxSize}`;
                     break;
@@ -150,7 +158,7 @@ m=audio 56930 UDP/TLS/RTP/SAVPF ${payloadTypes.map(x => x.id).join(' ')}
 c=IN IP4 0.0.0.0
 a=rtcp:9 IN IP4 0.0.0.0
 a=ice-options:trickle
-a=mid:${mid}`;
+a=mid:${i}`;
                     sdp += addExtmap(rtpExtensions);
                     if (dir) {
                         sdp += `
@@ -172,7 +180,7 @@ m=video 61986 UDP/TLS/RTP/SAVPF ${payloadTypes.map(x => x.id).join(' ')}
 c=IN IP4 0.0.0.0
 a=rtcp:9 IN IP4 0.0.0.0
 a=ice-options:trickle
-a=mid:${mid}`;
+a=mid:${i}`;
                     sdp += addExtmap(rtpExtensions);
                     if (dir) {
                         sdp += `

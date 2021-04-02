@@ -9,7 +9,12 @@ import {addExtmap, addPayloadTypes, addSsrc} from './P2PSdpBuilder';
 
 export class FirefoxP2PSdpBuilder {
     static generateOffer(info) {
-        const { sessionId, fingerprints, ufrag, pwd, media } = info;
+        const { sessionId, fingerprints, ufrag, pwd, audio, video, application } = info;
+        const media = [];
+        media.push(audio);
+        media.push(video);
+        media.push(application);
+
         let sdp = `v=0
 o=- ${sessionId} 0 IN IP4 0.0.0.0
 s=-
@@ -43,7 +48,7 @@ a=msid-semantic:WMS *`;
 m=application 9 UDP/DTLS/SCTP webrtc-datachannel
 c=IN IP4 0.0.0.0
 a=ice-options:trickle
-a=mid:${mid}
+a=mid:${i}
 a=sctp-port:${port}
 a=max-message-size:${maxSize}`;
                     break;
@@ -52,7 +57,7 @@ a=max-message-size:${maxSize}`;
                     sdp += `
 m=audio 9 UDP/TLS/RTP/SAVPF ${payloadTypes.map(x => x.id).join(' ')}
 c=IN IP4 0.0.0.0
-a=mid:${mid}`;
+a=mid:${i}`;
                     if (dir) {
                         sdp += `
 a=${dir}`;
@@ -69,7 +74,7 @@ a=rtcp-mux`;
                     sdp += `
 m=video 9 UDP/TLS/RTP/SAVPF ${payloadTypes.map(x => x.id).join(' ')}
 c=IN IP4 0.0.0.0
-a=mid:${mid}`;
+a=mid:${i}`;
                     if (dir) {
                         sdp += `
 a=${dir}`;
@@ -92,7 +97,12 @@ a=rtcp-rsize`;
     }
 
     static generateAnswer(info) {
-        const { sessionId, fingerprints, ufrag, pwd, media } = info;
+        const { sessionId, fingerprints, ufrag, pwd, audio, video, application } = info;
+        const media = [];
+        media.push(audio);
+        media.push(video);
+        media.push(application);
+
         let sdp = `v=0
 o=- ${sessionId} 0 IN IP4 0.0.0.0
 s=-
@@ -126,7 +136,7 @@ a=msid-semantic:WMS *`;
 m=application 9 UDP/DTLS/SCTP webrtc-datachannel
 c=IN IP4 0.0.0.0
 a=ice-options:trickle
-a=mid:${mid}
+a=mid:${i}
 a=sctp-port:${port}
 a=max-message-size:${maxSize}`;
                     break;
@@ -135,7 +145,7 @@ a=max-message-size:${maxSize}`;
                     sdp += `
 m=audio 9 UDP/TLS/RTP/SAVPF ${payloadTypes.map(x => x.id).join(' ')}
 c=IN IP4 0.0.0.0
-a=mid:${mid}`;
+a=mid:${i}`;
                     if (dir) {
                         sdp += `
 a=${dir}`;
@@ -152,7 +162,7 @@ a=rtcp-mux`;
                     sdp += `
 m=video 9 UDP/TLS/RTP/SAVPF ${payloadTypes.map(x => x.id).join(' ')}
 c=IN IP4 0.0.0.0
-a=mid:${mid}`;
+a=mid:${i}`;
                     if (dir) {
                         sdp += `
 a=${dir}`;
