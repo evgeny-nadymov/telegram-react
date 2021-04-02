@@ -24,6 +24,7 @@ const JOIN_TRACKS = true;
 const UNIFY_SDP = true;
 const UNIFY_CANDIDATE = true;
 const DATACHANNEL = true;
+const TG_CALLS = true;
 
 export function LOG_CALL(str, ...data) {
     // return;
@@ -1893,7 +1894,7 @@ class CallStore extends EventEmitter {
 
         const { is_outgoing } = call;
 
-        const { type } = data;
+        let type = TG_CALLS ? data['@type'] || data.type : data.type;
         switch (type) {
             case 'answer':
             case 'offer':{
@@ -1950,6 +1951,32 @@ class CallStore extends EventEmitter {
                 }
                 break;
             }
+            case 'Candidates': {
+                const candidates = [];
+                let candidate = data;
+                if (UNIFY_CANDIDATE) {
+                    data.candidates.forEach(x => {
+                        candidate = P2PSdpBuilder.generateCandidate(x);
+                        candidate.sdpMLineIndex = 0;
+
+                        candidates.push(candidate);
+                    });
+                }
+                if (candidates.length > 0) {
+                    candidates.forEach(async x => {
+                        const iceCandidate = new RTCIceCandidate(x);
+                        if (!connection.remoteDescription) {
+                            currentCall.candidates = currentCall.candidates || [];
+                            LOG_P2P_CALL('[candidate] postpone', iceCandidate);
+                            currentCall.candidates.push(iceCandidate);
+                        } else {
+                            LOG_P2P_CALL('[candidate] add', iceCandidate);
+                            await connection.addIceCandidate(iceCandidate);
+                        }
+                    });
+                }
+                break;
+            }
             case 'media': {
                 const { kind, isMuted } = data;
                 if (kind === 'audio') {
@@ -1993,9 +2020,19 @@ class CallStore extends EventEmitter {
     p2pSendIceCandidate(callId, iceCandidate) {
         LOG_P2P_CALL('p2pSendIceCandidate', callId, iceCandidate);
         if (UNIFY_CANDIDATE) {
-            let { candidate, sdpMLineIndex, sdpMid } = iceCandidate;
-            candidate = p2pParseCandidate(candidate);
-            this.p2pSendCallSignalingData(callId, JSON.stringify({ type: 'candidate', candidate, sdpMLineIndex, sdpMid }));
+            if (TG_CALLS) {
+                let { candidate, sdpMLineIndex } = iceCandidate;
+                if (sdpMLineIndex !== 0) {
+                    return;
+                }
+
+                candidate = p2pParseCandidate(candidate);
+                this.p2pSendCallSignalingData(callId, JSON.stringify({ '@type': 'Candidates', candidates: [candidate] }));
+            } else {
+                let { candidate, sdpMLineIndex, sdpMid } = iceCandidate;
+                candidate = p2pParseCandidate(candidate);
+                this.p2pSendCallSignalingData(callId, JSON.stringify({ type: 'candidate', candidate, sdpMLineIndex, sdpMid }));
+            }
         } else {
             const { candidate, sdpMLineIndex, sdpMid } = iceCandidate;
             this.p2pSendCallSignalingData(callId, JSON.stringify({ type: 'candidate', candidate, sdpMLineIndex, sdpMid }));
@@ -2005,12 +2042,20 @@ class CallStore extends EventEmitter {
     p2pSendSdp(callId, sdpData) {
         LOG_P2P_CALL('p2pSendSdp', callId, sdpData);
         if (UNIFY_SDP) {
-            const { type, sdp } = sdpData;
-            const sdpInfo = p2pParseSdp(sdp);
-            sdpInfo.type = type;
-            // sdpInfo.sdp = sdp;
+            if (TG_CALLS) {
+                const { type, sdp } = sdpData;
+                const sdpInfo = p2pParseSdp(sdp);
+                sdpInfo['@type'] = type;
 
-            this.p2pSendCallSignalingData(callId, JSON.stringify(sdpInfo));
+                this.p2pSendCallSignalingData(callId, JSON.stringify(sdpInfo));
+            } else {
+                const { type, sdp } = sdpData;
+                const sdpInfo = p2pParseSdp(sdp);
+                sdpInfo.type = type;
+                // sdpInfo.sdp = sdp;
+
+                this.p2pSendCallSignalingData(callId, JSON.stringify(sdpInfo));
+            }
         } else {
             this.p2pSendCallSignalingData(callId, JSON.stringify(sdpData));
         }
