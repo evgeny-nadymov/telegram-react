@@ -35,7 +35,7 @@ a=msid-semantic:WMS *`;
         const streamName = 'stream' + media.map(x => x.ssrc).join('_');
         for (let i = 0; i < media.length; i++) {
             const m = media[i];
-            const { type, mid, ssrc, ssrcGroup, types, dir, extmap } = m;
+            const { type, mid, ssrc, ssrcGroups, payloadTypes, dir, rtpExtensions } = m;
             switch (type) {
                 case 'application': {
                     const { port, maxSize } = m;
@@ -50,36 +50,36 @@ a=max-message-size:${maxSize}`;
                 }
                 case 'audio': {
                     sdp += `
-m=audio 9 UDP/TLS/RTP/SAVPF ${types.map(x => x.id).join(' ')}
+m=audio 9 UDP/TLS/RTP/SAVPF ${payloadTypes.map(x => x.id).join(' ')}
 c=IN IP4 0.0.0.0
 a=mid:${mid}`;
                     if (dir) {
                         sdp += `
 a=${dir}`;
                     }
-                    sdp += addExtmap(extmap);
+                    sdp += addExtmap(rtpExtensions);
                     sdp += `
 a=rtcp-mux`;
-                    sdp += addPayloadTypes(types);
-                    sdp += addSsrc(type, ssrc, ssrcGroup, streamName);
+                    sdp += addPayloadTypes(payloadTypes);
+                    sdp += addSsrc(type, ssrc, ssrcGroups, streamName);
 
                     break;
                 }
                 case 'video': {
                     sdp += `
-m=video 9 UDP/TLS/RTP/SAVPF ${types.map(x => x.id).join(' ')}
+m=video 9 UDP/TLS/RTP/SAVPF ${payloadTypes.map(x => x.id).join(' ')}
 c=IN IP4 0.0.0.0
 a=mid:${mid}`;
                     if (dir) {
                         sdp += `
 a=${dir}`;
                     }
-                    sdp += addExtmap(extmap);
+                    sdp += addExtmap(rtpExtensions);
                     sdp += `
 a=rtcp-mux
 a=rtcp-rsize`;
-                    sdp += addPayloadTypes(types);
-                    sdp += addSsrc(type, ssrc, ssrcGroup, streamName);
+                    sdp += addPayloadTypes(payloadTypes);
+                    sdp += addSsrc(type, ssrc, ssrcGroups, streamName);
 
                     break;
                 }
@@ -118,7 +118,7 @@ a=msid-semantic:WMS *`;
         const streamName = 'stream' + media.map(x => x.ssrc).join('_');
         for (let i = 0; i < media.length; i++) {
             const m = media[i];
-            const { type, mid, ssrc, ssrcGroup, types, dir, extmap } = m;
+            const { type, mid, ssrc, ssrcGroups, payloadTypes, dir, rtpExtensions } = m;
             switch (type) {
                 case 'application': {
                     const { port, maxSize } = m;
@@ -133,36 +133,36 @@ a=max-message-size:${maxSize}`;
                 }
                 case 'audio': {
                     sdp += `
-m=audio 9 UDP/TLS/RTP/SAVPF ${types.map(x => x.id).join(' ')}
+m=audio 9 UDP/TLS/RTP/SAVPF ${payloadTypes.map(x => x.id).join(' ')}
 c=IN IP4 0.0.0.0
 a=mid:${mid}`;
                     if (dir) {
                         sdp += `
 a=${dir}`;
                     }
-                    sdp += addExtmap(extmap);
+                    sdp += addExtmap(rtpExtensions);
                     sdp += `
 a=rtcp-mux`;
-                    sdp += addPayloadTypes(types);
-                    sdp += addSsrc(type, ssrc, ssrcGroup, streamName);
+                    sdp += addPayloadTypes(payloadTypes);
+                    sdp += addSsrc(type, ssrc, ssrcGroups, streamName);
 
                     break;
                 }
                 case 'video': {
                     sdp += `
-m=video 9 UDP/TLS/RTP/SAVPF ${types.map(x => x.id).join(' ')}
+m=video 9 UDP/TLS/RTP/SAVPF ${payloadTypes.map(x => x.id).join(' ')}
 c=IN IP4 0.0.0.0
 a=mid:${mid}`;
                     if (dir) {
                         sdp += `
 a=${dir}`;
                     }
-                    sdp += addExtmap(extmap);
+                    sdp += addExtmap(rtpExtensions);
                     sdp += `
 a=rtcp-mux
 a=rtcp-rsize`;
-                    sdp += addPayloadTypes(types);
-                    sdp += addSsrc(type, ssrc, ssrcGroup, streamName);
+                    sdp += addPayloadTypes(payloadTypes);
+                    sdp += addSsrc(type, ssrc, ssrcGroups, streamName);
                     break;
                 }
             }

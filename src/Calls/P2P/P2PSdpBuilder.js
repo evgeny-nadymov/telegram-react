@@ -168,8 +168,8 @@ export function p2pParseSdp(sdp) {
             type: lookup('m=', true, mediaIndex, nextMediaIndex).split(' ')[0],
             mid: lookup('a=mid:', true, mediaIndex, nextMediaIndex),
             dir: findDirection(mediaIndex, nextMediaIndex),
-            extmap,
-            types
+            rtpExtensions: extmap,
+            payloadTypes: types
         }
 
         if (media.type === 'application') {
@@ -189,8 +189,8 @@ export function p2pParseSdp(sdp) {
         for (let i = mediaIndex; i < lineTo; i++) {
             const line = lines[i];
             if (line.startsWith('a=extmap:')) {
-                const [ id, value ] = line.substr('a=extmap:'.length).split(' ');
-                extmap.push({ [id]: value });
+                const [ id, uri ] = line.substr('a=extmap:'.length).split(' ');
+                extmap.push({ id: parseInt(id), uri });
             } else if (line.startsWith('a=fmtp:')) {
                 const [ id, str ] = line.substr('a=fmtp:'.length).split(' ');
                 const arr =  str.split(';').map(x => {
@@ -232,10 +232,10 @@ export function p2pParseSdp(sdp) {
         const ssrcGroup = lookup('a=ssrc-group:', false, mediaIndex, nextMediaIndex);
         if (ssrcGroup) {
             const [ semantics, ...ssrcs ] = ssrcGroup.split(' ');
-            media.ssrcGroup = {
+            media.ssrcGroups = [{
                 semantics,
                 ssrcs: ssrcs.map(x => parseInt(x))
-            }
+            }]
         }
 
         info.media.push(media);
@@ -260,10 +260,9 @@ export function addExtmap(extmap) {
 
     for (let j = 0; j < extmap.length; j++) {
         const ext = extmap[j];
-        Object.getOwnPropertyNames(ext).forEach(x => {
-            sdp += `
-a=extmap:${x} ${ext[x]}`;
-        });
+        const { id, uri } = ext;
+        sdp += `
+a=extmap:${id} ${uri}`;
     }
 
     return sdp;
@@ -300,20 +299,23 @@ a=fmtp:${id} ${fmtp.join(';')}`;
     return sdp;
 }
 
-export function addSsrc(type, ssrc, ssrcGroup, streamName) {
+export function addSsrc(type, ssrc, ssrcGroups, streamName) {
     let sdp = '';
 
-    if (ssrcGroup && ssrcGroup.ssrcs.length > 0) {
-        sdp += `
+    if (ssrcGroups && ssrcGroups.length > 0) {
+        ssrcGroups.forEach(ssrcGroup => {
+            if (ssrcGroup && ssrcGroup.ssrcs.length > 0) {
+                sdp += `
 a=ssrc-group:${ssrcGroup.semantics} ${ssrcGroup.ssrcs.join(' ')}`;
-        ssrcGroup.ssrcs.forEach(ssrc => {
-            sdp += `
+                ssrcGroup.ssrcs.forEach(ssrc => {
+                    sdp += `
 a=ssrc:${ssrc} cname:stream${ssrc}
 a=ssrc:${ssrc} msid:${streamName} ${type}${ssrc}
 a=ssrc:${ssrc} mslabel:${type}${ssrc}
 a=ssrc:${ssrc} label:${type}${ssrc}`;
+                });
+            }
         });
-
     } else if (ssrc) {
         sdp += `
 a=ssrc:${ssrc} cname:stream${ssrc}
