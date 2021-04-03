@@ -25,8 +25,7 @@ export function p2pParseCandidate(candidate) {
         component,
         protocol,
         priority,
-        ip,
-        port
+        address: { ip, port }
     };
 
     for (let i = 0; i < other.length; i += 2) {
@@ -36,11 +35,19 @@ export function p2pParseCandidate(candidate) {
                 break;
             }
             case 'raddr': {
-                c.relAddr = other[i + 1];
+                if (!c.relAddress) {
+                    c.relAddress = { };
+                }
+
+                c.relAddress.ip = other[i + 1];
                 break;
             }
             case 'rport': {
-                c.relPort = other[i + 1];
+                if (!c.relAddress) {
+                    c.relAddress = { };
+                }
+
+                c.relAddress.port = other[i + 1];
                 break;
             }
             case 'generation': {
@@ -186,7 +193,7 @@ export function p2pParseSdp(sdp) {
         for (let i = 0; i < types.length; i++) {
             const { id } = types[i];
             if (rtcpFb.has(id)) {
-                types[i].feedback = rtcpFb.get(id);
+                types[i].feedbackTypes = rtcpFb.get(id);
             }
             if (fmtp.has(id)) {
                 types[i].parameters = fmtp.get(id);
@@ -252,11 +259,11 @@ export function addPayloadTypes(types) {
 
     for (let i = 0; i < types.length; i++) {
         const type = types[i];
-        const { id, name, clockrate, channels, feedback, parameters } = type;
+        const { id, name, clockrate, channels, feedbackTypes, parameters } = type;
         sdp += `
 a=rtpmap:${id} ${name}/${clockrate}${channels ? '/' + channels : ''}`;
-        if (feedback) {
-            feedback.forEach(x => {
+        if (feedbackTypes) {
+            feedbackTypes.forEach(x => {
                 const { type, subtype } = x;
                 sdp += `
 a=rtcp-fb:${id} ${[type, subtype].join(' ')}`;
@@ -320,17 +327,15 @@ export class P2PSdpBuilder {
     static generateCandidate(info) {
         if (!info) return null;
 
-        const { sdpMLineIndex, sdpMid, foundation, component, protocol, priority, ip, port, type, relAddr, relPort, generation, tcpType, networkId, networkCost, username } = info;
-        let candidate = `candidate:${foundation} ${component} ${protocol} ${priority} ${ip} ${port}`;
+        const { sdpMLineIndex, sdpMid, foundation, component, protocol, priority, address, type, relAddress, generation, tcpType, networkId, networkCost, username } = info;
+        let candidate = `candidate:${foundation} ${component} ${protocol} ${priority} ${address.ip} ${address.port}`;
         const attrs = []
         if (type) {
             attrs.push(`typ ${type}`);
         }
-        if (relAddr) {
-            attrs.push(`raddr ${relAddr}`);
-        }
-        if (relPort) {
-            attrs.push(`rport ${relPort}`);
+        if (relAddress) {
+            attrs.push(`raddr ${relAddress.ip}`);
+            attrs.push(`rport ${relAddress.port}`);
         }
         if (generation) {
             attrs.push(`generation ${generation}`);

@@ -1500,9 +1500,9 @@ class CallStore extends EventEmitter {
             '@type': 'callProtocol',
             udp_p2p: true,
             udp_reflector: true,
-            min_layer: 126,
-            max_layer: 126,
-            library_versions: ['3.0.0']
+            min_layer: 92,
+            max_layer: 92,
+            library_versions: ['4.0.0']
         };
     }
 
