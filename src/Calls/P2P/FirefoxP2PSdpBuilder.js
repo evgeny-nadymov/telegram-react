@@ -5,15 +5,12 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import {addExtmap, addPayloadTypes, addSsrc} from './P2PSdpBuilder';
+import { addDataChannel, addExtmap, addPayloadTypes, addSsrc } from './P2PSdpBuilder';
 
 export class FirefoxP2PSdpBuilder {
     static generateOffer(info) {
-        const { sessionId, fingerprints, ufrag, pwd, audio, video, application } = info;
-        const media = [];
-        media.push(audio);
-        media.push(video);
-        media.push(application);
+        const { sessionId, fingerprints, ufrag, pwd, audio, video } = info;
+        const media = [audio, video];
 
         let sdp = `v=0
 o=- ${sessionId} 0 IN IP4 0.0.0.0
@@ -34,34 +31,20 @@ a=ice-pwd:${pwd}`;
         }
 
         sdp += `
-a=group:BUNDLE ${media.map(x => x.mid).join(' ')}
+a=group:BUNDLE 0 1 2
 a=ice-options:trickle
 a=msid-semantic:WMS *`;
         const streamName = 'stream' + media.map(x => x.ssrc).join('_');
         for (let i = 0; i < media.length; i++) {
             const m = media[i];
-            const { type, mid, ssrc, ssrcGroups, payloadTypes, dir, rtpExtensions } = m;
+            const { type, ssrc, ssrcGroups, payloadTypes, rtpExtensions } = m;
             switch (type) {
-                case 'application': {
-                    const { port, maxSize } = m;
-                    sdp += `
-m=application 9 UDP/DTLS/SCTP webrtc-datachannel
-c=IN IP4 0.0.0.0
-a=ice-options:trickle
-a=mid:${i}
-a=sctp-port:${port}
-a=max-message-size:${maxSize}`;
-                    break;
-                }
                 case 'audio': {
                     sdp += `
 m=audio 9 UDP/TLS/RTP/SAVPF ${payloadTypes.map(x => x.id).join(' ')}
 c=IN IP4 0.0.0.0
-a=mid:${i}`;
-                    if (dir) {
-                        sdp += `
-a=${dir}`;
-                    }
+a=mid:${i}
+a=sendrecv`;
                     sdp += addExtmap(rtpExtensions);
                     sdp += `
 a=rtcp-mux`;
@@ -74,11 +57,8 @@ a=rtcp-mux`;
                     sdp += `
 m=video 9 UDP/TLS/RTP/SAVPF ${payloadTypes.map(x => x.id).join(' ')}
 c=IN IP4 0.0.0.0
-a=mid:${i}`;
-                    if (dir) {
-                        sdp += `
-a=${dir}`;
-                    }
+a=mid:${i}
+a=sendrecv`;
                     sdp += addExtmap(rtpExtensions);
                     sdp += `
 a=rtcp-mux
@@ -90,6 +70,7 @@ a=rtcp-rsize`;
                 }
             }
         }
+        sdp += addDataChannel(2);
         sdp += `
 `;
 
@@ -97,11 +78,8 @@ a=rtcp-rsize`;
     }
 
     static generateAnswer(info) {
-        const { sessionId, fingerprints, ufrag, pwd, audio, video, application } = info;
-        const media = [];
-        media.push(audio);
-        media.push(video);
-        media.push(application);
+        const { sessionId, fingerprints, ufrag, pwd, audio, video } = info;
+        const media = [audio, video];
 
         let sdp = `v=0
 o=- ${sessionId} 0 IN IP4 0.0.0.0
@@ -122,7 +100,7 @@ a=ice-pwd:${pwd}`;
         }
 
         sdp += `
-a=group:BUNDLE ${media.map(x => x.mid).join(' ')}
+a=group:BUNDLE 0 1 2
 a=ice-options:trickle
 a=msid-semantic:WMS *`;
         const streamName = 'stream' + media.map(x => x.ssrc).join('_');
@@ -130,26 +108,12 @@ a=msid-semantic:WMS *`;
             const m = media[i];
             const { type, mid, ssrc, ssrcGroups, payloadTypes, dir, rtpExtensions } = m;
             switch (type) {
-                case 'application': {
-                    const { port, maxSize } = m;
-                    sdp += `
-m=application 9 UDP/DTLS/SCTP webrtc-datachannel
-c=IN IP4 0.0.0.0
-a=ice-options:trickle
-a=mid:${i}
-a=sctp-port:${port}
-a=max-message-size:${maxSize}`;
-                    break;
-                }
                 case 'audio': {
                     sdp += `
 m=audio 9 UDP/TLS/RTP/SAVPF ${payloadTypes.map(x => x.id).join(' ')}
 c=IN IP4 0.0.0.0
-a=mid:${i}`;
-                    if (dir) {
-                        sdp += `
-a=${dir}`;
-                    }
+a=mid:${i}
+a=sendrecv`;
                     sdp += addExtmap(rtpExtensions);
                     sdp += `
 a=rtcp-mux`;
@@ -162,11 +126,8 @@ a=rtcp-mux`;
                     sdp += `
 m=video 9 UDP/TLS/RTP/SAVPF ${payloadTypes.map(x => x.id).join(' ')}
 c=IN IP4 0.0.0.0
-a=mid:${i}`;
-                    if (dir) {
-                        sdp += `
-a=${dir}`;
-                    }
+a=mid:${i}
+a=sendrecv`;
                     sdp += addExtmap(rtpExtensions);
                     sdp += `
 a=rtcp-mux
@@ -177,6 +138,7 @@ a=rtcp-rsize`;
                 }
             }
         }
+        sdp += addDataChannel(2);
         sdp += `
 `;
 

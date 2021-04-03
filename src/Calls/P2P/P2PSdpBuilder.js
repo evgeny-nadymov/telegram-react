@@ -128,8 +128,7 @@ export function p2pParseSdp(sdp) {
             sessionId: lookup('o=').split(' ')[1],
             ufrag: null,
             pwd: null,
-            fingerprints: [],
-            media: []
+            fingerprints: []
         };
     }
 
@@ -137,8 +136,7 @@ export function p2pParseSdp(sdp) {
         sessionId: lookup('o=').split(' ')[1],
         ufrag: null,
         pwd: null,
-        fingerprints: [],
-        media: []
+        fingerprints: []
     };
 
     let mediaIndex = findIndex('m=');
@@ -166,21 +164,10 @@ export function p2pParseSdp(sdp) {
         const types = [];
         const media = {
             type: lookup('m=', true, mediaIndex, nextMediaIndex).split(' ')[0],
-            mid: lookup('a=mid:', true, mediaIndex, nextMediaIndex),
-            dir: findDirection(mediaIndex, nextMediaIndex),
+            // mid: lookup('a=mid:', true, mediaIndex, nextMediaIndex),
+            // dir: findDirection(mediaIndex, nextMediaIndex),
             rtpExtensions: extmap,
             payloadTypes: types
-        }
-
-        if (media.type === 'application') {
-            const port = lookup('a=sctp-port:', true, mediaIndex, nextMediaIndex);
-            if (port) {
-                media.port = parseInt(port);
-            }
-            const maxSize = lookup('a=max-message-size:', true, mediaIndex, nextMediaIndex);
-            if (maxSize) {
-                media.maxSize = parseInt(maxSize);
-            }
         }
 
         const lineTo = nextMediaIndex === -1 ? lines.length : nextMediaIndex;
@@ -240,7 +227,6 @@ export function p2pParseSdp(sdp) {
 
         switch (media.type) {
             case 'application': {
-                info.application = media;
                 break;
             }
             case 'audio': {
@@ -252,7 +238,6 @@ export function p2pParseSdp(sdp) {
                 break;
             }
         }
-        // info.media.push(media);
 
         mediaIndex = nextMediaIndex;
     }
@@ -340,6 +325,16 @@ a=ssrc:${ssrc} label:${type}${ssrc}`;
     }
 
     return sdp;
+}
+
+export function addDataChannel(mid) {
+    return `
+m=application 9 UDP/DTLS/SCTP webrtc-datachannel
+c=IN IP4 0.0.0.0
+a=ice-options:trickle
+a=mid:2
+a=sctp-port:5000
+a=max-message-size:262144`;
 }
 
 export class P2PSdpBuilder {

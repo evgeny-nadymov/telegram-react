@@ -5,15 +5,12 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { addExtmap, addPayloadTypes, addSsrc } from './P2PSdpBuilder';
+import { addDataChannel, addExtmap, addPayloadTypes, addSsrc } from './P2PSdpBuilder';
 
 export class SafariP2PSdpBuilder {
     static generateOffer(info) {
-        const { sessionId, fingerprints, ufrag, pwd, audio, video, application } = info;
-        const media = [];
-        media.push(audio);
-        media.push(video);
-        media.push(application);
+        const { sessionId, fingerprints, ufrag, pwd, audio, video } = info;
+        const media = [audio, video];
 
         if (!media.length) {
             return `v=0
@@ -43,37 +40,23 @@ a=ice-pwd:${pwd}`;
         }
 
         sdp += `
-a=group:BUNDLE ${media.map(x => x.mid).join(' ')}
+a=group:BUNDLE 0 1 2
 a=extmap-allow-mixed
 a=msid-semantic: WMS *`;
         const streamName = 'stream' + media.map(x => x.ssrc).join('_');
         for (let i = 0; i < media.length; i++) {
             const m = media[i];
-            const { type, ssrc, ssrcGroups, payloadTypes, dir, mid, rtpExtensions } = m;
+            const { type, ssrc, ssrcGroups, payloadTypes, rtpExtensions } = m;
             switch (type) {
-                case 'application': {
-                    const { port, maxSize } = m;
-                    sdp += `
-m=application 9 UDP/DTLS/SCTP webrtc-datachannel
-c=IN IP4 0.0.0.0
-a=ice-options:trickle
-a=mid:${i}
-a=sctp-port:${port}
-a=max-message-size:${maxSize}`;
-                    break;
-                }
                 case 'audio': {
                     sdp += `
 m=audio 9 UDP/TLS/RTP/SAVPF ${payloadTypes.map(x => x.id).join(' ')}
 c=IN IP4 0.0.0.0
 a=rtcp:9 IN IP4 0.0.0.0
 a=ice-options:trickle
-a=mid:${i}`;
+a=mid:${i}
+a=sendrecv`;
                     sdp += addExtmap(rtpExtensions);
-                    if (dir) {
-                        sdp += `
-a=${dir}`;
-                    }
                     if (ssrc) {
                         sdp += `
 a=msid:${streamName} audio${ssrc}`;
@@ -91,12 +74,9 @@ m=video 9 UDP/TLS/RTP/SAVPF ${payloadTypes.map(x => x.id).join(' ')}
 c=IN IP4 0.0.0.0
 a=rtcp:9 IN IP4 0.0.0.0
 a=ice-options:trickle
-a=mid:${i}`;
+a=mid:${i}
+a=sendrecv`;
                     sdp += addExtmap(rtpExtensions);
-                    if (dir) {
-                        sdp += `
-a=${dir}`;
-                    }
                     if (ssrc) {
                         sdp += `
 a=msid:${streamName} video${ssrc}`;
@@ -110,7 +90,7 @@ a=rtcp-rsize`;
                 }
             }
         }
-
+        sdp += addDataChannel(2);
         sdp += `
 `;
 
@@ -118,11 +98,8 @@ a=rtcp-rsize`;
     }
 
     static generateAnswer(info) {
-        const { sessionId, fingerprints, ufrag, pwd, audio, video, application } = info;
-        const media = [];
-        media.push(audio);
-        media.push(video);
-        media.push(application);
+        const { sessionId, fingerprints, ufrag, pwd, audio, video } = info;
+        const media = [audio, video];
 
         if (!media.length) {
             return `v=0
@@ -152,37 +129,23 @@ a=ice-pwd:${pwd}`;
         }
 
         sdp += `
-a=group:BUNDLE ${media.map(x => x.mid).join(' ')}
+a=group:BUNDLE 0 1 2
 a=extmap-allow-mixed
 a=msid-semantic: WMS *`;
         const streamName = 'stream' + media.map(x => x.ssrc).join('_');
         for (let i = 0; i < media.length; i++) {
             const m = media[i];
-            const { type, ssrc, ssrcGroups, payloadTypes, dir, mid, rtpExtensions } = m;
+            const { type, ssrc, ssrcGroups, payloadTypes, rtpExtensions } = m;
             switch (type) {
-                case 'application': {
-                    const { port, maxSize } = m;
-                    sdp += `
-m=application 9 UDP/DTLS/SCTP webrtc-datachannel
-c=IN IP4 0.0.0.0
-a=ice-options:trickle
-a=mid:${i}
-a=sctp-port:${port}
-a=max-message-size:${maxSize}`;
-                    break;
-                }
                 case 'audio': {
                     sdp += `
 m=audio 9 UDP/TLS/RTP/SAVPF ${payloadTypes.map(x => x.id).join(' ')}
 c=IN IP4 0.0.0.0
 a=rtcp:9 IN IP4 0.0.0.0
 a=ice-options:trickle
-a=mid:${i}`;
+a=mid:${i}
+a=sendrecv`;
                     sdp += addExtmap(rtpExtensions);
-                    if (dir) {
-                        sdp += `
-a=${dir}`;
-                    }
                     if (ssrc) {
                         sdp += `
 a=msid:${streamName} audio${ssrc}`;
@@ -200,12 +163,9 @@ m=video 9 UDP/TLS/RTP/SAVPF ${payloadTypes.map(x => x.id).join(' ')}
 c=IN IP4 0.0.0.0
 a=rtcp:9 IN IP4 0.0.0.0
 a=ice-options:trickle
-a=mid:${i}`;
+a=mid:${i}
+a=sendrecv`;
                     sdp += addExtmap(rtpExtensions);
-                    if (dir) {
-                        sdp += `
-a=${dir}`;
-                    }
                     if (ssrc) {
                         sdp += `
 a=msid:${streamName} video${ssrc}`;
@@ -219,7 +179,7 @@ a=rtcp-rsize`;
                 }
             }
         }
-
+        sdp += addDataChannel(2);
         sdp += `
 `;
 
