@@ -9,11 +9,13 @@ import { addDataChannel, addExtmap, addPayloadTypes, addSsrc } from './P2PSdpBui
 
 export class ChromeP2PSdpBuilder {
     static generateOffer(info) {
-        const { sessionId, fingerprints, ufrag, pwd, audio, video } = info;
+        const { fingerprints, ufrag, pwd, audio, video } = info;
+        audio.type = 'audio';
+        video.type = 'video';
         const media = [audio, video];
 
         let sdp = `v=0
-o=- ${sessionId} 2 IN IP4 127.0.0.1
+o=- 1 2 IN IP4 127.0.0.1
 s=-
 t=0 0`;
         if (fingerprints) {
@@ -88,11 +90,13 @@ a=rtcp-rsize`;
     }
 
     static generateAnswer(info) {
-        const { sessionId, fingerprints, ufrag, pwd, audio, video } = info;
+        const { fingerprints, ufrag, pwd, audio, video } = info;
+        audio.type = 'audio';
+        video.type = 'video';
         const media = [audio, video];
 
         let sdp = `v=0
-o=- ${sessionId} 2 IN IP4 127.0.0.1
+o=- 1 2 IN IP4 127.0.0.1
 s=-
 t=0 0`;
         if (fingerprints) {

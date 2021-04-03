@@ -101,31 +101,12 @@ export function p2pParseSdp(sdp) {
 
         return -1;
     };
-    const findDirection = (lineFrom = 0, lineTo = Number.MAX_VALUE) => {
-        if (lineTo === -1) {
-            lineTo = Number.MAX_VALUE;
-        }
-        for (let i = lineFrom; i < lines.length && i < lineTo; i++) {
-            const line = lines[i];
-            if (line.startsWith('a=sendonly')) {
-                return 'sendonly';
-            } else if (line.startsWith('a=recvonly')) {
-                return 'recvonly';
-            } else if (line.startsWith('a=sendrecv')) {
-                return 'sendrecv';
-            } else if (line.startsWith('a=inactive')) {
-                return 'inactive';
-            }
-        }
-
-        return '';
-    }
 
     const pwdIndex = findIndex('a=ice-pwd:');
     const ufragIndex = findIndex('a=ice-ufrag:');
     if (pwdIndex === -1 && ufragIndex === -1) {
         return {
-            sessionId: lookup('o=').split(' ')[1],
+            // sessionId: lookup('o=').split(' ')[1],
             ufrag: null,
             pwd: null,
             fingerprints: []
@@ -133,7 +114,7 @@ export function p2pParseSdp(sdp) {
     }
 
     const info = {
-        sessionId: lookup('o=').split(' ')[1],
+        // sessionId: lookup('o=').split(' ')[1],
         ufrag: null,
         pwd: null,
         fingerprints: []
@@ -162,8 +143,9 @@ export function p2pParseSdp(sdp) {
 
         const extmap = [];
         const types = [];
+        const mediaType = lookup('m=', true, mediaIndex, nextMediaIndex).split(' ')[0];
         const media = {
-            type: lookup('m=', true, mediaIndex, nextMediaIndex).split(' ')[0],
+            // type: lookup('m=', true, mediaIndex, nextMediaIndex).split(' ')[0],
             // mid: lookup('a=mid:', true, mediaIndex, nextMediaIndex),
             // dir: findDirection(mediaIndex, nextMediaIndex),
             rtpExtensions: extmap,
@@ -225,10 +207,7 @@ export function p2pParseSdp(sdp) {
             }]
         }
 
-        switch (media.type) {
-            case 'application': {
-                break;
-            }
+        switch (mediaType) {
             case 'audio': {
                 info.audio = media;
                 break;

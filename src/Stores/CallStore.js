@@ -1858,7 +1858,10 @@ class CallStore extends EventEmitter {
         const senders = connection.getSenders();
         if (senders.some(x => x.track)) return;
 
-        inputStream && inputStream.getTracks().forEach(x => {
+        inputStream && inputStream.getAudioTracks().forEach(x => {
+            connection.addTrack(x, inputStream);
+        });
+        inputStream && inputStream.getVideoTracks().forEach(x => {
             connection.addTrack(x, inputStream);
         });
         LOG_P2P_CALL('p2pAppendInputStream stop', inputStream);
