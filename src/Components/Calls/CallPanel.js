@@ -358,7 +358,7 @@ class CallPanel extends React.Component {
                 </div>
                 <div className='call-panel-content scrollbars-hidden' onDoubleClick={this.handleFullScreen}>
                     <video id='call-output-video' autoPlay={true} muted={false}/>
-                    <video id='call-input-video' autoPlay={true} muted={false}/>
+                    <video id='call-input-video' autoPlay={true} muted={true}/>
                 </div>
                 { !otherAudioEnabled && (
                     <div className='call-panel-microphone-hint'>

@@ -27,6 +27,7 @@ const DATACHANNEL = true;
 const TG_CALLS = true;
 const TG_CALLS_MEDIA_STATE = true;
 const TG_CALLS_SDP = true;
+export const TG_CALLS_SDP_STRING = true;
 
 export function LOG_CALL(str, ...data) {
     // return;
@@ -1813,10 +1814,10 @@ class CallStore extends EventEmitter {
         const call = this.p2pGet(callId)
         if (!call) return;
 
-        // const { is_outgoing } = call;
+        const { is_outgoing } = call;
         // if (!is_outgoing) return;
 
-        const offer = await connection.createOffer({
+        let offer = await connection.createOffer({
             offerToReceiveAudio: true,
             offerToReceiveVideo: true
         });
@@ -1826,14 +1827,16 @@ class CallStore extends EventEmitter {
         if (TG_CALLS_SDP) {
             const initialSetup = p2pParseSdp(offer.sdp);
             initialSetup['@type'] = 'InitialSetup';
+
             this.p2pSendInitialSetup(callId, initialSetup);
             if (currentCall.answer) {
                 await connection.setRemoteDescription(currentCall.answer);
                 currentCall.answer = null;
                 if (currentCall.candidates) {
                     currentCall.candidates.forEach(x => {
-                        LOG_P2P_CALL('[candidate] add postpone', x);
-                        connection.addIceCandidate(x);
+                        this.p2pAddIceCandidate(connection, x);
+                        // LOG_P2P_CALL('[candidate] add postpone', x);
+                        // connection.addIceCandidate(x);
                     });
                     currentCall.candidates = [];
                 }
@@ -1842,6 +1845,17 @@ class CallStore extends EventEmitter {
             this.p2pSendSdp(callId, offer);
         }
     };
+
+    async p2pAddIceCandidate(connection, candidate) {
+        LOG_P2P_CALL('[candidate] start', candidate);
+        try {
+            // if (!candidate.address) return;
+            await connection.addIceCandidate(candidate);
+            LOG_P2P_CALL('[candidate] add', candidate);
+        } catch (e) {
+            LOG_P2P_CALL('[candidate] error', candidate, e);
+        }
+    }
 
     p2pAppendInputStream(inputStream) {
         LOG_P2P_CALL('p2pAppendInputStream start', inputStream);
@@ -1957,8 +1971,9 @@ class CallStore extends EventEmitter {
                 await connection.setRemoteDescription(description);
                 if (currentCall.candidates) {
                     currentCall.candidates.forEach(x => {
-                        LOG_P2P_CALL('[candidate] add postpone', x);
-                        connection.addIceCandidate(x);
+                        this.p2pAddIceCandidate(connection, x);
+                        // LOG_P2P_CALL('[candidate] add postpone', x);
+                        // connection.addIceCandidate(x);
                     });
                     currentCall.candidates = [];
                 }
@@ -1991,8 +2006,9 @@ class CallStore extends EventEmitter {
                         LOG_P2P_CALL('[candidate] postpone', iceCandidate);
                         currentCall.candidates.push(iceCandidate);
                     } else {
-                        LOG_P2P_CALL('[candidate] add', iceCandidate);
-                        await connection.addIceCandidate(iceCandidate);
+                        await this.p2pAddIceCandidate(connection, iceCandidate);
+                        // LOG_P2P_CALL('[candidate] add', iceCandidate);
+                        // await connection.addIceCandidate(iceCandidate);
                     }
                 }
                 break;
@@ -2004,10 +2020,12 @@ class CallStore extends EventEmitter {
                     const { fingerprints } = description;
                     if (fingerprints) {
                         fingerprints.forEach(x => {
-                            if (is_outgoing) {
-                                x.setup = 'active';
-                            } else {
-                                x.setup = 'passive';
+                            if (x.setup === 'actpass') {
+                                if (is_outgoing) {
+                                    x.setup = 'active';
+                                } else {
+                                    x.setup = 'passive';
+                                }
                             }
                         })
                     }
@@ -2022,8 +2040,9 @@ class CallStore extends EventEmitter {
                     await connection.setRemoteDescription(description);
                     if (currentCall.candidates) {
                         currentCall.candidates.forEach(x => {
-                            LOG_P2P_CALL('[candidate] add postpone', x);
-                            connection.addIceCandidate(x);
+                            this.p2pAddIceCandidate(connection, x);
+                            // LOG_P2P_CALL('[candidate] add postpone', x);
+                            // connection.addIceCandidate(x);
                         });
                         currentCall.candidates = [];
                     }
@@ -2050,10 +2069,22 @@ class CallStore extends EventEmitter {
                 let candidate = data;
                 if (UNIFY_CANDIDATE) {
                     data.candidates.forEach(x => {
+                        // if (x.type === 'local') {
+                        //     x.type = 'host';
+                        // } else if (x.type === 'relay') {
+                        //     x.component = 1;
+                        //     x.relAddress = {
+                        //         ip: '0.0.0.0',
+                        //         port: 0
+                        //     }
+                        // }
+
                         candidate = P2PSdpBuilder.generateCandidate(x);
                         candidate.sdpMLineIndex = 0;
 
-                        candidates.push(candidate);
+                        // if (x.type === 'relay') {
+                            candidates.push(candidate);
+                        // }
                     });
                 }
                 if (candidates.length > 0) {
@@ -2064,8 +2095,9 @@ class CallStore extends EventEmitter {
                             LOG_P2P_CALL('[candidate] postpone', iceCandidate);
                             currentCall.candidates.push(iceCandidate);
                         } else {
-                            LOG_P2P_CALL('[candidate] add', iceCandidate);
-                            await connection.addIceCandidate(iceCandidate);
+                            await this.p2pAddIceCandidate(connection, iceCandidate);
+                            // LOG_P2P_CALL('[candidate] add', iceCandidate);
+                            // await connection.addIceCandidate(iceCandidate);
                         }
                     });
                 }

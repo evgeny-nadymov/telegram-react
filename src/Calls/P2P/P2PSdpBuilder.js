@@ -8,6 +8,7 @@
 import { ChromeP2PSdpBuilder } from './ChromeP2PSdpBuilder';
 import { FirefoxP2PSdpBuilder } from './FirefoxP2PSdpBuilder';
 import { SafariP2PSdpBuilder } from './SafariP2PSdpBuilder';
+import { TG_CALLS_SDP_STRING } from '../../Stores/CallStore';
 
 export function p2pParseCandidate(candidate) {
     if (!candidate) {
@@ -17,10 +18,12 @@ export function p2pParseCandidate(candidate) {
         return null;
     }
 
+    const sdpString = candidate;
     candidate = candidate.substr('candidate:'.length);
 
     const [ foundation, component, protocol, priority, ip, port, ...other ] = candidate.split(' ');
     const c = {
+        sdpString,
         foundation,
         component,
         protocol,
@@ -169,11 +172,13 @@ export function p2pParseSdp(sdp) {
                 extmap.push({ id: parseInt(id), uri });
             } else if (line.startsWith('a=fmtp:')) {
                 const [ id, str ] = line.substr('a=fmtp:'.length).split(' ');
+                const obj = { };
                 const arr =  str.split(';').map(x => {
                     const [ key, value ] = x.split('=');
+                    obj[key] = value;
                     return { [key]: value };
                 });
-                fmtp.set(parseInt(id), arr);
+                fmtp.set(parseInt(id), obj);
             } else if (line.startsWith('a=rtcp-fb:')) {
                 const [ id, type = '', subtype = '' ] = line.substr('a=rtcp-fb:'.length).split(' ');
                 if (rtcpFb.has(parseInt(id))) {
@@ -202,7 +207,7 @@ export function p2pParseSdp(sdp) {
 
         const ssrc = lookup('a=ssrc:', false, mediaIndex, nextMediaIndex);
         if (ssrc) {
-            media.ssrc = parseInt(ssrc.split(' ')[0]);
+            media.ssrc = ssrc.split(' ')[0];
         }
 
         const ssrcGroup = lookup('a=ssrc-group:', false, mediaIndex, nextMediaIndex);
@@ -210,7 +215,7 @@ export function p2pParseSdp(sdp) {
             const [ semantics, ...ssrcs ] = ssrcGroup.split(' ');
             media.ssrcGroups = [{
                 semantics,
-                ssrcs: ssrcs.map(x => parseInt(x))
+                ssrcs
             }]
         }
 
@@ -256,7 +261,7 @@ a=extmap:${id} ${uri}`;
 
 export function addPayloadTypes(types) {
     let sdp = '';
-
+    console.log('[SDP] addPayloadTypes', types);
     for (let i = 0; i < types.length; i++) {
         const type = types[i];
         const { id, name, clockrate, channels, feedbackTypes, parameters } = type;
@@ -270,12 +275,10 @@ a=rtcp-fb:${id} ${[type, subtype].join(' ')}`;
             });
         }
         if (parameters) {
-            const fmtp = parameters.reduce((arr, x) => {
-                Object.getOwnPropertyNames(x).forEach(pName => {
-                    arr.push(`${pName}=${x[pName]}`);
-                });
-                return arr;
-            }, []);
+            const fmtp = [];
+            Object.getOwnPropertyNames(parameters).forEach(pName => {
+                fmtp.push(`${pName}=${parameters[pName]}`);
+            });
 
             sdp += `
 a=fmtp:${id} ${fmtp.join(';')}`;
@@ -327,7 +330,18 @@ export class P2PSdpBuilder {
     static generateCandidate(info) {
         if (!info) return null;
 
-        const { sdpMLineIndex, sdpMid, foundation, component, protocol, priority, address, type, relAddress, generation, tcpType, networkId, networkCost, username } = info;
+        const { sdpString, sdpMLineIndex, sdpMid, foundation, component, protocol, priority, address, type, relAddress, generation, tcpType, networkId, networkCost, username } = info;
+        if (TG_CALLS_SDP_STRING) {
+            if (sdpString) {
+                return {
+                    candidate: sdpString,
+                    sdpMLineIndex,
+                    sdpMid
+                };
+            }
+        }
+        throw 'no sdpString';
+
         let candidate = `candidate:${foundation} ${component} ${protocol} ${priority} ${address.ip} ${address.port}`;
         const attrs = []
         if (type) {
@@ -337,11 +351,11 @@ export class P2PSdpBuilder {
             attrs.push(`raddr ${relAddress.ip}`);
             attrs.push(`rport ${relAddress.port}`);
         }
-        if (generation) {
-            attrs.push(`generation ${generation}`);
-        }
         if (tcpType) {
             attrs.push(`tcptype ${tcpType}`);
+        }
+        if (generation) {
+            attrs.push(`generation ${generation}`);
         }
         if (username) {
             attrs.push(`ufrag ${username}`);
