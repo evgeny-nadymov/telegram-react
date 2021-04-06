@@ -63,6 +63,7 @@ class CallStore extends EventEmitter {
         this.groupItems = new Map();
         this.items = new Map();
 
+        this.mediaState = new Map();
         this.participants = new Map();
         this.groupCallPanelOpened = false;
         this.callPanelOpened = false;
@@ -100,12 +101,21 @@ class CallStore extends EventEmitter {
                 LOG_P2P_CALL('[update] updateCall', update);
                 const { call } = update;
 
-                const { id, state, is_outgoing } = call;
+                const { id, state, is_video } = call;
                 const prevCall = this.p2pGet(id)
                 this.p2pSet(call);
 
                 if (this.p2pCallsEnabled) {
                     if (call) {
+                        if (!prevCall) {
+                            this.p2pSetMediaState(id, 'input', {
+                                '@type': 'MediaState',
+                                muted: false,
+                                videoState: is_video ? 'active' : 'inactive',
+                                lowBattery: false
+                            });
+                        }
+
                         switch (state['@type']) {
                             case 'callStateDiscarded': {
                                 closeCallPanel();
@@ -337,10 +347,6 @@ class CallStore extends EventEmitter {
             case 'clientUpdateCallPanel': {
                 this.callPanelOpened = update.opened;
                 this.emit('clientUpdateCallPanel', update);
-                break;
-            }
-            case 'clientUpdateCallMediaIsMuted': {
-                this.emit('clientUpdateCallMediaIsMuted', update);
                 break;
             }
             case 'clientUpdateCallMediaState': {
@@ -1713,6 +1719,17 @@ class CallStore extends EventEmitter {
                 const { data } = e;
                 this.p2pApplyCallDataChannelData(JSON.parse(data));
             };
+            channel.onopen = () => {
+                const { currentCall } = this;
+                if (!currentCall) return;
+
+                const { callId } = currentCall;
+
+                const mediaState = this.p2pGetMediaState(callId, 'input');
+                if (!mediaState) return;
+
+                this.p2pSendMediaState(callId, mediaState);
+            };
 
             return channel;
         }
@@ -1791,7 +1808,6 @@ class CallStore extends EventEmitter {
         } else {
             if (is_outgoing) {
                 this.p2pAppendInputStream(inputStream);
-                // this.p2pStartNegotiation(id);
             } else {
                 LOG_P2P_CALL('try invoke p2pAppendInputStream', connection.localDescription, connection.remoteDescription);
                 if (connection.localDescription && connection.remoteDescription) {
@@ -1903,24 +1919,15 @@ class CallStore extends EventEmitter {
                     currentCall.videoIsMuted = isMuted;
                 }
 
-                TdLibController.clientUpdate({
-                    '@type': 'clientUpdateCallMediaIsMuted',
-                    callId,
-                    kind,
-                    isMuted
-                });
-
                 break;
             }
             case 'MediaState': {
-                const { muted, videoState, lowBattery } = data;
-
+                this.p2pSetMediaState(callId, 'output', data);
                 TdLibController.clientUpdate({
                     '@type': 'clientUpdateCallMediaState',
                     callId,
-                    muted,
-                    videoState,
-                    lowBattery
+                    type: 'output',
+                    mediaState: data
                 });
                 break;
             }
@@ -2111,13 +2118,6 @@ class CallStore extends EventEmitter {
                     currentCall.videoIsMuted = isMuted;
                 }
 
-                TdLibController.clientUpdate({
-                    '@type': 'clientUpdateCallMediaIsMuted',
-                    callId,
-                    kind,
-                    isMuted
-                });
-
                 break;
             }
         }
@@ -2129,6 +2129,7 @@ class CallStore extends EventEmitter {
 
         const { channel } = currentCall;
         if (!channel) return;
+        if (channel.readyState !== 'open') return;
 
         channel.send(data);
     }
@@ -2143,10 +2144,10 @@ class CallStore extends EventEmitter {
         }
     }
 
-    p2pSendMediaState(callId, muted, videoState, lowBattery) {
-        LOG_P2P_CALL('p2pSendMediaState', callId, muted, videoState, lowBattery);
+    p2pSendMediaState(callId, mediaState) {
+        LOG_P2P_CALL('p2pSendMediaState', callId, mediaState);
 
-        this.p2pSendDataChannelData(JSON.stringify({ '@type': 'MediaState', lowBattery, muted, videoState }));
+        this.p2pSendDataChannelData(JSON.stringify(mediaState));
     }
 
     p2pSendIceCandidate(callId, iceCandidate) {
@@ -2337,20 +2338,26 @@ class CallStore extends EventEmitter {
         const { connection, callId } = currentCall;
         if (!connection) return;
 
-        let videoEnabled = false;
         const senders = connection.getSenders();
         senders.forEach(x => {
             const { track } = x;
             if (track && track.kind === 'audio') {
                 track.enabled = enabled;
             }
-            if (track && track.kind === 'video' && track.enabled) {
-                videoEnabled = true;
-            }
         });
 
         if (TG_CALLS_MEDIA_STATE) {
-            this.p2pSendMediaState(callId, !enabled, videoEnabled ? 'active' : 'inactive', false);
+            const mediaState = this.p2pGetMediaState(callId, 'input');
+            const nextMediaState = { ...mediaState, ...{ muted: !enabled } };
+
+            TdLibController.clientUpdate({
+                '@type': 'clientUpdateCallMediaState',
+                callId,
+                type: 'input',
+                mediaState: nextMediaState
+            });
+            this.p2pSetMediaState(callId, 'input', nextMediaState);
+            this.p2pSendMediaState(callId, nextMediaState);
         } else {
             this.p2pSendMediaIsMuted(callId, 'audio', !enabled);
         }
@@ -2363,23 +2370,46 @@ class CallStore extends EventEmitter {
         const { connection, callId } = currentCall;
         if (!connection) return;
 
-        let audioEnabled = false;
         const senders = connection.getSenders();
         senders.forEach(x => {
             const { track } = x;
             if (track && track.kind === 'video') {
                 track.enabled = enabled;
             }
-            if (track && track.kind === 'audio' && track.enabled) {
-                audioEnabled = true;
-            }
         });
 
         if (TG_CALLS_MEDIA_STATE) {
-            this.p2pSendMediaState(callId, !audioEnabled, enabled ? 'active' : 'inactive', false);
+            const mediaState = this.p2pGetMediaState(callId, 'input');
+            const nextMediaState = { ...mediaState, ...{ videoState: enabled ? 'active' : 'inactive' } };
+
+            TdLibController.clientUpdate({
+                '@type': 'clientUpdateCallMediaState',
+                callId,
+                type: 'input',
+                mediaState: nextMediaState
+            });
+            this.p2pSetMediaState(callId, 'input', nextMediaState);
+            this.p2pSendMediaState(callId, nextMediaState);
         } else {
             this.p2pSendMediaIsMuted(callId, 'video', !enabled);
         }
+    }
+
+    p2pSetMediaState(callId, type, state) {
+        let s = this.mediaState.get(callId);
+        if (!s) {
+            s = { };
+            this.mediaState.set(callId, s);
+        }
+
+        s[type] = state;
+    }
+
+    p2pGetMediaState(callId, type) {
+        let s = this.mediaState.get(callId);
+        if (!s) return null;
+
+        return s[type];
     }
 }
 

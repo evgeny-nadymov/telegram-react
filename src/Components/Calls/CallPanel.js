@@ -37,17 +37,17 @@ class CallPanel extends React.Component {
 
         this.callPanelRef = React.createRef();
 
+        const { callId } = props;
+
         this.state = {
             openSettings: false,
             contextMenu: false,
             left: 0,
             top: 0,
             fullScreen: false,
-            audioEnabled: true,
-            videoEnabled: true,
 
-            otherAudioEnabled: true,
-            otherVideoEnabled: true
+            inputMediaState: CallStore.p2pGetMediaState(callId, 'input'),
+            outputMediaState: CallStore.p2pGetMediaState(callId, 'output')
         };
     }
 
@@ -61,7 +61,6 @@ class CallPanel extends React.Component {
         }
 
         CallStore.on('updateCall', this.handleUpdateCall);
-        CallStore.on('clientUpdateCallMediaIsMuted', this.onClientUpdateCallMediaIsMuted);
         CallStore.on('clientUpdateCallMediaState', this.onClientUpdateCallMediaState);
     }
 
@@ -75,36 +74,20 @@ class CallPanel extends React.Component {
         }
 
         CallStore.off('updateCall', this.handleUpdateCall);
-        CallStore.off('clientUpdateCallMediaIsMuted', this.onClientUpdateCallMediaIsMuted);
         CallStore.off('clientUpdateCallMediaState', this.onClientUpdateCallMediaState);
     }
 
     onClientUpdateCallMediaState = update => {
         const { callId: currentCallId } = this.props;
-        const { callId, muted, videoState, lowBattery } = update;
+        const { callId, mediaState, type } = update;
         if (callId !== currentCallId) return;
 
-        this.setState({
-            otherAudioEnabled: !muted,
-            otherVideoEnabled: videoState === 'active'
-        });
-    };
-
-    onClientUpdateCallMediaIsMuted = update => {
-        const { callId: currentCallId } = this.props;
-        const { callId, kind, isMuted } = update;
-        if (callId !== currentCallId) return;
-
-        if (kind === 'audio') {
-            this.setState({
-                otherAudioEnabled: !isMuted
-            });
-        } else if (kind === 'video') {
-            this.setState({
-                otherVideoEnabled: !isMuted
-            });
+        if (type === 'input') {
+            this.setState({ inputMediaState: mediaState });
+        } else {
+            this.setState({ outputMediaState: mediaState });
         }
-    }
+    };
 
     handleUpdateCall = update => {
         this.forceUpdate();
@@ -243,36 +226,26 @@ class CallPanel extends React.Component {
     };
 
     handleAudio = () => {
-        const { audioEnabled } = this.state;
+        const { inputMediaState } = this.state;
+        if (!inputMediaState) return;
 
-        if (audioEnabled) {
-            CallStore.p2pAudioEnabled(false);
-        } else {
-            CallStore.p2pAudioEnabled(true)
-        }
+        const { muted } = inputMediaState;
 
-        this.setState({
-            audioEnabled: !audioEnabled
-        });
+        CallStore.p2pAudioEnabled(muted);
     };
 
     handleVideo = () => {
-        const { videoEnabled } = this.state;
+        const { inputMediaState } = this.state;
+        if (!inputMediaState) return;
 
-        if (videoEnabled) {
-            CallStore.p2pVideoEnabled(false);
-        } else {
-            CallStore.p2pVideoEnabled(true)
-        }
+        const muted = inputMediaState.videoState === 'inactive';
 
-        this.setState({
-            videoEnabled: !videoEnabled
-        });
+        CallStore.p2pVideoEnabled(muted)
     };
 
     render() {
         const { callId, t } = this.props;
-        const { openSettings, anchorEl, fullScreen, audioEnabled, videoEnabled, otherAudioEnabled, otherVideoEnabled } = this.state;
+        const { openSettings, anchorEl, fullScreen, inputMediaState, outputMediaState } = this.state;
         const { currentCall } = CallStore;
 
         const call = CallStore.p2pGet(callId);
@@ -360,7 +333,7 @@ class CallPanel extends React.Component {
                     <video id='call-output-video' autoPlay={true} muted={false}/>
                     <video id='call-input-video' autoPlay={true} muted={true}/>
                 </div>
-                { !otherAudioEnabled && (
+                { outputMediaState && outputMediaState.muted && (
                     <div className='call-panel-microphone-hint'>
                         <div className='call-panel-microphone-hint-wrapper'>
                             <MicOffIcon/>
@@ -373,10 +346,10 @@ class CallPanel extends React.Component {
                 <div className='group-call-panel-buttons'>
                     <div className='group-call-panel-button'>
                         <div className='group-call-settings-button' onMouseDown={stopPropagation} onClick={this.handleVideo}>
-                            {videoEnabled ? <VideocamIcon/> : <VideocamOffIcon/>}
+                            {inputMediaState && inputMediaState.videoState === 'active' ? <VideocamIcon/> : <VideocamOffIcon/>}
                         </div>
                         <div className='group-call-panel-button-text'>
-                            {videoEnabled ? t('VoipStopVideo') : t('VoipStartVideo')}
+                            {inputMediaState && inputMediaState.videoState === 'active' ? t('VoipStopVideo') : t('VoipStartVideo')}
                         </div>
                     </div>
                     <div className='group-call-panel-button'>
@@ -399,10 +372,10 @@ class CallPanel extends React.Component {
                     )}
                     <div className='group-call-panel-button'>
                         <div className='group-call-settings-button' onMouseDown={stopPropagation} onClick={this.handleAudio}>
-                            {audioEnabled ? <MicIcon/> : <MicOffIcon/>}
+                            {inputMediaState && !inputMediaState.muted ? <MicIcon/> : <MicOffIcon/>}
                         </div>
                         <div className='group-call-panel-button-text'>
-                            {audioEnabled ? t('Mute') : t('Unmute')}
+                            {inputMediaState && !inputMediaState.muted ? t('Mute') : t('Unmute')}
                         </div>
                     </div>
                 </div>
