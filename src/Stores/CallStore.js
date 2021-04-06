@@ -1793,6 +1793,8 @@ class CallStore extends EventEmitter {
         };
         LOG_P2P_CALL('p2pJoinCall currentCall', this.currentCall);
 
+        const mediaState = this.p2pGetMediaState(id, 'input');
+
         const inputStream = await navigator.mediaDevices.getUserMedia({
             video: true,
             audio: true
@@ -2076,22 +2078,10 @@ class CallStore extends EventEmitter {
                 let candidate = data;
                 if (UNIFY_CANDIDATE) {
                     data.candidates.forEach(x => {
-                        // if (x.type === 'local') {
-                        //     x.type = 'host';
-                        // } else if (x.type === 'relay') {
-                        //     x.component = 1;
-                        //     x.relAddress = {
-                        //         ip: '0.0.0.0',
-                        //         port: 0
-                        //     }
-                        // }
-
                         candidate = P2PSdpBuilder.generateCandidate(x);
                         candidate.sdpMLineIndex = 0;
 
-                        // if (x.type === 'relay') {
-                            candidates.push(candidate);
-                        // }
+                        candidates.push(candidate);
                     });
                 }
                 if (candidates.length > 0) {
