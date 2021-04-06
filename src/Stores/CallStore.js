@@ -1807,6 +1807,14 @@ class CallStore extends EventEmitter {
         }
         if (TG_CALLS_SDP) {
             this.p2pAppendInputStream(inputStream);
+            // if (is_outgoing) {
+            //     this.p2pAppendInputStream(inputStream);
+            // } else {
+            //     LOG_P2P_CALL('try invoke p2pAppendInputStream', connection.localDescription, connection.remoteDescription);
+            //     if (connection.localDescription && connection.remoteDescription) {
+            //         this.p2pAppendInputStream(inputStream);
+            //     }
+            // }
         } else {
             if (is_outgoing) {
                 this.p2pAppendInputStream(inputStream);
@@ -1833,6 +1841,7 @@ class CallStore extends EventEmitter {
         if (!call) return;
 
         const { is_outgoing } = call;
+        if (!connection.localDescription && !connection.remoteDescription && !is_outgoing) return;
         // if (!is_outgoing) return;
 
         let offer = await connection.createOffer({
@@ -1845,20 +1854,9 @@ class CallStore extends EventEmitter {
         if (TG_CALLS_SDP) {
             const initialSetup = p2pParseSdp(offer.sdp);
             initialSetup['@type'] = 'InitialSetup';
+            currentCall.offerSent = true;
 
             this.p2pSendInitialSetup(callId, initialSetup);
-            if (currentCall.answer) {
-                await connection.setRemoteDescription(currentCall.answer);
-                currentCall.answer = null;
-                if (currentCall.candidates) {
-                    currentCall.candidates.forEach(x => {
-                        this.p2pAddIceCandidate(connection, x);
-                        // LOG_P2P_CALL('[candidate] add postpone', x);
-                        // connection.addIceCandidate(x);
-                    });
-                    currentCall.candidates = [];
-                }
-            }
         } else {
             this.p2pSendSdp(callId, offer);
         }
@@ -1965,6 +1963,48 @@ class CallStore extends EventEmitter {
 
         let type = TG_CALLS ? data['@type'] || data.type : data.type;
         switch (type) {
+            case 'InitialSetup': {
+                console.log('[sdp] InitialSetup', data);
+                const isAnswer = currentCall.offerSent;
+                currentCall.offerSent = false;
+
+                let description = data;
+                if (UNIFY_SDP) {
+                    description = {
+                        type: isAnswer ? 'answer' : 'offer',
+                        sdp: isAnswer ?
+                            P2PSdpBuilder.generateAnswer(data) :
+                            P2PSdpBuilder.generateOffer(data)
+                    }
+                }
+
+                await connection.setRemoteDescription(description);
+
+                if (currentCall.candidates) {
+                    currentCall.candidates.forEach(x => {
+                        this.p2pAddIceCandidate(connection, x);
+                    });
+                    currentCall.candidates = [];
+                }
+
+                if (!isAnswer) {
+                    const answer = await connection.createAnswer();
+                    await connection.setLocalDescription(answer);
+
+                    // LOG_P2P_CALL('2 try invoke p2pAppendInputStream', inputStream, is_outgoing);
+                    // const { inputStream } = currentCall;
+                    // if (inputStream && !is_outgoing) {
+                    //     this.p2pAppendInputStream(inputStream);
+                    // }
+                    const initialSetup = p2pParseSdp(answer.sdp);
+                    initialSetup['@type'] = 'InitialSetup';
+
+                    console.log('[sdp] InitialSetup 4', callId, initialSetup);
+                    this.p2pSendInitialSetup(callId, initialSetup);
+                    // this.p2pSendSdp(callId, answer);
+                }
+                break;
+            }
             case 'answer':
             case 'offer':{
                 let description = data;
@@ -2020,57 +2060,6 @@ class CallStore extends EventEmitter {
                         // await connection.addIceCandidate(iceCandidate);
                     }
                 }
-                break;
-            }
-            case 'InitialSetup': {
-                console.log('[sdp] InitialSetup');
-                let description = data;
-                if (UNIFY_SDP) {
-                    const { fingerprints } = description;
-                    if (fingerprints) {
-                        fingerprints.forEach(x => {
-                            if (x.setup === 'actpass') {
-                                if (is_outgoing) {
-                                    x.setup = 'active';
-                                } else {
-                                    x.setup = 'passive';
-                                }
-                            }
-                        })
-                    }
-                    description = {
-                        type: 'answer',
-                        sdp: P2PSdpBuilder.generateAnswer(data)
-                    }
-                }
-
-                console.log('[sdp] remote', description.sdp);
-                if (connection.localDescription) {
-                    await connection.setRemoteDescription(description);
-                    if (currentCall.candidates) {
-                        currentCall.candidates.forEach(x => {
-                            this.p2pAddIceCandidate(connection, x);
-                            // LOG_P2P_CALL('[candidate] add postpone', x);
-                            // connection.addIceCandidate(x);
-                        });
-                        currentCall.candidates = [];
-                    }
-                } else {
-                    currentCall.answer = description;
-                }
-
-
-
-                // const answer = await connection.createAnswer();
-                // await connection.setLocalDescription(answer);
-                //
-                // LOG_P2P_CALL('2 try invoke p2pAppendInputStream', inputStream, is_outgoing);
-                // const { inputStream } = currentCall;
-                // if (inputStream && !is_outgoing) {
-                //     this.p2pAppendInputStream(inputStream);
-                // }
-
-                // this.p2pSendSdp(callId, answer);
                 break;
             }
             case 'Candidates': {
@@ -2202,13 +2191,22 @@ class CallStore extends EventEmitter {
         }
 
         if (discard) {
-            LOG_P2P_CALL('[tdlib] discardCall', callId);
+            const inputMediaState = this.p2pGetMediaState(callId, 'input');
+            const outputMediaState = this.p2pGetMediaState(callId, 'output');
+
+            const call = this.p2pGet(callId);
+
+            const isVideo = inputMediaState && inputMediaState.videoState === 'active'
+                || outputMediaState && outputMediaState.videoState === 'active'
+                || call && call.is_video;
+            LOG_P2P_CALL('[tdlib] discardCall', callId, isVideo);
+
             TdLibController.send({
                 '@type': 'discardCall',
                 call_id: callId,
                 is_disconnected: false,
                 duration: 0,
-                is_video: true,
+                is_video: isVideo,
                 connection_id: 0
             });
         }
