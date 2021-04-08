@@ -330,8 +330,8 @@ class CallPanel extends React.Component {
                     </Popover>
                 </div>
                 <div className='call-panel-content scrollbars-hidden' onDoubleClick={this.handleFullScreen}>
-                    <video id='call-output-video' autoPlay={true} muted={false}/>
-                    <video id='call-input-video' autoPlay={true} muted={true}/>
+                    <video id='call-output-video' className={outputMediaState && outputMediaState.videoState === 'active' ? 'call-video-active' : 'call-video-inactive'} autoPlay={true} muted={false}/>
+                    <video id='call-input-video' className={inputMediaState && inputMediaState.videoState === 'active' ? 'call-video-active' : 'call-video-inactive'} autoPlay={true} muted={true}/>
                 </div>
                 { outputMediaState && outputMediaState.muted && (
                     <div className='call-panel-microphone-hint'>

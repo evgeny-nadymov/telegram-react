@@ -1799,6 +1799,13 @@ class CallStore extends EventEmitter {
             video: true,
             audio: true
         });
+
+        if (mediaState && mediaState.videoState === 'inactive') {
+            inputStream.getVideoTracks().forEach(x => {
+                x.enabled = false;
+            });
+        }
+
         this.currentCall.inputStream = inputStream;
 
         const inputVideo = document.getElementById('call-input-video');
@@ -1807,14 +1814,6 @@ class CallStore extends EventEmitter {
         }
         if (TG_CALLS_SDP) {
             this.p2pAppendInputStream(inputStream);
-            // if (is_outgoing) {
-            //     this.p2pAppendInputStream(inputStream);
-            // } else {
-            //     LOG_P2P_CALL('try invoke p2pAppendInputStream', connection.localDescription, connection.remoteDescription);
-            //     if (connection.localDescription && connection.remoteDescription) {
-            //         this.p2pAppendInputStream(inputStream);
-            //     }
-            // }
         } else {
             if (is_outgoing) {
                 this.p2pAppendInputStream(inputStream);
@@ -2217,7 +2216,7 @@ class CallStore extends EventEmitter {
         const { currentCall } = this;
         if (!currentCall) return;
 
-        const { connection } = currentCall;
+        const { callId, connection } = currentCall;
         if (!connection) return;
 
         const options = {
@@ -2243,6 +2242,11 @@ class CallStore extends EventEmitter {
             inputVideo.srcObject = screenStream;
         }
 
+        const inputMediaState = this.p2pGetMediaState(callId, 'input');
+        if (inputMediaState && inputMediaState.videoState !== 'active') {
+            this.p2pVideoEnabled(true);
+        }
+
         currentCall.screenStream = screenStream;
     }
 
@@ -2255,15 +2259,11 @@ class CallStore extends EventEmitter {
         if (!screenStream) return;
 
         const videoTracks = inputStream.getVideoTracks();
-        if (videoTracks.length > 0)
+        const videoTrack = videoTracks.length > 0 ? videoTracks[0] : null
 
         connection.getSenders().forEach(x => {
             if (x.track.kind === 'video') {
-                if (videoTracks.length > 0) {
-                    x.replaceTrack(videoTracks[0]);
-                } else {
-                    x.replaceTrack(null);
-                }
+                x.replaceTrack(videoTrack);
             }
         })
 
@@ -2277,6 +2277,10 @@ class CallStore extends EventEmitter {
         }
 
         currentCall.screenStream = null;
+
+        if (!videoTrack || videoTrack.readyState !== 'live') {
+            this.p2pVideoEnabled(false);
+        }
     }
 
     p2pCloseConnectionAndStream(connection, inputStream, outputStream, screenStream) {
@@ -2352,7 +2356,7 @@ class CallStore extends EventEmitter {
         }
     }
 
-    p2pVideoEnabled(enabled) {
+    async p2pVideoEnabled(enabled) {
         const { currentCall } = this;
         if (!currentCall) return;
 
