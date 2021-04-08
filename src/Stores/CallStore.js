@@ -464,7 +464,7 @@ class CallStore extends EventEmitter {
             description.updateFromServer(data);
             const sdp = description.generateSdp();
 
-            LOG_CALL(`[conn][updateGroupCallParticipants] setRemoteDescription participantsCount=${participants.length} signaling=${connection.signalingState} ice=${connection.iceConnectionState} gathering=${connection.iceGatheringState} connection=${connection.connectionState}`, sdp);
+            LOG_CALL(`[conn][updateGroupCallParticipants][sdp] setRemoteDescription participantsCount=${participants.length} signaling=${connection.signalingState} ice=${connection.iceConnectionState} gathering=${connection.iceGatheringState} connection=${connection.connectionState}`, sdp);
             await connection.setRemoteDescription({
                 type: 'offer',
                 sdp,
@@ -472,7 +472,7 @@ class CallStore extends EventEmitter {
 
             LOG_CALL(`[conn][updateGroupCallParticipants] createAnswer id=${groupCallId}`, ts);
             const answer = await connection.createAnswer();
-            LOG_CALL(`[conn][updateGroupCallParticipants] setLocalDescription id=${groupCallId}`, ts);
+            LOG_CALL(`[conn][updateGroupCallParticipants][sdp] createAnswer setLocalDescription id=${groupCallId}`, ts, answer.sdp);
             await connection.setLocalDescription(answer);
         } finally {
             LOG_CALL(`updateGroupCallParticipants id=${groupCallId} updateSdp finish`, ts);
@@ -759,18 +759,18 @@ class CallStore extends EventEmitter {
             offerToReceiveVideo: 0,
         };
         let offer = await connection.createOffer(offerOptions);
-        LOG_CALL('[conn][joinGroupCallInternal] setLocalDescription', offer);
+        LOG_CALL('[conn][joinGroupCallInternal][sdp] setLocalDescription', offer.sdp);
         await connection.setLocalDescription(offer);
         let clientInfo = parseSdp(offer.sdp);
         let { ufrag, pwd, hash, setup, fingerprint, source } = clientInfo;
         LOG_CALL('[conn][joinGroupCallInternal] clientInfo', clientInfo);
 
 
-        offer = await connection.createOffer(offerOptions);
-        LOG_CALL('[conn][joinGroupCallInternal] setLocalDescription', offer);
-        await connection.setLocalDescription(offer);
-        clientInfo = parseSdp(offer.sdp);
-        LOG_CALL('[conn][joinGroupCallInternal] clientInfo', clientInfo);
+        // offer = await connection.createOffer(offerOptions);
+        // LOG_CALL('[conn][joinGroupCallInternal][sdp] setLocalDescription', offer.sdp);
+        // await connection.setLocalDescription(offer);
+        // clientInfo = parseSdp(offer.sdp);
+        // LOG_CALL('[conn][joinGroupCallInternal] clientInfo', clientInfo);
 
         currentGroupCall.meSignSource = toTelegramSource(source);
 
@@ -887,7 +887,7 @@ class CallStore extends EventEmitter {
         description.updateFromServer(data1);
         const sdp1 = description.generateSdp(true);
 
-        LOG_CALL(`[conn][joinGroupCallInternal] setRemoteDescription signaling=${connection.signalingState} ice=${connection.iceConnectionState} gathering=${connection.iceGatheringState} connection=${connection.connectionState}`, sdp1);
+        LOG_CALL(`[conn][joinGroupCallInternal][sdp] setRemoteDescription signaling=${connection.signalingState} ice=${connection.iceConnectionState} gathering=${connection.iceGatheringState} connection=${connection.connectionState}`, sdp1);
         await connection.setRemoteDescription({
             type: 'answer',
             sdp: sdp1,
@@ -1989,6 +1989,7 @@ class CallStore extends EventEmitter {
 
                 if (!isAnswer) {
                     const answer = await connection.createAnswer();
+                    console.log('[sdp] local', answer.sdp);
                     await connection.setLocalDescription(answer);
 
                     // LOG_P2P_CALL('2 try invoke p2pAppendInputStream', inputStream, is_outgoing);
