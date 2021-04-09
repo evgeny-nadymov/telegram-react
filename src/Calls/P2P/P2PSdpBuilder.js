@@ -247,11 +247,11 @@ function isSafari() {
 
 export function addExtmap(extmap) {
     let sdp = '';
-    return sdp;
-
+    // return sdp;
     for (let j = 0; j < extmap.length; j++) {
         const ext = extmap[j];
         const { id, uri } = ext;
+        console.log('[extmap] add', id, uri);
         sdp += `
 a=extmap:${id} ${uri}`;
     }
