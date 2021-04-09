@@ -1165,10 +1165,8 @@ class CallStore extends EventEmitter {
 
             const p2pPlayer = document.getElementById('call-output-video');
             if (p2pPlayer) {
-                for (let audio of p2pPlayer.getElementsByTagName('audio')) {
-                    if (typeof audio.sinkId !== 'undefined') {
-                        audio.setSinkId(deviceId);
-                    }
+                if (typeof p2pPlayer.sinkId !== 'undefined') {
+                    p2pPlayer.setSinkId(deviceId);
                 }
             }
         } else {
@@ -1195,8 +1193,8 @@ class CallStore extends EventEmitter {
     }
 
     getOutputDeviceId() {
-        const { currentGroupCall } = this;
-        if (!currentGroupCall) return null;
+        const { currentGroupCall, currentCall } = this;
+        if (!currentGroupCall && !currentCall) return null;
 
         if (JOIN_TRACKS) {
             const player = document.getElementById('group-call-player');
@@ -1210,10 +1208,8 @@ class CallStore extends EventEmitter {
 
             const p2pPlayer = document.getElementById('call-output-video');
             if (p2pPlayer) {
-                for (let audio of p2pPlayer.getElementsByTagName('audio')) {
-                    if (typeof audio.sinkId !== 'undefined') {
-                        return audio.sinkId;
-                    }
+                if (typeof p2pPlayer.sinkId !== 'undefined') {
+                    return p2pPlayer.sinkId;
                 }
             }
         } else {
@@ -1254,25 +1250,26 @@ class CallStore extends EventEmitter {
             oldTrack.stop();
             streamManager.replaceInputAudio(stream, oldTrack);
         } else if (currentCall) {
-            // const { connection, streamManager } = currentGroupCall;
-            // if (!connection) return;
-            //
-            // const { inputStream } = streamManager;
-            //
+            const { connection, inputStream } = currentCall;
+            if (!connection) return;
+            if (!inputStream) return;
+
             // // const videoTrack = stream.getVideoTracks()[0];
             // // const sender = pc.getSenders().find(function(s) {
             // //     return s.track.kind == videoTrack.kind;
             // // });
             // // sender.replaceTrack(videoTrack);
-            //
-            // const audioTrack = stream.getAudioTracks()[0];
-            // const sender2 = connection.getSenders().find(x => {
-            //     return x.track.kind === audioTrack.kind;
-            // });
-            // const oldTrack = sender2.track;
-            // await sender2.replaceTrack(audioTrack);
-            //
-            // oldTrack.stop();
+
+            const audioTrack = stream.getAudioTracks()[0];
+            const sender2 = connection.getSenders().find(x => {
+                return x.track.kind === audioTrack.kind;
+            });
+            const oldTrack = sender2.track;
+            await sender2.replaceTrack(audioTrack);
+
+            oldTrack.stop();
+            inputStream.removeTrack(oldTrack);
+            inputStream.addTrack(audioTrack);
             // streamManager.replaceInputAudio(stream, oldTrack);
         }
     }
@@ -1301,10 +1298,16 @@ class CallStore extends EventEmitter {
             // oldTrack.stop();
             // streamManager.replaceInputAudio(stream, oldTrack);
         } else if (currentCall) {
-            const { connection, inputStream } = currentCall;
+            const { callId, connection, inputStream } = currentCall;
             if (!connection) return;
+            if (!inputStream) return;
 
             const videoTrack = stream.getVideoTracks()[0];
+            const mediaState = this.p2pGetMediaState(callId, 'input');
+            if (mediaState && mediaState.videoState === 'inactive') {
+                videoTrack.enabled = false;
+            }
+
             const sender = connection.getSenders().find(function(s) {
                 return s.track.kind == videoTrack.kind;
             });
@@ -1312,17 +1315,8 @@ class CallStore extends EventEmitter {
             sender.replaceTrack(videoTrack);
 
             oldTrack.stop();
-            // inputStream.replaceTrack()
-
-            // const audioTrack = stream.getAudioTracks()[0];
-            // const sender2 = connection.getSenders().find(x => {
-            //     return x.track.kind === audioTrack.kind;
-            // });
-            // const oldTrack = sender2.track;
-            // await sender2.replaceTrack(audioTrack);
-
-            // oldTrack.stop();
-            // streamManager.replaceInputAudio(stream, oldTrack);
+            inputStream.removeTrack(oldTrack);
+            inputStream.addTrack(videoTrack);
         }
     }
 

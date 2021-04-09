@@ -5,6 +5,15 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#call-settings-video {
+    width: calc(100% - 44px);
+    max-height: 100px;
+    background: black;
+    transform: scaleX(-1);
+    margin: 10px 22px;
+    box-sizing: border-box;
+}
+
 .group-call-settings {
     position: absolute;
     left: 0;
