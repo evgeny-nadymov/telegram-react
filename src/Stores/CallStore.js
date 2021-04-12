@@ -1971,6 +1971,11 @@ class CallStore extends EventEmitter {
                     }
                 }
 
+                // if (description.type === 'offer' && description.sdp.indexOf('a=setup:active')) {
+                //     description.sdp = description.sdp.replaceAll('a=setup:active', 'a=setup:actpass')
+                // }
+
+                console.log('[sdp] remote', description.type, description.sdp)
                 await connection.setRemoteDescription(description);
 
                 if (currentCall.candidates) {
@@ -1982,7 +1987,10 @@ class CallStore extends EventEmitter {
 
                 if (!isAnswer) {
                     const answer = await connection.createAnswer();
-                    console.log('[sdp] local', answer.sdp);
+                    // if (description.sdp.indexOf('a=setup:active') && answer.sdp.indexOf('a=setup:active')) {
+                    //     answer.sdp = answer.sdp.replaceAll('a=setup:active', 'a=setup:passive');
+                    // }
+                    console.log('[sdp] local', answer.type, answer.sdp);
                     await connection.setLocalDescription(answer);
 
                     // LOG_P2P_CALL('2 try invoke p2pAppendInputStream', inputStream, is_outgoing);

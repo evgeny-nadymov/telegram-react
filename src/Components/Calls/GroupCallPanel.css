@@ -7,7 +7,8 @@
 
 #call-output-video {
     width: 348px;
-    max-height: 320px;
+    height: 348px;
+    background: black;
 }
 
 .full-screen #call-output-video {
@@ -115,11 +116,11 @@
 
 .group-call-panel-buttons {
     flex-shrink: 0;
-    padding: 58px 40px;
+    padding: 30px 40px 58px 40px;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    height: 220px;
+    height: 192px;
     min-width: 348px;
     box-sizing: border-box;
     position: relative;
