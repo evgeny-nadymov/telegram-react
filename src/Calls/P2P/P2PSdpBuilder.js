@@ -237,7 +237,7 @@ export function p2pParseSdp(sdp) {
     return info;
 }
 
-function isFirefox() {
+export function isFirefox() {
     return navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 }
 

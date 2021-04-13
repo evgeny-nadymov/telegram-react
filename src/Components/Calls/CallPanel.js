@@ -23,6 +23,7 @@ import MenuIcon from '../../Assets/Icons/More';
 import MicIcon from '../../Assets/Icons/Mic';
 import MicOffIcon from '../../Assets/Icons/MicOff';
 import { closeCallPanel } from '../../Actions/Call';
+import { isFirefox } from '../../Calls/P2P/P2PSdpBuilder';
 import { p2pGetCallStatus, p2pIsCallReady } from '../../Calls/Utils';
 import { getUserFullName } from '../../Utils/User';
 import { stopPropagation } from '../../Utils/Message';
@@ -30,6 +31,8 @@ import CallStore from '../../Stores/CallStore';
 import LStore from '../../Stores/LocalizationStore';
 import UserStore from '../../Stores/UserStore';
 import './CallPanel.css';
+
+const SUPPORTS_ROTATION = true;
 
 class CallPanel extends React.Component {
     constructor(props) {
@@ -255,6 +258,13 @@ class CallPanel extends React.Component {
 
         let screenSharing = currentCall && Boolean(currentCall.screenStream);
 
+        let outputVideoStyle = null;
+        if (SUPPORTS_ROTATION && outputMediaState && isFirefox()) {
+            outputVideoStyle = {
+                transform: `rotate(${outputMediaState.videoRotation}deg)`
+            };
+        }
+
         return (
             <div className={classNames('group-call-panel', { 'full-screen': fullScreen })} ref={this.callPanelRef}>
                 <div className='group-call-panel-header'>
@@ -330,7 +340,7 @@ class CallPanel extends React.Component {
                     </Popover>
                 </div>
                 <div className='call-panel-content scrollbars-hidden' onDoubleClick={this.handleFullScreen}>
-                    <video id='call-output-video' className={outputMediaState && outputMediaState.videoState === 'active' ? 'call-video-active' : 'call-video-inactive'} autoPlay={true} muted={false}/>
+                    <video id='call-output-video' style={outputVideoStyle} className={outputMediaState && outputMediaState.videoState === 'active' ? 'call-video-active' : 'call-video-inactive'} autoPlay={true} muted={false}/>
                     <video id='call-input-video' className={inputMediaState && inputMediaState.videoState === 'active' ? 'call-video-active' : 'call-video-inactive'} autoPlay={true} muted={true}/>
                 </div>
                 { outputMediaState && outputMediaState.muted && (
