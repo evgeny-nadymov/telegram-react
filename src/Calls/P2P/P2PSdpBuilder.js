@@ -251,6 +251,7 @@ export function addExtmap(extmap) {
     for (let j = 0; j < extmap.length; j++) {
         const ext = extmap[j];
         const { id, uri } = ext;
+        // if (isFirefox() && uri.indexOf(''))
         console.log('[extmap] add', id, uri);
         sdp += `
 a=extmap:${id} ${uri}`;

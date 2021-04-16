@@ -1752,7 +1752,7 @@ class CallStore extends EventEmitter {
             LOG_P2P_CALL('[conn] oniceconnectionstatechange', connection.iceConnectionState);
         };
         connection.onnegotiationneeded = event => {
-            LOG_P2P_CALL('[conn] onnegotiationneeded', connection.signalingState);
+            LOG_P2P_CALL('[conn][InitialSetup] onnegotiationneeded', connection.signalingState);
             this.p2pStartNegotiation(id);
         }
         connection.onicecandidate = event => {
@@ -1808,6 +1808,22 @@ class CallStore extends EventEmitter {
         }
         if (TG_CALLS_SDP) {
             this.p2pAppendInputStream(inputStream);
+            const { offerReceived } = this.currentCall;
+            if (offerReceived) {
+                console.log('[InitialSetup] after p2pAppendInputStream');
+                this.currentCall.offerReceived = false;
+
+                const answer = await connection.createAnswer();
+
+                console.log('[sdp] local', answer.type, answer.sdp);
+                await connection.setLocalDescription(answer);
+
+                const initialSetup = p2pParseSdp(answer.sdp);
+                initialSetup['@type'] = 'InitialSetup';
+
+                console.log('[InitialSetup] send 2');
+                this.p2pSendInitialSetup(callId, initialSetup);
+            }
         } else {
             if (is_outgoing) {
                 this.p2pAppendInputStream(inputStream);
@@ -1823,10 +1839,10 @@ class CallStore extends EventEmitter {
     /// https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Perfect_negotiation
     p2pStartNegotiation = async id => {
         const { currentCall } = this;
-        LOG_P2P_CALL('p2pStartNegotiation', currentCall);
+        LOG_P2P_CALL('[InitialSetup] p2pStartNegotiation', currentCall);
         if (!currentCall) return;
 
-        const { callId, connection } = currentCall;
+        const { callId, connection, offerReceived } = currentCall;
         if (callId !== id) return;
         if (!connection) return;
 
@@ -1837,21 +1853,38 @@ class CallStore extends EventEmitter {
         if (!connection.localDescription && !connection.remoteDescription && !is_outgoing) return;
         // if (!is_outgoing) return;
 
-        let offer = await connection.createOffer({
-            offerToReceiveAudio: true,
-            offerToReceiveVideo: true
-        });
+        LOG_P2P_CALL('[InitialSetup] p2pStartNegotiation 1', offerReceived);
+        if (offerReceived) {
+            currentCall.offerReceived = false;
 
-        console.log('[sdp] local', offer.sdp);
-        await connection.setLocalDescription(offer);
-        if (TG_CALLS_SDP) {
-            const initialSetup = p2pParseSdp(offer.sdp);
+            const answer = await connection.createAnswer();
+
+            console.log('[sdp] local', answer.type, answer.sdp);
+            await connection.setLocalDescription(answer);
+
+            const initialSetup = p2pParseSdp(answer.sdp);
             initialSetup['@type'] = 'InitialSetup';
-            currentCall.offerSent = true;
 
+            console.log('[InitialSetup] send 2');
             this.p2pSendInitialSetup(callId, initialSetup);
         } else {
-            this.p2pSendSdp(callId, offer);
+            let offer = await connection.createOffer({
+                offerToReceiveAudio: true,
+                offerToReceiveVideo: true
+            });
+
+            console.log('[sdp] local', offer.sdp);
+            await connection.setLocalDescription(offer);
+            if (TG_CALLS_SDP) {
+                const initialSetup = p2pParseSdp(offer.sdp);
+                initialSetup['@type'] = 'InitialSetup';
+                currentCall.offerSent = true;
+
+                console.log('[InitialSetup] send 0');
+                this.p2pSendInitialSetup(callId, initialSetup);
+            } else {
+                this.p2pSendSdp(callId, offer);
+            }
         }
     };
 
@@ -1867,7 +1900,7 @@ class CallStore extends EventEmitter {
     }
 
     p2pAppendInputStream(inputStream) {
-        LOG_P2P_CALL('p2pAppendInputStream start', inputStream);
+        LOG_P2P_CALL('[InitialSetup] p2pAppendInputStream start', inputStream);
         const { currentCall } = this;
         if (!currentCall) return;
 
@@ -1887,7 +1920,7 @@ class CallStore extends EventEmitter {
         inputStream && inputStream.getVideoTracks().forEach(x => {
             connection.addTrack(x, inputStream);
         });
-        LOG_P2P_CALL('p2pAppendInputStream stop', inputStream);
+        LOG_P2P_CALL('[InitialSetup] p2pAppendInputStream stop', inputStream);
     }
 
     async p2pApplyCallDataChannelData(data) {
@@ -1971,10 +2004,6 @@ class CallStore extends EventEmitter {
                     }
                 }
 
-                // if (description.type === 'offer' && description.sdp.indexOf('a=setup:active')) {
-                //     description.sdp = description.sdp.replaceAll('a=setup:active', 'a=setup:actpass')
-                // }
-
                 console.log('[sdp] remote', description.type, description.sdp)
                 await connection.setRemoteDescription(description);
 
@@ -1986,24 +2015,22 @@ class CallStore extends EventEmitter {
                 }
 
                 if (!isAnswer) {
-                    const answer = await connection.createAnswer();
-                    // if (description.sdp.indexOf('a=setup:active') && answer.sdp.indexOf('a=setup:active')) {
-                    //     answer.sdp = answer.sdp.replaceAll('a=setup:active', 'a=setup:passive');
-                    // }
-                    console.log('[sdp] local', answer.type, answer.sdp);
-                    await connection.setLocalDescription(answer);
+                    const { inputStream } = currentCall;
+                    if (inputStream) {
+                        const answer = await connection.createAnswer();
 
-                    // LOG_P2P_CALL('2 try invoke p2pAppendInputStream', inputStream, is_outgoing);
-                    // const { inputStream } = currentCall;
-                    // if (inputStream && !is_outgoing) {
-                    //     this.p2pAppendInputStream(inputStream);
-                    // }
-                    const initialSetup = p2pParseSdp(answer.sdp);
-                    initialSetup['@type'] = 'InitialSetup';
+                        console.log('[sdp] local', answer.type, answer.sdp);
+                        await connection.setLocalDescription(answer);
 
-                    console.log('[sdp] InitialSetup 4', callId, initialSetup);
-                    this.p2pSendInitialSetup(callId, initialSetup);
-                    // this.p2pSendSdp(callId, answer);
+                        const initialSetup = p2pParseSdp(answer.sdp);
+                        initialSetup['@type'] = 'InitialSetup';
+
+                        console.log('[InitialSetup] send 1');
+                        this.p2pSendInitialSetup(callId, initialSetup);
+                    } else {
+                        console.log('[InitialSetup] offerReceived=true');
+                        currentCall.offerReceived = true;
+                    }
                 }
                 break;
             }
