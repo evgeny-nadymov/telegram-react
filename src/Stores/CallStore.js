@@ -19,6 +19,7 @@ import AppStore from './ApplicationStore';
 import LStore from './LocalizationStore';
 import UserStore from './UserStore';
 import TdLibController from '../Controllers/TdLibController';
+import P2PEncryptor from '../Calls/P2P/P2PEncryptor';
 
 const JOIN_TRACKS = true;
 const UNIFY_SDP = true;
@@ -243,10 +244,18 @@ class CallStore extends EventEmitter {
                 const { call_id, data } = update;
 
                 try {
-                    const signalingData = JSON.parse(atob(data));
-                    LOG_P2P_CALL('[update] updateNewCallSignalingData', update, signalingData);
-                    if (this.p2pCallsEnabled) {
-                        this.p2pApplyCallSignalingData(call_id, signalingData);
+                    const { currentCall } = this;
+                    if (currentCall) {
+                        const { encryptor } = currentCall;
+                        if (encryptor) {
+                            const decryptedData = encryptor.decryptFromBase64(data);
+                            const signalingData = JSON.parse(decryptedData);
+                            // const signalingData = JSON.parse(atob(data));
+                            LOG_P2P_CALL('[update] updateNewCallSignalingData', update, signalingData);
+                            if (this.p2pCallsEnabled) {
+                                this.p2pApplyCallSignalingData(call_id, signalingData);
+                            }
+                        }
                     }
                 } catch (e) {
                     ERROR_P2P_CALL('[update] updateNewSignalingData parse', update);
@@ -1643,13 +1652,21 @@ class CallStore extends EventEmitter {
         });
     }
 
-    p2pSendCallSignalingData(callId, data) {
-        LOG_P2P_CALL('[tdlib] sendCallSignalingData', callId, data);
-        TdLibController.send({
-            '@type': 'sendCallSignalingData',
-            call_id: callId,
-            data: btoa(data)
-        });
+    p2pSendCallSignalingData(callId, str) {
+        LOG_P2P_CALL('[tdlib] sendCallSignalingData', callId, str);
+        const { currentCall } = this;
+        if (currentCall) {
+            const { encryptor } = currentCall;
+            if (encryptor) {
+                const data = encryptor.encryptToBase64(str);
+
+                TdLibController.send({
+                    '@type': 'sendCallSignalingData',
+                    call_id: callId,
+                    data
+                });
+            }
+        }
     }
 
     p2pGetConfiguration(state){
@@ -1741,6 +1758,8 @@ class CallStore extends EventEmitter {
         if (!state) return;
         if (state['@type'] !== 'callStateReady') return;
 
+        const { encryption_key } = state;
+
         const outputStream = new MediaStream();
 
         const configuration = this.p2pGetConfiguration(state);
@@ -1783,7 +1802,8 @@ class CallStore extends EventEmitter {
             callId: id,
             connection,
             inputStream: null,
-            outputStream
+            outputStream,
+            encryptor: new P2PEncryptor(encryption_key)
         };
         LOG_P2P_CALL('p2pJoinCall currentCall', this.currentCall);
 

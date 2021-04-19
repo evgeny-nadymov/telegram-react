@@ -1,14 +1,14 @@
 {
   "homepage": "https://evgeny-nadymov.github.io/telegram-react",
   "name": "telegram_react",
-  "version": "0.0.991",
+  "version": "0.0.992",
   "private": true,
   "dependencies": {
-    "tdweb": "^1.7.2",
     "@material-ui/core": "^4.9.7",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.46",
     "classnames": "^2.2.6",
+    "crypto-js": "^4.0.0",
     "emoji-mart": "^3.0.0",
     "emoji-regex": "^8.0.0",
     "i18next": "^19.3.3",
@@ -22,7 +22,8 @@
     "react-i18next": "^11.3.4",
     "react-router-dom": "^5.0.0",
     "react-scripts": "^3.1.1",
-    "react-transition-group": "^4.3.0"
+    "react-transition-group": "^4.3.0",
+    "tdweb": "^1.7.2"
   },
   "lint-staged": {
     "src/**/*.{js,jsx,json,css}": [
