@@ -14,6 +14,9 @@
 .full-screen #call-output-video {
     max-width: unset;
     max-height: unset;
+    position: absolute;
+    left: 0;
+    top: 0;
     width: 100%;
     height: 100%;
 }
@@ -98,6 +101,7 @@
 .full-screen .call-panel-content {
     margin: 0;
     border-radius: 0;
+    position: relative;
 }
 
 .call-panel-content {

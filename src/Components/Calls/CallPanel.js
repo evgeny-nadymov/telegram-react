@@ -32,7 +32,7 @@ import LStore from '../../Stores/LocalizationStore';
 import UserStore from '../../Stores/UserStore';
 import './CallPanel.css';
 
-const SUPPORTS_ROTATION = true;
+const SUPPORTS_ROTATION = false;
 
 class CallPanel extends React.Component {
     constructor(props) {
@@ -259,7 +259,7 @@ class CallPanel extends React.Component {
         let screenSharing = currentCall && Boolean(currentCall.screenStream);
 
         let outputVideoStyle = null;
-        if (SUPPORTS_ROTATION && outputMediaState && isFirefox()) {
+        if (SUPPORTS_ROTATION && outputMediaState && isFirefox() && !is_outgoing) {
             outputVideoStyle = {
                 transform: `rotate(${outputMediaState.videoRotation}deg)`
             };

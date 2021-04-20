@@ -1653,13 +1653,13 @@ class CallStore extends EventEmitter {
     }
 
     p2pSendCallSignalingData(callId, str) {
-        LOG_P2P_CALL('[tdlib] sendCallSignalingData', callId, str);
         const { currentCall } = this;
         if (currentCall) {
             const { encryptor } = currentCall;
             if (encryptor) {
                 const data = encryptor.encryptToBase64(str);
 
+                LOG_P2P_CALL('[tdlib] sendCallSignalingData', callId, str);
                 TdLibController.send({
                     '@type': 'sendCallSignalingData',
                     call_id: callId,
