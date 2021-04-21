@@ -2039,11 +2039,20 @@ class CallStore extends EventEmitter {
                     if (inputStream) {
                         const answer = await connection.createAnswer();
 
-                        console.log('[sdp] local', answer.type, answer.sdp);
-                        await connection.setLocalDescription(answer);
-
                         const initialSetup = p2pParseSdp(answer.sdp);
                         initialSetup['@type'] = 'InitialSetup';
+
+                        // if (initialSetup.video) {
+                        //     if (initialSetup.video.rtpExtensions) {
+                        //         initialSetup.video.rtpExtensions.push({ id: 13, uri: 'urn:3gpp:video-orientation' });
+                        //         console.log('[InitialSetup] push', initialSetup);
+                        //
+                        //         answer.sdp = P2PSdpBuilder.generateAnswer(initialSetup);
+                        //     }
+                        // }
+
+                        console.log('[sdp] local', answer.type, answer.sdp);
+                        await connection.setLocalDescription(answer);
 
                         console.log('[InitialSetup] send 1');
                         this.p2pSendInitialSetup(callId, initialSetup);

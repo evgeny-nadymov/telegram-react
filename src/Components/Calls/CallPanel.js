@@ -32,7 +32,7 @@ import LStore from '../../Stores/LocalizationStore';
 import UserStore from '../../Stores/UserStore';
 import './CallPanel.css';
 
-const SUPPORTS_ROTATION = false;
+const SUPPORTS_ROTATION = true;
 
 class CallPanel extends React.Component {
     constructor(props) {

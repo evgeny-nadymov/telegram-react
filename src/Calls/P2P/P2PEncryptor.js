@@ -7,10 +7,10 @@
 
 import CryptoJS from 'crypto-js';
 
-const MTPROTO_ENCRYPTION = false;
+const P2P_ENCRYPTION = false;
 
 export default class P2PEncryptor {
-    constructor(key) {
+    constructor(key, isOutgoing) {
         const p2pKey = CryptoJS.enc.Base64.parse(key);
 
         this.key = CryptoJS.enc.Hex.parse('3132333435363738393031323334353641424344454647484940414243444546');
@@ -20,7 +20,7 @@ export default class P2PEncryptor {
     }
 
     encryptToBase64(str) {
-        if (MTPROTO_ENCRYPTION) {
+        if (P2P_ENCRYPTION) {
             const { key, iv, mode, padding } = this;
 
             const encrypted = CryptoJS.AES.encrypt(str, key, {
@@ -31,12 +31,13 @@ export default class P2PEncryptor {
 
             return encrypted.toString();
         } else {
+            // to base64 string
             return btoa(str);
         }
     }
 
     decryptFromBase64(base64) {
-        if (MTPROTO_ENCRYPTION) {
+        if (P2P_ENCRYPTION) {
             const { key, iv, mode, padding } = this;
 
             const decrypted = CryptoJS.AES.decrypt(base64, key, {
@@ -47,6 +48,7 @@ export default class P2PEncryptor {
 
             return decrypted.toString(CryptoJS.enc.Utf8);
         } else {
+            // from base64 string
             return atob(base64);
         }
     }
