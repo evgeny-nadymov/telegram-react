@@ -249,16 +249,17 @@ class CallStore extends EventEmitter {
                         const { encryptor } = currentCall;
                         if (encryptor) {
                             const decryptedData = encryptor.decryptFromBase64(data);
+                            LOG_P2P_CALL('[update] updateNewCallSignalingData', update, decryptedData);
                             const signalingData = JSON.parse(decryptedData);
+                            // LOG_P2P_CALL('[update] updateNewCallSignalingData', update, signalingData);
                             // const signalingData = JSON.parse(atob(data));
-                            LOG_P2P_CALL('[update] updateNewCallSignalingData', update, signalingData);
                             if (this.p2pCallsEnabled) {
                                 this.p2pApplyCallSignalingData(call_id, signalingData);
                             }
                         }
                     }
                 } catch (e) {
-                    ERROR_P2P_CALL('[update] updateNewSignalingData parse', update);
+                    ERROR_P2P_CALL('[update] updateNewSignalingData parse', update, e);
                 }
 
                 this.emit('updateNewCallSignalingData', update);
@@ -1803,7 +1804,7 @@ class CallStore extends EventEmitter {
             connection,
             inputStream: null,
             outputStream,
-            encryptor: new P2PEncryptor(encryption_key)
+            encryptor: new P2PEncryptor(is_outgoing, encryption_key)
         };
         LOG_P2P_CALL('p2pJoinCall currentCall', this.currentCall);
 
