@@ -90,9 +90,8 @@ export default class P2PEncryptor {
 
     concatSHA256(parts) {
         const sha256 = CryptoJS.algo.SHA256.create();
-        const dec = new TextDecoder('utf-8')
         for (let i = 0; i < parts.length; i++) {
-            const str = dec.decode(parts[i]);
+            const str = uint8ArrayToWordArray(parts[i]);
             sha256.update(str);
         }
 
