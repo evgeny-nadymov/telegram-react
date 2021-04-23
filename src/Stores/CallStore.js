@@ -24,7 +24,6 @@ import P2PEncryptor from '../Calls/P2P/P2PEncryptor';
 const JOIN_TRACKS = true;
 const UNIFY_SDP = true;
 const UNIFY_CANDIDATE = true;
-const TG_CALLS_SDP = true;
 export const TG_CALLS_SDP_STRING = true;
 
 export function LOG_CALL(str, ...data) {
@@ -1825,33 +1824,23 @@ class CallStore extends EventEmitter {
         if (inputVideo) {
             inputVideo.srcObject = inputStream;
         }
-        if (TG_CALLS_SDP) {
-            this.p2pAppendInputStream(inputStream);
-            const { offerReceived } = this.currentCall;
-            if (offerReceived) {
-                console.log('[InitialSetup] after p2pAppendInputStream');
-                this.currentCall.offerReceived = false;
 
-                const answer = await connection.createAnswer();
+        this.p2pAppendInputStream(inputStream);
+        const { offerReceived } = this.currentCall;
+        if (offerReceived) {
+            console.log('[InitialSetup] after p2pAppendInputStream');
+            this.currentCall.offerReceived = false;
 
-                console.log('[sdp] local', answer.type, answer.sdp);
-                await connection.setLocalDescription(answer);
+            const answer = await connection.createAnswer();
 
-                const initialSetup = p2pParseSdp(answer.sdp);
-                initialSetup['@type'] = 'InitialSetup';
+            console.log('[sdp] local', answer.type, answer.sdp);
+            await connection.setLocalDescription(answer);
 
-                console.log('[InitialSetup] send 2');
-                this.p2pSendInitialSetup(callId, initialSetup);
-            }
-        } else {
-            if (is_outgoing) {
-                this.p2pAppendInputStream(inputStream);
-            } else {
-                LOG_P2P_CALL('try invoke p2pAppendInputStream', connection.localDescription, connection.remoteDescription);
-                if (connection.localDescription && connection.remoteDescription) {
-                    this.p2pAppendInputStream(inputStream);
-                }
-            }
+            const initialSetup = p2pParseSdp(answer.sdp);
+            initialSetup['@type'] = 'InitialSetup';
+
+            console.log('[InitialSetup] send 2');
+            this.p2pSendInitialSetup(callId, initialSetup);
         }
     }
 
@@ -1894,16 +1883,13 @@ class CallStore extends EventEmitter {
 
             console.log('[sdp] local', offer.sdp);
             await connection.setLocalDescription(offer);
-            if (TG_CALLS_SDP) {
-                const initialSetup = p2pParseSdp(offer.sdp);
-                initialSetup['@type'] = 'InitialSetup';
-                currentCall.offerSent = true;
 
-                console.log('[InitialSetup] send 0');
-                this.p2pSendInitialSetup(callId, initialSetup);
-            } else {
-                this.p2pSendSdp(callId, offer);
-            }
+            const initialSetup = p2pParseSdp(offer.sdp);
+            initialSetup['@type'] = 'InitialSetup';
+            currentCall.offerSent = true;
+
+            console.log('[InitialSetup] send 0');
+            this.p2pSendInitialSetup(callId, initialSetup);
         }
     };
 
