@@ -53,6 +53,7 @@ export default class P2PEncryptor {
         this.isOutgoing = isOutgoing;
         this.type = 'Signaling';
         this.counter = 0;
+        this.seqMap = new Map();
 
         const p2pKeyWA = CryptoJS.enc.Base64.parse(keyBase64);
         this.p2pKey = wordArrayToUint8Array(p2pKeyWA);
@@ -250,16 +251,12 @@ export default class P2PEncryptor {
             return null;
         }
 
-        // let msgKeyEquals = true;
-        // for (let i = 0; i < 16; i++) {
-        //     if (msgKey[i] !== msgKeyLarge[i + 8]) {
-        //         msgKeyEquals = false;
-        //     }
-        // }
-        //
-        // if (!msgKeyEquals) {
-        //     return null;
-        // }
+        const dataView = new DataView(decryptionBuffer.buffer);
+        const seq = dataView.getUint32(0);
+        if (this.seqMap.has(seq)) {
+            return null;
+        }
+        this.seqMap.set(seq, seq);
 
         return decryptionBuffer.slice(4);
     }
