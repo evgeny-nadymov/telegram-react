@@ -24,7 +24,6 @@ import P2PEncryptor from '../Calls/P2P/P2PEncryptor';
 const JOIN_TRACKS = true;
 const UNIFY_SDP = true;
 const UNIFY_CANDIDATE = true;
-const TG_CALLS_MEDIA_STATE = true;
 const TG_CALLS_SDP = true;
 export const TG_CALLS_SDP_STRING = true;
 
@@ -1953,7 +1952,7 @@ class CallStore extends EventEmitter {
 
         const { callId } = currentCall;
 
-        const type = TG_CALLS_MEDIA_STATE ? data['@type'] || data.type : data.type;
+        const type = data['@type'] || data.type;
         switch (type) {
             case 'media': {
                 const { kind, isMuted } = data;
@@ -2376,21 +2375,17 @@ class CallStore extends EventEmitter {
             }
         });
 
-        if (TG_CALLS_MEDIA_STATE) {
-            const mediaState = this.p2pGetMediaState(callId, 'input');
-            const nextMediaState = { ...mediaState, ...{ muted: !enabled } };
+        const mediaState = this.p2pGetMediaState(callId, 'input');
+        const nextMediaState = { ...mediaState, ...{ muted: !enabled } };
 
-            TdLibController.clientUpdate({
-                '@type': 'clientUpdateCallMediaState',
-                callId,
-                type: 'input',
-                mediaState: nextMediaState
-            });
-            this.p2pSetMediaState(callId, 'input', nextMediaState);
-            this.p2pSendMediaState(callId, nextMediaState);
-        } else {
-            this.p2pSendMediaIsMuted(callId, 'audio', !enabled);
-        }
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateCallMediaState',
+            callId,
+            type: 'input',
+            mediaState: nextMediaState
+        });
+        this.p2pSetMediaState(callId, 'input', nextMediaState);
+        this.p2pSendMediaState(callId, nextMediaState);
     }
 
     async p2pVideoEnabled(enabled) {
@@ -2408,21 +2403,17 @@ class CallStore extends EventEmitter {
             }
         });
 
-        if (TG_CALLS_MEDIA_STATE) {
-            const mediaState = this.p2pGetMediaState(callId, 'input');
-            const nextMediaState = { ...mediaState, ...{ videoState: enabled ? 'active' : 'inactive' } };
+        const mediaState = this.p2pGetMediaState(callId, 'input');
+        const nextMediaState = { ...mediaState, ...{ videoState: enabled ? 'active' : 'inactive' } };
 
-            TdLibController.clientUpdate({
-                '@type': 'clientUpdateCallMediaState',
-                callId,
-                type: 'input',
-                mediaState: nextMediaState
-            });
-            this.p2pSetMediaState(callId, 'input', nextMediaState);
-            this.p2pSendMediaState(callId, nextMediaState);
-        } else {
-            this.p2pSendMediaIsMuted(callId, 'video', !enabled);
-        }
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateCallMediaState',
+            callId,
+            type: 'input',
+            mediaState: nextMediaState
+        });
+        this.p2pSetMediaState(callId, 'input', nextMediaState);
+        this.p2pSendMediaState(callId, nextMediaState);
     }
 
     p2pSetMediaState(callId, type, state) {
