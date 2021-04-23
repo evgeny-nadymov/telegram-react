@@ -24,7 +24,6 @@ import P2PEncryptor from '../Calls/P2P/P2PEncryptor';
 const JOIN_TRACKS = true;
 const UNIFY_SDP = true;
 const UNIFY_CANDIDATE = true;
-const TG_CALLS = true;
 const TG_CALLS_MEDIA_STATE = true;
 const TG_CALLS_SDP = true;
 export const TG_CALLS_SDP_STRING = true;
@@ -2006,7 +2005,7 @@ class CallStore extends EventEmitter {
 
         const { is_outgoing } = call;
 
-        let type = TG_CALLS ? data['@type'] || data.type : data.type;
+        let type = data['@type'] || data.type;
         switch (type) {
             case 'InitialSetup': {
                 console.log('[sdp] InitialSetup', data);
@@ -2185,19 +2184,13 @@ class CallStore extends EventEmitter {
     p2pSendIceCandidate(callId, iceCandidate) {
         LOG_P2P_CALL('p2pSendIceCandidate', callId, iceCandidate);
         if (UNIFY_CANDIDATE) {
-            if (TG_CALLS) {
-                let { candidate, sdpMLineIndex } = iceCandidate;
-                if (sdpMLineIndex !== 0) {
-                    return;
-                }
-
-                candidate = p2pParseCandidate(candidate);
-                this.p2pSendCallSignalingData(callId, JSON.stringify({ '@type': 'Candidates', candidates: [candidate] }));
-            } else {
-                let { candidate, sdpMLineIndex, sdpMid } = iceCandidate;
-                candidate = p2pParseCandidate(candidate);
-                this.p2pSendCallSignalingData(callId, JSON.stringify({ type: 'candidate', candidate, sdpMLineIndex, sdpMid }));
+            let { candidate, sdpMLineIndex } = iceCandidate;
+            if (sdpMLineIndex !== 0) {
+                return;
             }
+
+            candidate = p2pParseCandidate(candidate);
+            this.p2pSendCallSignalingData(callId, JSON.stringify({ '@type': 'Candidates', candidates: [candidate] }));
         } else {
             const { candidate, sdpMLineIndex, sdpMid } = iceCandidate;
             this.p2pSendCallSignalingData(callId, JSON.stringify({ type: 'candidate', candidate, sdpMLineIndex, sdpMid }));
@@ -2213,20 +2206,11 @@ class CallStore extends EventEmitter {
     p2pSendSdp(callId, sdpData) {
         LOG_P2P_CALL('p2pSendSdp', callId, sdpData);
         if (UNIFY_SDP) {
-            if (TG_CALLS) {
-                const { type, sdp } = sdpData;
-                const sdpInfo = p2pParseSdp(sdp);
-                sdpInfo['@type'] = type;
+            const { type, sdp } = sdpData;
+            const sdpInfo = p2pParseSdp(sdp);
+            sdpInfo['@type'] = type;
 
-                this.p2pSendCallSignalingData(callId, JSON.stringify(sdpInfo));
-            } else {
-                const { type, sdp } = sdpData;
-                const sdpInfo = p2pParseSdp(sdp);
-                sdpInfo.type = type;
-                // sdpInfo.sdp = sdp;
-
-                this.p2pSendCallSignalingData(callId, JSON.stringify(sdpInfo));
-            }
+            this.p2pSendCallSignalingData(callId, JSON.stringify(sdpInfo));
         } else {
             this.p2pSendCallSignalingData(callId, JSON.stringify(sdpData));
         }
