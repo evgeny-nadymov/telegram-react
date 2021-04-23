@@ -23,7 +23,6 @@ import P2PEncryptor from '../Calls/P2P/P2PEncryptor';
 
 const JOIN_TRACKS = true;
 const UNIFY_SDP = true;
-const UNIFY_CANDIDATE = true;
 export const TG_CALLS_SDP_STRING = true;
 
 export function LOG_CALL(str, ...data) {
@@ -2084,11 +2083,10 @@ class CallStore extends EventEmitter {
             }
             case 'candidate': {
                 let candidate = data;
-                if (UNIFY_CANDIDATE) {
-                    candidate = P2PSdpBuilder.generateCandidate(candidate.candidate);
-                    candidate.sdpMLineIndex = data.sdpMLineIndex;
-                    candidate.sdpMid = data.sdpMid;
-                }
+                candidate = P2PSdpBuilder.generateCandidate(candidate.candidate);
+                candidate.sdpMLineIndex = data.sdpMLineIndex;
+                candidate.sdpMid = data.sdpMid;
+
                 if (candidate) {
                     const iceCandidate = new RTCIceCandidate(candidate);
                     if (!connection.remoteDescription) {
@@ -2106,14 +2104,13 @@ class CallStore extends EventEmitter {
             case 'Candidates': {
                 const candidates = [];
                 let candidate = data;
-                if (UNIFY_CANDIDATE) {
-                    data.candidates.forEach(x => {
-                        candidate = P2PSdpBuilder.generateCandidate(x);
-                        candidate.sdpMLineIndex = 0;
+                data.candidates.forEach(x => {
+                    candidate = P2PSdpBuilder.generateCandidate(x);
+                    candidate.sdpMLineIndex = 0;
 
-                        candidates.push(candidate);
-                    });
-                }
+                    candidates.push(candidate);
+                });
+
                 if (candidates.length > 0) {
                     candidates.forEach(async x => {
                         const iceCandidate = new RTCIceCandidate(x);
@@ -2168,18 +2165,13 @@ class CallStore extends EventEmitter {
 
     p2pSendIceCandidate(callId, iceCandidate) {
         LOG_P2P_CALL('p2pSendIceCandidate', callId, iceCandidate);
-        if (UNIFY_CANDIDATE) {
-            let { candidate, sdpMLineIndex } = iceCandidate;
-            if (sdpMLineIndex !== 0) {
-                return;
-            }
-
-            candidate = p2pParseCandidate(candidate);
-            this.p2pSendCallSignalingData(callId, JSON.stringify({ '@type': 'Candidates', candidates: [candidate] }));
-        } else {
-            const { candidate, sdpMLineIndex, sdpMid } = iceCandidate;
-            this.p2pSendCallSignalingData(callId, JSON.stringify({ type: 'candidate', candidate, sdpMLineIndex, sdpMid }));
+        let { candidate, sdpMLineIndex } = iceCandidate;
+        if (sdpMLineIndex !== 0) {
+            return;
         }
+
+        candidate = p2pParseCandidate(candidate);
+        this.p2pSendCallSignalingData(callId, JSON.stringify({ '@type': 'Candidates', candidates: [candidate] }));
     }
 
     p2pSendInitialSetup(callId, initialSetup) {
