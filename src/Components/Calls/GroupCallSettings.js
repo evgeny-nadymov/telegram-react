@@ -150,15 +150,16 @@ class GroupCallSettings extends React.Component {
     closeStreams() {
         const { inputAudioStream, inputAudioDeviceId, inputVideoStream, inputVideoDeviceId } = this.state;
         if (inputAudioStream) {
-            if (!CallStore.currentGroupCall || !CallStore.currentCall || inputAudioDeviceId === CallStore.getInputAudioDeviceId()) {
+            if (!CallStore.currentGroupCall && !CallStore.currentCall || inputAudioDeviceId === CallStore.getInputAudioDeviceId()) {
                 inputAudioStream.getAudioTracks().forEach(x => {
                     x.stop();
                 });
             }
         }
+
         if (inputVideoStream) {
-            if (!CallStore.currentGroupCall || !CallStore.currentCall || inputVideoDeviceId === CallStore.getInputVideoDeviceId()) {
-                inputVideoStream.getAudioTracks().forEach(x => {
+            if (!CallStore.currentGroupCall && !CallStore.currentCall || inputVideoDeviceId === CallStore.getInputVideoDeviceId()) {
+                inputVideoStream.getVideoTracks().forEach(x => {
                     x.stop();
                 });
             }

@@ -146,6 +146,11 @@ class CallPanel extends React.Component {
     };
 
     handleClose = () => {
+        if (this.isFullScreen()) {
+            this.exitFullscreen();
+            return;
+        }
+
         this.handleDiscard(null);
     };
 

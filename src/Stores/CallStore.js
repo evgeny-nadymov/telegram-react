@@ -24,7 +24,6 @@ import P2PEncryptor from '../Calls/P2P/P2PEncryptor';
 const JOIN_TRACKS = true;
 const UNIFY_SDP = true;
 const UNIFY_CANDIDATE = true;
-const DATACHANNEL = true;
 const TG_CALLS = true;
 const TG_CALLS_MEDIA_STATE = true;
 const TG_CALLS_SDP = true;
@@ -1725,32 +1724,28 @@ class CallStore extends EventEmitter {
     }
 
     p2pCreateChannel(connection) {
-        if (DATACHANNEL) {
-            const channel = connection.createDataChannel('data', {
-                id: 0,
-                negotiated: true
-            });
-            channel.onmessage = e => {
-                LOG_P2P_CALL('[channel] onmessage', e);
-                const { data } = e;
-                this.p2pApplyCallDataChannelData(JSON.parse(data));
-            };
-            channel.onopen = () => {
-                const { currentCall } = this;
-                if (!currentCall) return;
+        const channel = connection.createDataChannel('data', {
+            id: 0,
+            negotiated: true
+        });
+        channel.onmessage = e => {
+            LOG_P2P_CALL('[channel] onmessage', e);
+            const { data } = e;
+            this.p2pApplyCallDataChannelData(JSON.parse(data));
+        };
+        channel.onopen = () => {
+            const { currentCall } = this;
+            if (!currentCall) return;
 
-                const { callId } = currentCall;
+            const { callId } = currentCall;
 
-                const mediaState = this.p2pGetMediaState(callId, 'input');
-                if (!mediaState) return;
+            const mediaState = this.p2pGetMediaState(callId, 'input');
+            if (!mediaState) return;
 
-                this.p2pSendMediaState(callId, mediaState);
-            };
+            this.p2pSendMediaState(callId, mediaState);
+        };
 
-            return channel;
-        }
-
-        return null;
+        return channel;
     }
 
     async p2pJoinCall(callId) {
@@ -1933,9 +1928,7 @@ class CallStore extends EventEmitter {
         const { connection } = currentCall;
         if (!connection) return;
 
-        if (DATACHANNEL) {
-            currentCall.channel = this.p2pCreateChannel(connection);
-        }
+        currentCall.channel = this.p2pCreateChannel(connection);
 
         const senders = connection.getSenders();
         if (senders.some(x => x.track)) return;
@@ -2180,11 +2173,7 @@ class CallStore extends EventEmitter {
     p2pSendMediaIsMuted(callId, kind, isMuted) {
         LOG_P2P_CALL('p2pSendMediaIsMuted', callId, kind, isMuted);
 
-        if (DATACHANNEL) {
-            this.p2pSendDataChannelData(JSON.stringify({ type: 'media', kind, isMuted }));
-        } else {
-            this.p2pSendCallSignalingData(callId, JSON.stringify({ type: 'media', kind, isMuted }));
-        }
+        this.p2pSendDataChannelData(JSON.stringify({ type: 'media', kind, isMuted }));
     }
 
     p2pSendMediaState(callId, mediaState) {
