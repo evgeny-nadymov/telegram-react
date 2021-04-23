@@ -63,6 +63,12 @@ export default class P2PEncryptor {
             const enc = new TextEncoder();
             const arr = enc.encode(str);
 
+            // const base64 = btoa(str);
+            // const inputWA = CryptoJS.enc.Base64.parse(base64);
+            // const input8Arr = wordArrayToUint8Array(inputWA);
+
+            // const packet = this.encryptRawPacket(input8Arr);
+            // console.log('[arr] ', arr, input8Arr);
             const packet = this.encryptRawPacket(new Uint8Array(arr));
 
             const { bytes } = packet;
@@ -194,7 +200,7 @@ export default class P2PEncryptor {
             const encrypted = CryptoJS.AES.encrypt(str, key, {
                 mode: CryptoJS.mode.CTR,
                 iv,
-                padding: CryptoJS.pad.ZeroPadding
+                padding: CryptoJS.pad.NoPadding
             });
 
             const result = wordArrayToUint8Array(encrypted.ciphertext);
@@ -206,7 +212,7 @@ export default class P2PEncryptor {
             const decrypted = CryptoJS.AES.decrypt({ ciphertext: str }, key, {
                 mode: CryptoJS.mode.CTR,
                 iv,
-                padding: CryptoJS.pad.ZeroPadding
+                padding: CryptoJS.pad.NoPadding
             });
 
             const result = wordArrayToUint8Array(decrypted);
@@ -265,6 +271,7 @@ export default class P2PEncryptor {
             return null;
         }
 
+        console.log('[base64] decryptionBuffer', decryptionBuffer);
         const resultBuffer = decryptionBuffer.slice(4);
 
         return resultBuffer;
