@@ -6,6 +6,7 @@
  */
 import EventEmitter from './EventEmitter';
 import LocalConferenceDescription from '../Calls/LocalConferenceDescription';
+import P2PEncryptor from '../Calls/P2P/P2PEncryptor';
 import StreamManager from '../Calls/StreamManager';
 import { canManageVoiceChats, getChatTitle } from '../Utils/Chat';
 import { closeCallPanel, closeGroupCallPanel, openCallPanel } from '../Actions/Call';
@@ -19,10 +20,8 @@ import AppStore from './ApplicationStore';
 import LStore from './LocalizationStore';
 import UserStore from './UserStore';
 import TdLibController from '../Controllers/TdLibController';
-import P2PEncryptor from '../Calls/P2P/P2PEncryptor';
 
 const JOIN_TRACKS = true;
-const UNIFY_SDP = true;
 export const TG_CALLS_SDP_STRING = true;
 
 export function LOG_CALL(str, ...data) {
@@ -1997,13 +1996,11 @@ class CallStore extends EventEmitter {
                 currentCall.offerSent = false;
 
                 let description = data;
-                if (UNIFY_SDP) {
-                    description = {
-                        type: isAnswer ? 'answer' : 'offer',
-                        sdp: isAnswer ?
-                            P2PSdpBuilder.generateAnswer(data) :
-                            P2PSdpBuilder.generateOffer(data)
-                    }
+                description = {
+                    type: isAnswer ? 'answer' : 'offer',
+                    sdp: isAnswer ?
+                        P2PSdpBuilder.generateAnswer(data) :
+                        P2PSdpBuilder.generateOffer(data)
                 }
 
                 console.log('[sdp] remote', description.type, description.sdp)
@@ -2048,14 +2045,13 @@ class CallStore extends EventEmitter {
             case 'answer':
             case 'offer':{
                 let description = data;
-                if (UNIFY_SDP) {
-                    description = {
-                        type,
-                        sdp: type === 'offer' ?
-                            P2PSdpBuilder.generateOffer(data) :
-                            P2PSdpBuilder.generateAnswer(data)
-                    }
+                description = {
+                    type,
+                    sdp: type === 'offer' ?
+                        P2PSdpBuilder.generateOffer(data) :
+                        P2PSdpBuilder.generateAnswer(data)
                 }
+
                 // LOG_P2P_CALL('[generate] ', data, description.type, description.sdp);
                 await connection.setRemoteDescription(description);
                 if (currentCall.candidates) {
@@ -2182,15 +2178,12 @@ class CallStore extends EventEmitter {
 
     p2pSendSdp(callId, sdpData) {
         LOG_P2P_CALL('p2pSendSdp', callId, sdpData);
-        if (UNIFY_SDP) {
-            const { type, sdp } = sdpData;
-            const sdpInfo = p2pParseSdp(sdp);
-            sdpInfo['@type'] = type;
 
-            this.p2pSendCallSignalingData(callId, JSON.stringify(sdpInfo));
-        } else {
-            this.p2pSendCallSignalingData(callId, JSON.stringify(sdpData));
-        }
+        const { type, sdp } = sdpData;
+        const sdpInfo = p2pParseSdp(sdp);
+        sdpInfo['@type'] = type;
+
+        this.p2pSendCallSignalingData(callId, JSON.stringify(sdpInfo));
     }
 
     p2pHangUp(callId, discard = false) {
