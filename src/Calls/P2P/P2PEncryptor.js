@@ -56,6 +56,8 @@ export default class P2PEncryptor {
 
         const p2pKeyWA = CryptoJS.enc.Base64.parse(keyBase64);
         this.p2pKey = wordArrayToUint8Array(p2pKeyWA);
+        this.mode = CryptoJS.mode.CTR;
+        this.padding = CryptoJS.pad.NoPadding;
     }
 
     encryptToBase64(str) {
@@ -63,12 +65,6 @@ export default class P2PEncryptor {
             const enc = new TextEncoder();
             const arr = enc.encode(str);
 
-            // const base64 = btoa(str);
-            // const inputWA = CryptoJS.enc.Base64.parse(base64);
-            // const input8Arr = wordArrayToUint8Array(inputWA);
-
-            // const packet = this.encryptRawPacket(input8Arr);
-            // console.log('[arr] ', arr, input8Arr);
             const packet = this.encryptRawPacket(new Uint8Array(arr));
 
             const { bytes } = packet;
@@ -115,21 +111,15 @@ export default class P2PEncryptor {
         const x = (this.isOutgoing ? 0 : 8) + (this.type === 'Signaling' ? 128 : 0);
         const key = this.p2pKey;
 
-        // console.log('[encryptor][p2p] encryptPrepared (x, key)', x, key);
         const msgKeyLarge = this.concatSHA256([key.subarray(x + 88, x + 88 + 32), buffer]);
         const msgKey = result.bytes;
         for (let i = 0; i < 16; i++) {
             msgKey[i] = msgKeyLarge[i + 8];
         }
-        // console.log('[encryptor][p2p] encryptPrepared msgKeyLarge', msgKeyLarge, msgKey);
 
-        // console.log('[encryptor][p2p] encryptPrepared prepareAesKeyIv start', key, msgKey, x);
         const aesKeyIv = this.prepareAesKeyIv(key, msgKey, x);
-        // console.log('[encryptor][p2p] encryptPrepared prepareAesKeyIv stop', aesKeyIv);
 
-        // console.log('[encryptor][p2p] encryptPrepared aesProcessCtr start', buffer, buffer.length, aesKeyIv);
         const bytes = this.aesProcessCtr(buffer, buffer.length, aesKeyIv, true);
-        // console.log('[encryptor][p2p] encryptPrepared aesProcessCtr stop', bytes);
 
         result.bytes = new Uint8Array([...result.bytes.subarray(0, 16), ...bytes]);
 
@@ -158,10 +148,7 @@ export default class P2PEncryptor {
 
         const result = new Uint8Array([...new Uint8Array(arr), ...buffer]);
 
-        // console.log('[encryptor][p2p] encryptRawPacker buffer', result);
-        const encryptedPacket = this.encryptPrepared(result);
-
-        return encryptedPacket;
+        return this.encryptPrepared(result);
     }
 
     prepareAesKeyIv(key, msgKey, x) {
@@ -192,33 +179,26 @@ export default class P2PEncryptor {
     aesProcessCtr(encryptedData, dataSize, aesKeyIv, encrypt = true) {
         const key = uint8ArrayToWordArray(aesKeyIv.key);
         const iv = uint8ArrayToWordArray(aesKeyIv.iv);
-
         const str = uint8ArrayToWordArray(encryptedData);
-        // console.log('[encryptor][p2p] aesProcessCtr (aesKey, aesIv, encrypt)', { key, iv, encrypt, encryptedData });
+
+        const { mode, padding } = this;
 
         if (encrypt) {
             const encrypted = CryptoJS.AES.encrypt(str, key, {
-                mode: CryptoJS.mode.CTR,
+                mode,
                 iv,
-                padding: CryptoJS.pad.NoPadding
+                padding
             });
 
-            const result = wordArrayToUint8Array(encrypted.ciphertext);
-
-            // console.log('[encryptor][p2p] aesProcessCtr (result)', { result, ciphertext: encrypted.ciphertext });
-
-            return result;
+            return wordArrayToUint8Array(encrypted.ciphertext);
         } else {
             const decrypted = CryptoJS.AES.decrypt({ ciphertext: str }, key, {
-                mode: CryptoJS.mode.CTR,
+                mode,
                 iv,
-                padding: CryptoJS.pad.NoPadding
+                padding
             });
 
-            const result = wordArrayToUint8Array(decrypted);
-
-            // console.log('[encryptor][p2p] aesProcessCtr (result)', { result, text: decrypted });
-            return result;
+            return wordArrayToUint8Array(decrypted);
         }
     }
 
@@ -232,6 +212,17 @@ export default class P2PEncryptor {
         return JSON.parse(dec.decode(decrypted))
     }
 
+    constTimeIsDifferent(a, b, count) {
+        let msgKeyEquals = true;
+        for (let i = 0; i < count; i++) {
+            if (a[i] !== b[i]) {
+                msgKeyEquals = false;
+            }
+        }
+
+        return !msgKeyEquals;
+    }
+
     decryptRawPacket(buffer) {
         if (buffer.length < 21 || buffer.length > kMaxIncomingPacketSize) {
             return null;
@@ -241,39 +232,35 @@ export default class P2PEncryptor {
 
         const x = (isOutgoing ? 8 : 0) + (type === 'Signaling' ? 128 : 0);
         const key = this.p2pKey;
-        // console.log('[encryptor][p2p] decryptRawPacket (x, key)', x, key);
 
         const msgKey = buffer.subarray(0, 16);
         const encryptedData = buffer.subarray(16);
         const encryptedDataSize = buffer.length - 16;
 
-        // console.log('[encryptor][p2p] decryptRawPacket prepareAesKeyIv start', { key, msgKey, x });
         const aesKeyIv = this.prepareAesKeyIv(key, msgKey, x);
-        // console.log('[encryptor][p2p] decryptRawPacket prepareAesKeyIv stop', aesKeyIv);
 
-        // console.log('[encryptor][p2p] decryptRawPacket aesProcessCtr start', encryptedData, dataSize, aesKeyIv);
         const decryptionBuffer = this.aesProcessCtr(encryptedData, encryptedDataSize, aesKeyIv, false);
-        // console.log('[encryptor][p2p] decryptRawPacket aesProcessCtr stop', decryptionBuffer);
 
         const msgKeyLarge = this.concatSHA256([
             key.subarray(88 + x, 88 + x + 32),
             decryptionBuffer
         ]);
 
-        let msgKeyEquals = true;
-        for (let i = 0; i < 16; i++) {
-            if (msgKey[i] !== msgKeyLarge[i + 8]) {
-                msgKeyEquals = false;
-            }
-        }
-        console.log('[msgKey]', msgKey, msgKeyLarge, msgKeyEquals);
-        if (!msgKeyEquals) {
+        if (this.constTimeIsDifferent(msgKeyLarge.subarray(8), msgKey, 16)) {
             return null;
         }
 
-        console.log('[base64] decryptionBuffer', decryptionBuffer);
-        const resultBuffer = decryptionBuffer.slice(4);
+        // let msgKeyEquals = true;
+        // for (let i = 0; i < 16; i++) {
+        //     if (msgKey[i] !== msgKeyLarge[i + 8]) {
+        //         msgKeyEquals = false;
+        //     }
+        // }
+        //
+        // if (!msgKeyEquals) {
+        //     return null;
+        // }
 
-        return resultBuffer;
+        return decryptionBuffer.slice(4);
     }
 };
