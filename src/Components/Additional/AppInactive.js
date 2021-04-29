@@ -24,11 +24,11 @@ class AppInactive extends React.Component {
                         alt=''
                         onClick={AppInactive.handleReload}
                     />
-                    <h3 className='app-inactive-title'>Such error, many tabs</h3>
+                    <h3 className='app-inactive-title'>Error: Too many active instances.</h3>
                     <div className='app-inactive-description'>
-                        Telegram supports only one active tab with the app.
+                        You can run only one active instance of the app.
                         <br />
-                        Please reload this page to continue using this tab or close it.
+                        Please, reload this page to continue using Telegram Web, or otherwise, close it.
                     </div>
                     <div className='app-inactive-actions'>
                         <Button color='primary' onClick={AppInactive.handleReload}>
