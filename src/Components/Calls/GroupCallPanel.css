@@ -92,6 +92,7 @@
 .group-call-panel-participants {
     flex: 1 1 auto;
     overflow-y: auto;
+    scrollbar-width: thin; /* this property right here is specific to firefox and works with firefox only. It ensures to have a thinner scrollabr like on webkit and chrome */
     margin: 0 16px;
     border-radius: 5px;
     z-index: 1;

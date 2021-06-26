@@ -16,6 +16,7 @@
     flex: 1 1 auto;
     padding: 12px 24px;
     overflow-y: auto;
+    scrollbar-width: thin; /* this property right here is specific to firefox and works with firefox only. It ensures to have a thinner scrollabr like on webkit and chrome */
 }
 
 .forward-dialog-search-list {
@@ -33,6 +34,7 @@
     align-content: start;
     padding: 12px 24px;
     overflow-y: auto;
+    scrollbar-width: thin; /* this property right here is specific to firefox and works with firefox only. It ensures to have a thinner scrollabr like on webkit and chrome */
     -webkit-overflow-scrolling: touch;
 }
 
@@ -46,6 +48,7 @@
     border-bottom-style: solid;
     border-color: var(--border);
     overflow-y: auto;
+    scrollbar-width: thin; /* this property right here is specific to firefox and works with firefox only. It ensures to have a thinner scrollabr like on webkit and chrome */
     -webkit-overflow-scrolling: touch;
 }
 
@@ -61,6 +64,7 @@
     min-height: 24px;
     overflow-x: hidden;
     overflow-y: auto;
+    scrollbar-width: thin; /* this property right here is specific to firefox and works with firefox only. It ensures to have a thinner scrollabr like on webkit and chrome */
     -webkit-overflow-scrolling: touch;
     padding: 12px 24px 12px 24px;
     white-space: pre-wrap;

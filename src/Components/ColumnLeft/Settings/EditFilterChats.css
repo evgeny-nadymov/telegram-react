@@ -12,6 +12,7 @@
     bottom: 0;
     left: 0;
     overflow-y: auto;
+    scrollbar-width: thin; /* this property right here is specific to firefox and works with firefox only. It ensures to have a thinner scrollabr like on webkit and chrome */
     -webkit-overflow-scrolling: touch;
     background: var(--background);
     z-index: 1;

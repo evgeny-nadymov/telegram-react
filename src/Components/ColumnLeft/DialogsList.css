@@ -10,6 +10,7 @@
     background: var(--panel-background);
     overflow-y: scroll;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin; /* this property right here is specific to firefox and works with firefox only. It ensures to have a thinner scrollabr like on webkit and chrome */
     overflow-x: hidden;
     height: 100%;
     transform: translateZ(0);

@@ -40,6 +40,7 @@
     bottom: 0;
     left: 0;
     overflow-y: auto;
+    scrollbar-width: thin; /* this property right here is specific to firefox and works with firefox only. It ensures to have a thinner scrollabr like on webkit and chrome */
     -webkit-overflow-scrolling: touch;
     transform: translateZ(0);
     padding: 8px 8px 8px;
@@ -53,6 +54,7 @@
     transition: max-height 0.25s ease, min-height 0.25s ease;
     overflow-x: hidden;
     overflow-y: auto;
+    scrollbar-width: thin; /* this property right here is specific to firefox and works with firefox only. It ensures to have a thinner scrollabr like on webkit and chrome */
     -webkit-overflow-scrolling: touch;
     flex-grow: 0;
     flex-shrink: 0;
