@@ -17,7 +17,7 @@ ENV REACT_APP_TELEGRAM_API_HASH=${TELEGRAM_API_HASH}
 
 RUN npm run build
 
-FROM nginx:stable
+FROM nginx:stable-alpine
 
 WORKDIR /usr/share/nginx/html/
 COPY --from=build /app/build/ .
