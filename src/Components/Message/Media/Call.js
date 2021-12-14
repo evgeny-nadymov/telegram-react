@@ -25,9 +25,9 @@ class Call extends React.Component {
         if (!message) return null;
 
         const { duration, is_video, discard_reason } = call;
-        const { sender, content, is_outgoing } = message;
+        const { sender_id, content, is_outgoing } = message;
 
-        const callTitle = getCallContent(sender, content);
+        const callTitle = getCallContent(sender_id, content);
         const durationString = duration > 0 ? ', ' + LStore.formatCallDuration(Math.floor(duration || 0)) : '';
 
         return (

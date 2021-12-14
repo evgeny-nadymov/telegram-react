@@ -259,17 +259,17 @@ class CacheStore extends EventEmitter {
             }
 
             if (last_message) {
-                const { sender } = last_message;
-                switch (sender['@type']) {
+                const { sender_id } = last_message;
+                switch (sender_id['@type']) {
                     case 'messageSenderUser': {
-                        const user = UserStore.get(sender.user_id);
+                        const user = UserStore.get(sender_id.user_id);
                         if (user) {
                             userMap.set(user.id, user);
                         }
                         break;
                     }
                     case 'messageSenderChat': {
-                        const chat = ChatStore.get(sender.chat_id);
+                        const chat = ChatStore.get(sender_id.chat_id);
                         if (chat) {
                             chatMap.set(chat.id, chat);
                         }

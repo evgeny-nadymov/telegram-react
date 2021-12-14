@@ -356,7 +356,7 @@ class MessageStore extends EventEmitter {
                     '@type': 'deletedMessage',
                     chat_id: chatId,
                     id: messageId,
-                    sender: { },
+                    sender_id: { },
                     content: null
                 };
                 this.set(deletedMessage);

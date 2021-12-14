@@ -25,11 +25,11 @@ class MediaInfo extends React.Component {
         const message = MessageStore.get(chatId, messageId);
         if (!message) return null;
 
-        const { date, sender } = message;
+        const { date, sender_id } = message;
 
         const dateHint = getDateHint(date);
 
-        const tileControl = sender.user_id ? <UserTile userId={sender.user_id} /> : <ChatTile chatId={chatId} />;
+        const tileControl = sender_id.user_id ? <UserTile userId={sender_id.user_id} /> : <ChatTile chatId={chatId} />;
 
         return (
             <div className='media-info'>
@@ -37,7 +37,7 @@ class MediaInfo extends React.Component {
                     {tileControl}
                     <div className='media-info-content'>
                         <div className='media-info-row'>
-                            <MessageAuthor sender={sender} />
+                            <MessageAuthor sender={sender_id} />
                         </div>
                         <div className='media-info-row meta'>
                             <span>{dateHint}</span>
