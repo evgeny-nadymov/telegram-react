@@ -66,8 +66,6 @@ export async function openPinnedChat(index) {
     const chats = await TdLibController.send({
         '@type': 'getChats',
         chat_list: { '@type': 'chatListMain' },
-        offset_order: '9223372036854775807',
-        offset_chat_id: 0,
         limit: 10
     });
 

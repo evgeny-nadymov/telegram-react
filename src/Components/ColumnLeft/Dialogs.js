@@ -218,15 +218,11 @@ class Dialogs extends Component {
         promises.push(TdLibController.send({
             '@type': 'getChats',
             chat_list: { '@type': 'chatListMain' },
-            offset_order: '9223372036854775807',
-            offset_chat_id: 0,
             limit: CHAT_SLICE_LIMIT
         }));
         promises.push(TdLibController.send({
             '@type': 'getChats',
             chat_list: { '@type': 'chatListArchive' },
-            offset_order: '9223372036854775807',
-            offset_chat_id: 0,
             limit: CHAT_SLICE_LIMIT
         }));
         const [mainChats, archiveChats] = await Promise.all(promises);

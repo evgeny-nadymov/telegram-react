@@ -66,8 +66,6 @@ class Filters extends React.Component {
         const chats = await TdLibController.send({
             '@type': 'getChats',
             chat_list: { '@type': 'chatListMain' },
-            offset_chat_id: 0,
-            offset_order: '9223372036854775807',
             limit: 1000
         });
 

@@ -205,8 +205,6 @@ class Dialog extends Component {
         const chats = await TdLibController.send({
             '@type': 'getChats',
             chat_list: chatList,
-            offset_order: '9223372036854775807',
-            offset_chat_id: 0,
             limit: pinnedSumMaxOption.value + 10
         });
 
