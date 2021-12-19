@@ -74,8 +74,4 @@
     "webpack-dev-server": "^3.1.14",
     "wrapper-webpack-plugin": "^2.1.0"
   }
-
-,"_resolved": "https://registry.npmjs.org/opus-media-recorder/-/opus-media-recorder-0.8.0.tgz"
-,"_integrity": "sha512-AIvJMpnJqZ18dFAU7Amtt5cZZp8oPzDoAOtobdTcLzwVNm/j815+GJmBupBzBZGBa4L940TEulm7Uu4tGOYDGQ=="
-,"_from": "opus-media-recorder@0.8.0"
 }
