@@ -191,16 +191,17 @@ function getAuthor(message, t = k => k) {
 function getTitle(message, t = k => k) {
     if (!message) return null;
 
-    const { sender, chat_id } = message;
+    const { sender_id, chat_id } = message;
 
-    if (!sender) {
+    if (!sender_id) {
         return null;
     }
 
-    if (sender.user_id) {
-        const user = UserStore.get(sender.user_id);
+    const { user_id } = sender_id;
+    if (user_id) {
+        const user = UserStore.get(user_id);
         if (user) {
-            return getUserFullName(sender.user_id, null, t);
+            return getUserFullName(user_id, null, t);
         }
     }
 
@@ -302,8 +303,8 @@ function getFormattedText(formattedText, t = k => k, options = { }) {
                             const { chatId, messageId } = options;
                             const message = MessageStore.get(chatId, messageId);
                             if (message) {
-                                const { sender, via_bot_user_id } = message;
-                                botUserId = sender.user_id;
+                                const { sender_id, via_bot_user_id } = message;
+                                botUserId = sender_id.user_id;
                                 if (via_bot_user_id) {
                                     botUserId = via_bot_user_id;
                                 }
@@ -585,11 +586,11 @@ function filterDuplicateMessages(result, history) {
     result.messages = result.messages.filter(x => !map.has(x.id));
 }
 
-export function getCallContent(sender, content) {
+export function getCallContent(senderId, content) {
     const { is_video, discard_reason } = content;
     const isMissed = discard_reason && discard_reason['@type'] === 'callDiscardReasonMissed';
     const isBusy = discard_reason && discard_reason['@type'] === 'callDiscardReasonDeclined';
-    if (isMeUser(sender.user_id)) {
+    if (isMeUser(senderId.user_id)) {
         if (isMissed) {
             if (is_video) {
                 return LStore.getString('CallMessageVideoOutgoingMissed');
@@ -629,7 +630,7 @@ export function getCallContent(sender, content) {
 function getContent(message, t = key => key) {
     if (!message) return null;
 
-    const { content, is_outgoing, sender } = message;
+    const { content, is_outgoing, sender_id } = message;
     if (!content) return null;
 
     let caption = '';
@@ -655,7 +656,7 @@ function getContent(message, t = key => key) {
             return getServiceMessageContent(message);
         }
         case 'messageCall': {
-            const text = getCallContent(sender, content);
+            const text = getCallContent(sender_id, content);
 
             const { duration } = content;
             if (duration > 0) {

@@ -96,9 +96,9 @@ class Actions extends React.PureComponent {
     };
 
     onClientUpdateBlockSender = update => {
-        const { sender } = update;
+        const { sender_id } = update;
 
-        this.setState({ requestBlockSenderAlert: { sender }});
+        this.setState({ requestBlockSenderAlert: { sender: sender_id }});
     }
 
     onClientUpdateInputPasswordAlert = update => {

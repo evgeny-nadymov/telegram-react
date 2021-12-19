@@ -58,8 +58,6 @@ class ForwardDialog extends React.Component {
         const promises = [];
         const getChatsPromise = TdLibController.send({
             '@type': 'getChats',
-            offset_order: '9223372036854775807',
-            offset_chat_id: 0,
             limit: 100
         });
         promises.push(getChatsPromise);

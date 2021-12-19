@@ -189,7 +189,7 @@ class Album extends React.Component {
         const message = MessageStore.get(chatId, messageId);
         if (!message) return <div>[empty message]</div>;
 
-        const { content, is_outgoing, date, reply_to_message_id, forward_info, sender } = message;
+        const { content, is_outgoing, date, reply_to_message_id, forward_info, sender_id } = message;
 
         const isOutgoing = is_outgoing && !isChannelChat(chatId);
 
@@ -263,8 +263,8 @@ class Album extends React.Component {
                 tile = <EmptyTile small />
             } else if (is_outgoing) {
                 tile = <EmptyTile small />
-            } else if (sender.user_id) {
-                tile = <UserTile small userId={sender.user_id} onSelect={this.handleSelectUser} />;
+            } else if (sender_id.user_id) {
+                tile = <UserTile small userId={sender_id.user_id} onSelect={this.handleSelectUser} />;
             } else {
                 tile = <ChatTile small chatId={chatId} onSelect={this.handleSelectChat} />;
             }
@@ -322,7 +322,7 @@ class Album extends React.Component {
                                 {withBubble && ((showTitle && !suppressTitle) || showForward) && (
                                     <div className='message-title'>
                                         {showTitle && !showForward && (
-                                            <MessageAuthor sender={sender} forwardInfo={forward_info} openChat openUser />
+                                            <MessageAuthor sender={sender_id} forwardInfo={forward_info} openChat openUser />
                                         )}
                                         {showForward && <Forward forwardInfo={forward_info} />}
                                     </div>

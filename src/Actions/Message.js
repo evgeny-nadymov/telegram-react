@@ -39,7 +39,7 @@ export function unblockSender(sender) {
 function toggleMessageSenderIsBlocked(sender, isBlocked) {
     TdLibController.send({
         '@type': 'toggleMessageSenderIsBlocked',
-        sender,
+        sender_id: sender,
         is_blocked: isBlocked
     });
 }

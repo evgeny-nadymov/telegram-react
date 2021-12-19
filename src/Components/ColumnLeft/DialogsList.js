@@ -313,6 +313,8 @@ class DialogsList extends React.Component {
     }
 
     handleScroll = () => {
+        return;
+
         // console.log('[vl] onScroll');
         if (this.stub) return;
 
@@ -366,9 +368,7 @@ class DialogsList extends React.Component {
         const result = await TdLibController.send({
             '@type': 'getChats',
             chat_list: chatList,
-            offset_chat_id: offsetChatId,
-            offset_order: offsetOrder,
-            limit: CHAT_SLICE_LIMIT
+            limit: 300
         }).finally(() => {
             params.loading = false;
             if (replace) {

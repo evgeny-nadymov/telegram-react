@@ -63,7 +63,7 @@ class FoundMessage extends React.Component {
         const selectedMessageId = this.state.nextMessageId;
         const message = MessageStore.get(chatId, messageId);
 
-        const { sender } = message;
+        const { sender_id } = message;
 
         const date = getMessageDate(message);
         const senderName = getMessageSenderName(message, t);
@@ -72,8 +72,8 @@ class FoundMessage extends React.Component {
         const selected = chatId === selectedChatId && messageId === selectedMessageId;
 
         const tile =
-            sender.user_id && chatSearch ? (
-                <UserTile userId={sender.user_id} dialog />
+            sender_id.user_id && chatSearch ? (
+                <UserTile userId={sender_id.user_id} dialog />
             ) : (
                 <ChatTile chatId={chatId} dialog />
             );

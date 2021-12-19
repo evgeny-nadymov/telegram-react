@@ -31,7 +31,7 @@ class KeyboardButton extends React.Component {
 
     handleCallbackQueryAnswer = (type, result, message) => {
         const { chatId } = this.props;
-        const { sender, content, via_bot_user_id } = message;
+        const { sender_id, content, via_bot_user_id } = message;
         const { text, show_alert, url } = result;
         const { game } = content;
 
@@ -68,7 +68,7 @@ class KeyboardButton extends React.Component {
             }
         } else if (url) {
             if (type['@type'] === 'inlineKeyboardButtonTypeCallbackGame') {
-                const userId = via_bot_user_id ? via_bot_user_id : sender.user_id;
+                const userId = via_bot_user_id ? via_bot_user_id : sender_id.user_id;
                 const user = UserStore.get(userId);
 
                 showOpenGameAlert(game, { message, url, userId, isVerified: user && user.is_verified });
@@ -102,7 +102,7 @@ class KeyboardButton extends React.Component {
                 const message = MessageStore.get(chatId, messageId);
                 if (!message) break;
 
-                const { sender, content, via_bot_user_id } = message;
+                const { sender_id, content, via_bot_user_id } = message;
                 if (!content) break;
 
                 let payload = null;
@@ -218,8 +218,8 @@ class KeyboardButton extends React.Component {
                 const message = MessageStore.get(chatId, messageId);
                 if (!message) break;
 
-                const { sender, via_bot_user_id } = message;
-                let userId = sender.user_id;
+                const { sender_id, via_bot_user_id } = message;
+                let userId = sender_id.user_id;
                 if (via_bot_user_id !== 0) {
                     userId = via_bot_user_id;
                 }

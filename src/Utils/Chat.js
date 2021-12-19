@@ -499,22 +499,22 @@ function getChatTypingString(chatId) {
 function getMessageSenderFullName(message, t = k => k) {
     if (!message) return null;
     if (isServiceMessage(message)) return null;
-    if (!message.sender) return null;
+    if (!message.sender_id) return null;
 
-    switch (message.sender['@type']) {
+    switch (message.sender_id['@type']) {
         case 'messageSenderUser': {
-            return getUserFullName(message.sender.user_id, null, t);
+            return getUserFullName(message.sender_id.user_id, null, t);
         }
     }
 
-    return getChatTitle(message.sender.chat_id, false, t);
+    return getChatTitle(message.sender_id.chat_id, false, t);
 }
 
 function getMessageSenderName(message, t = k => k) {
     if (!message) return null;
     if (isServiceMessage(message)) return null;
 
-    const { chat_id, sender } = message;
+    const { chat_id, sender_id } = message;
 
     const chat = ChatStore.get(chat_id);
     if (!chat) return null;
@@ -530,16 +530,16 @@ function getMessageSenderName(message, t = k => k) {
                 return null;
             }
 
-            switch (sender['@type']) {
+            switch (sender_id['@type']) {
                 case 'messageSenderUser': {
-                    if (isMeUser(sender.user_id)) {
+                    if (isMeUser(sender_id.user_id)) {
                         return t('FromYou');
                     }
 
-                    return getUserShortName(sender.user_id, t);
+                    return getUserShortName(sender_id.user_id, t);
                 }
                 case 'messageSenderChat': {
-                    return getChatTitle(sender.chat_id, false, t);
+                    return getChatTitle(sender_id.chat_id, false, t);
                 }
             }
         }

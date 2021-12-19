@@ -1498,7 +1498,7 @@ class MessagesList extends React.Component {
     showMessageTitle(message, prevMessage, isFirst, isFirstUnread) {
         if (!message) return false;
 
-        const { chat_id, date, is_outgoing, sender, content, forward_info } = message;
+        const { chat_id, date, is_outgoing, sender_id, content, forward_info } = message;
 
         if (isFirst) {
             return true;
@@ -1517,7 +1517,7 @@ class MessagesList extends React.Component {
             (isServiceMessage(prevMessage) ||
                 prevMessage.content['@type'] === 'messageSticker' ||
                 prevMessage.content['@type'] === 'messageVideoNote' ||
-                !senderEquals(sender, prevMessage.sender) ||
+                !senderEquals(sender_id, prevMessage.sender_id) ||
                 is_outgoing !== prevMessage.is_outgoing ||
                 (isMeChat(chat_id) && !forwardInfoEquals(forward_info, prevMessage.forward_info)) ||
                 date - prevMessage.date > MESSAGE_SPLIT_MAX_TIME_S)
@@ -1585,7 +1585,7 @@ class MessagesList extends React.Component {
                             || isServiceMessage(nextMessage)
                             || nextMessage.content['@type'] === 'messageSticker'
                             || nextMessage.content['@type'] === 'messageVideoNote'
-                            || !senderEquals(x.sender, nextMessage.sender)
+                            || !senderEquals(x.sender_id, nextMessage.sender_id)
                             || (isMeChat(x.chat_id) && !forwardInfoEquals(x.forward_info, nextMessage.forward_info))
                             || x.is_outgoing !== nextMessage.is_outgoing
                             || nextShowTitle;
@@ -1631,7 +1631,7 @@ class MessagesList extends React.Component {
                             || isServiceMessage(nextMessage)
                             || nextMessage.content['@type'] === 'messageSticker'
                             || nextMessage.content['@type'] === 'messageVideoNote'
-                            || !senderEquals(x.sender, nextMessage.sender)
+                            || !senderEquals(x.sender_id, nextMessage.sender_id)
                             || (isMeChat(x.chat_id) && !forwardInfoEquals(x.forward_info, nextMessage.forward_info))
                             || x.is_outgoing !== nextMessage.is_outgoing
                             || nextShowTitle;
@@ -1689,7 +1689,7 @@ class MessagesList extends React.Component {
                             || isServiceMessage(nextMessage)
                             || nextMessage.content['@type'] === 'messageSticker'
                             || nextMessage.content['@type'] === 'messageVideoNote'
-                            || !senderEquals(x.sender, nextMessage.sender)
+                            || !senderEquals(x.sender_id, nextMessage.sender_id)
                             || isMeChat(x.chat_id) && !forwardInfoEquals(x.forward_info, nextMessage.forward_info)
                             || x.is_outgoing !== nextMessage.is_outgoing
                             || nextShowTitle;

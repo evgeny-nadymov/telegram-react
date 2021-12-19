@@ -875,7 +875,7 @@ class Button extends React.Component {
         const { left, right, top, bottom, scale } = this;
 
         return (
-            <div id='button' className='button' style={{ height: bottom / scale, borderRadius: 12, position: 'relative', transform: 'translateY(-14px)' }}>
+            <div id='button' className='button' style={{ height: bottom / scale, borderRadius: 12, position: 'relative', transform: 'translateY(-28px)' }}>
                 <canvas id='button-canvas' width={right} height={bottom} style={{ width: right / scale, height: bottom / scale }}/>
                 <div style={{
                     position: 'absolute',

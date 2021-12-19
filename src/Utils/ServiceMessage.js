@@ -155,10 +155,10 @@ function getPassportElementTypeString(type) {
 function getMessageAuthor(key, message, openUser) {
     if (!message) return null;
 
-    const { chat_id, sender } = message;
+    const { chat_id, sender_id } = message;
 
-    if (sender) {
-        return <MessageAuthor key={key} sender={sender} openUser={openUser} />;
+    if (sender_id) {
+        return <MessageAuthor key={key} sender={sender_id} openUser={openUser} />;
     }
 
     const chat = ChatStore.get(chat_id);
@@ -171,7 +171,7 @@ export function getServiceMessageContent(message, openUser = false) {
     if (!message) return null;
     if (!message.content) return null;
 
-    const { chat_id, ttl, sender, content, is_outgoing: isOutgoing } = message;
+    const { chat_id, ttl, sender_id, content, is_outgoing: isOutgoing } = message;
     const isChannel = isChannelChat(chat_id);
     if (ttl > 0) {
         switch (content['@type']) {
@@ -180,14 +180,14 @@ export function getServiceMessageContent(message, openUser = false) {
                     return LStore.getString('ActionYouSendTTLPhoto');
                 }
 
-                return LStore.replace(LStore.getString('ActionSendTTLPhoto'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
+                return LStore.replace(LStore.getString('ActionSendTTLPhoto'), 'un1', <MessageAuthor key='un1' sender={sender_id} openUser={openUser} />);
             }
             case 'messageVideo': {
                 if (isOutgoing) {
                     return LStore.getString('ActionYouSendTTLVideo');
                 }
 
-                return LStore.replace(LStore.getString('ActionSendTTLVideo'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
+                return LStore.replace(LStore.getString('ActionSendTTLVideo'), 'un1', <MessageAuthor key='un1' sender={sender_id} openUser={openUser} />);
             }
         }
     }
@@ -204,7 +204,7 @@ export function getServiceMessageContent(message, openUser = false) {
                 return LStore.getString('ActionYouCreateGroup');
             }
 
-            return LStore.replace(LStore.getString('ActionCreateGroup'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
+            return LStore.replace(LStore.getString('ActionCreateGroup'), 'un1', <MessageAuthor key='un1' sender={sender_id} openUser={openUser} />);
         }
         case 'messageSupergroupChatCreate': {
             if (isChannel) {
@@ -224,7 +224,7 @@ export function getServiceMessageContent(message, openUser = false) {
                 return LStore.getString('ActionYouChangedTitle').replace('un2', title);
             }
 
-            return LStore.replace(LStore.getString('ActionChangedTitle').replace('un2', title), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
+            return LStore.replace(LStore.getString('ActionChangedTitle').replace('un2', title), 'un1', <MessageAuthor key='un1' sender={sender_id} openUser={openUser} />);
         }
         case 'messageChatChangePhoto': {
             if (isChannel) {
@@ -235,7 +235,7 @@ export function getServiceMessageContent(message, openUser = false) {
                 return LStore.getString('ActionYouChangedPhoto');
             }
 
-            return LStore.replace(LStore.getString('ActionChangedPhoto'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
+            return LStore.replace(LStore.getString('ActionChangedPhoto'), 'un1', <MessageAuthor key='un1' sender={sender_id} openUser={openUser} />);
         }
         case 'messageChatDeletePhoto': {
             if (isChannel) {
@@ -246,13 +246,13 @@ export function getServiceMessageContent(message, openUser = false) {
                 return LStore.getString('ActionYouRemovedPhoto');
             }
 
-            return LStore.replace(LStore.getString('ActionRemovedPhoto'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
+            return LStore.replace(LStore.getString('ActionRemovedPhoto'), 'un1', <MessageAuthor key='un1' sender={sender_id} openUser={openUser} />);
         }
         case 'messageChatAddMembers': {
             const singleMember = content.member_user_ids.length === 1;
             if (singleMember) {
                 const memberUserId = content.member_user_ids[0];
-                if (sender.user_id === memberUserId) {
+                if (sender_id.user_id === memberUserId) {
                     if (isSupergroup(chat_id) && isChannel) {
                         return LStore.getString('ChannelJoined');
                     }
@@ -262,14 +262,14 @@ export function getServiceMessageContent(message, openUser = false) {
                             return LStore.getString('ChannelMegaJoined');
                         }
 
-                        return LStore.replace(LStore.getString('ActionAddUserSelfMega'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
+                        return LStore.replace(LStore.getString('ActionAddUserSelfMega'), 'un1', <MessageAuthor key='un1' sender={sender_id} openUser={openUser} />);
                     }
 
                     if (isOutgoing) {
                         return LStore.getString('ActionAddUserSelfYou');
                     }
 
-                    return LStore.replace(LStore.getString('ActionAddUserSelf'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
+                    return LStore.replace(LStore.getString('ActionAddUserSelf'), 'un1', <MessageAuthor key='un1' sender={sender_id} openUser={openUser} />);
                 }
 
                 if (isOutgoing) {
@@ -279,16 +279,16 @@ export function getServiceMessageContent(message, openUser = false) {
                 if (isMeUser(memberUserId)) {
                     if (isSupergroup(chat_id)) {
                         if (!isChannel) {
-                            return LStore.replace(LStore.getString('MegaAddedBy'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
+                            return LStore.replace(LStore.getString('MegaAddedBy'), 'un1', <MessageAuthor key='un1' sender={sender_id} openUser={openUser} />);
                         }
 
-                        return LStore.replace(LStore.getString('ChannelAddedBy'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
+                        return LStore.replace(LStore.getString('ChannelAddedBy'), 'un1', <MessageAuthor key='un1' sender={sender_id} openUser={openUser} />);
                     }
 
-                    return LStore.replace(LStore.getString('ActionAddUserYou'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
+                    return LStore.replace(LStore.getString('ActionAddUserYou'), 'un1', <MessageAuthor key='un1' sender={sender_id} openUser={openUser} />);
                 }
 
-                return LStore.replaceTwo(LStore.getString('ActionAddUser'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />, 'un2', <MessageAuthor key='un2' sender={{ '@type': 'messageSenderUser', user_id: memberUserId }} openUser={openUser} />);
+                return LStore.replaceTwo(LStore.getString('ActionAddUser'), 'un1', <MessageAuthor key='un1' sender={sender_id} openUser={openUser} />, 'un2', <MessageAuthor key='un2' sender={{ '@type': 'messageSenderUser', user_id: memberUserId }} openUser={openUser} />);
             }
 
             const members = content.member_user_ids
@@ -303,31 +303,31 @@ export function getServiceMessageContent(message, openUser = false) {
                 return LStore.replace(LStore.getString('ActionYouAddUser'), 'un2', members);
             }
 
-            return LStore.replaceTwo(LStore.getString('ActionAddUser'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />, 'un2', members);
+            return LStore.replaceTwo(LStore.getString('ActionAddUser'), 'un1', <MessageAuthor key='un1' sender={sender_id} openUser={openUser} />, 'un2', members);
         }
         case 'messageChatJoinByLink': {
             if (isOutgoing) {
                 return LStore.getString('ActionInviteYou');
             }
 
-            return LStore.replace(LStore.getString('ActionInviteUser'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
+            return LStore.replace(LStore.getString('ActionInviteUser'), 'un1', <MessageAuthor key='un1' sender={sender_id} openUser={openUser} />);
         }
         case 'messageChatDeleteMember': {
-            if (content.user_id === sender.user_id) {
+            if (content.user_id === sender_id.user_id) {
                 if (isOutgoing) {
                     return LStore.getString('ActionYouLeftUser');
                 }
 
-                return LStore.replace(LStore.getString('ActionLeftUser'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
+                return LStore.replace(LStore.getString('ActionLeftUser'), 'un1', <MessageAuthor key='un1' sender={sender_id} openUser={openUser} />);
             }
 
             if (isOutgoing) {
                 return LStore.replace(LStore.getString('ActionYouKickUser'), 'un2', <MessageAuthor key='un2' sender={{ '@type': 'messageSenderUser', user_id: content.user_id }} openUser={openUser} />);
             } else if (isMeUser(content.user_id)) {
-                return LStore.replace(LStore.getString('ActionKickUserYou'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
+                return LStore.replace(LStore.getString('ActionKickUserYou'), 'un1', <MessageAuthor key='un1' sender={sender_id} openUser={openUser} />);
             }
 
-            return LStore.replaceTwo(LStore.getString('ActionKickUser'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />, 'un2', <MessageAuthor key='un2' sender={{ '@type': 'messageSenderUser', user_id: content.user_id }} openUser={openUser} />);
+            return LStore.replaceTwo(LStore.getString('ActionKickUser'), 'un1', <MessageAuthor key='un1' sender={sender_id} openUser={openUser} />, 'un2', <MessageAuthor key='un2' sender={{ '@type': 'messageSenderUser', user_id: content.user_id }} openUser={openUser} />);
         }
         case 'messageChatUpgradeTo': {
             return LStore.getString('ActionMigrateFromGroup');
@@ -414,7 +414,7 @@ export function getServiceMessageContent(message, openUser = false) {
                 return LStore.getString('ActionTakeScreenshootYou');
             }
 
-            return LStore.replace(LStore.getString('ActionTakeScreenshoot'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
+            return LStore.replace(LStore.getString('ActionTakeScreenshoot'), 'un1', <MessageAuthor key='un1' sender={sender_id} openUser={openUser} />);
         }
         case 'messageChatSetTtl': {
             const { ttl } = content;
@@ -425,14 +425,14 @@ export function getServiceMessageContent(message, openUser = false) {
                     return LStore.getString('MessageLifetimeYouRemoved');
                 }
 
-                return LStore.formatString('MessageLifetimeRemoved', getUserShortName(sender.user_id, LStore.i18n.t));
+                return LStore.formatString('MessageLifetimeRemoved', getUserShortName(sender_id.user_id, LStore.i18n.t));
             }
 
             if (isOutgoing) {
                 return LStore.formatString('MessageLifetimeChangedOutgoing', ttlString);
             }
 
-            return LStore.formatString('MessageLifetimeChanged', getUserShortName(sender.user_id, LStore.i18n.t), ttlString);
+            return LStore.formatString('MessageLifetimeChanged', getUserShortName(sender_id.user_id, LStore.i18n.t), ttlString);
         }
         case 'messageCustomServiceAction': {
             return content.text;
@@ -451,7 +451,7 @@ export function getServiceMessageContent(message, openUser = false) {
                         }
 
                         const str = LStore.formatString('ActionUserScoredInGame', LStore.formatPluralString('Points', score)).replace('un2', game.title);
-                        return LStore.replace(str, 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
+                        return LStore.replace(str, 'un1', <MessageAuthor key='un1' sender={sender_id} openUser={openUser} />);
                     }
                 }
             }
@@ -461,7 +461,7 @@ export function getServiceMessageContent(message, openUser = false) {
             }
 
             const str = LStore.formatString('ActionUserScored', LStore.formatPluralString('Points', score));
-            return LStore.replace(str, 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
+            return LStore.replace(str, 'un1', <MessageAuthor key='un1' sender={sender_id} openUser={openUser} />);
         }
         case 'messagePaymentSuccessful': {
             const chat = ChatStore.get(message.chat_id);
@@ -485,7 +485,7 @@ export function getServiceMessageContent(message, openUser = false) {
             break;
         }
         case 'messageContactRegistered': {
-            return LStore.replace(LStore.formatString('NotificationContactJoined', 'un1'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
+            return LStore.replace(LStore.formatString('NotificationContactJoined', 'un1'), 'un1', <MessageAuthor key='un1' sender={sender_id} openUser={openUser} />);
         }
         case 'messageWebsiteConnected': {
             return LStore.formatString('ActionBotAllowed', content.domain_name);
@@ -525,7 +525,7 @@ export function getServiceMessageContent(message, openUser = false) {
                 return LStore.getString('ActionGroupCallStartedByYou');
             }
 
-            return LStore.replace(LStore.getString('ActionGroupCallStarted'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
+            return LStore.replace(LStore.getString('ActionGroupCallStarted'), 'un1', <MessageAuthor key='un1' sender={sender_id} openUser={openUser} />);
         }
         case 'messageVoiceChatEnded': {
             const { duration } = content;
@@ -542,10 +542,10 @@ export function getServiceMessageContent(message, openUser = false) {
                     }
 
                     if (isMeUser(memberUserId)) {
-                        return LStore.replace(LStore.getString('ActionGroupCallInvitedYou'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
+                        return LStore.replace(LStore.getString('ActionGroupCallInvitedYou'), 'un1', <MessageAuthor key='un1' sender={sender_id} openUser={openUser} />);
                     }
 
-                    return LStore.replaceTwo(LStore.getString('ActionGroupCallInvited'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />, 'un2', <MessageAuthor key='un2' sender={{ '@type': 'messageSenderUser', user_id: memberUserId }} openUser={openUser} />);
+                    return LStore.replaceTwo(LStore.getString('ActionGroupCallInvited'), 'un1', <MessageAuthor key='un1' sender={sender_id} openUser={openUser} />, 'un2', <MessageAuthor key='un2' sender={{ '@type': 'messageSenderUser', user_id: memberUserId }} openUser={openUser} />);
                 }
             }
 
@@ -561,7 +561,7 @@ export function getServiceMessageContent(message, openUser = false) {
                 return LStore.replace(LStore.getString('ActionGroupCallYouInvited'), 'un2', members);
             }
 
-            return LStore.replaceTwo(LStore.getString('ActionAddUser'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />, 'un2', members);
+            return LStore.replaceTwo(LStore.getString('ActionAddUser'), 'un1', <MessageAuthor key='un1' sender={sender_id} openUser={openUser} />, 'un2', members);
         }
     }
 

@@ -183,7 +183,7 @@ async function loadReplies(store, chatId, messageIds) {
                     '@type': 'deletedMessage',
                     chat_id: chatId,
                     id: messageIds[i],
-                    sender: { },
+                    sender_id: { },
                     content: null
                 }
             );
@@ -988,12 +988,12 @@ function loadMessageContents(store, messages) {
             continue;
         }
 
-        const { chat_id, content, sender, reply_to_message_id, forward_info } = message;
+        const { chat_id, content, sender_id, reply_to_message_id, forward_info } = message;
 
-        if (sender.user_id) {
-            users.set(sender.user_id, sender.user_id);
-        } else if (sender.chat_id) {
-            chats.set(sender.chat_id, sender.chat_id);
+        if (sender_id.user_id) {
+            users.set(sender_id.user_id, sender_id.user_id);
+        } else if (sender_id.chat_id) {
+            chats.set(sender_id.chat_id, sender_id.chat_id);
         }
 
         if (forward_info) {
