@@ -530,6 +530,11 @@ function getMessageSenderName(message, t = k => k) {
                 return null;
             }
 
+            if (!sender_id) {
+                console.log('[sender_id] empty', message);
+                return null;
+            }
+
             switch (sender_id['@type']) {
                 case 'messageSenderUser': {
                     if (isMeUser(sender_id.user_id)) {
