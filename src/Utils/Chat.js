@@ -901,6 +901,15 @@ function isPrivateChat(chatId) {
     return false;
 }
 
+function isRTLChat(messageText){
+    if(!messageText) return false;
+    const pattern = new RegExp("[\u0600-\u06FF]");
+    if(pattern.test(messageText)) {
+        return true;
+    }
+    return false;
+}
+
 function isGroupChat(chatId) {
     const chat = ChatStore.get(chatId);
     if (!chat) return false;
@@ -2042,6 +2051,7 @@ export {
     getChatUsername,
     getChatPhoneNumber,
     getChatBio,
+    isRTLChat,
     isPrivateChat,
     isGroupChat,
     isChannelChat,

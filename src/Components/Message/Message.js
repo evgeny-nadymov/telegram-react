@@ -35,7 +35,7 @@ import {
     isEmptySelection
 } from '../../Utils/Message';
 import { getMedia } from '../../Utils/Media';
-import { canSendMessages, isChannelChat, isGroupChat, isMeChat, isPrivateChat } from '../../Utils/Chat';
+import { canSendMessages, isChannelChat, isGroupChat, isMeChat, isPrivateChat, isRTLChat } from '../../Utils/Chat';
 import {
     openUser,
     openChat,
@@ -410,6 +410,7 @@ class Message extends Component {
         const media = getMedia(message, this.openMedia, { hasTitle, hasCaption, inlineMeta, meta });
         const isChannel = isChannelChat(chatId);
         const isPrivate = isPrivateChat(chatId);
+        const messageIsRTL = isRTLChat(text);
 
         // if (showTail && isMediaContent() && !hasCaption) {
         //     showTail = false;
@@ -527,7 +528,8 @@ class Message extends Component {
                                         className={classNames('message-text', {
                                             'message-text-1emoji': emojiMatches === 1,
                                             'message-text-2emoji': emojiMatches === 2,
-                                            'message-text-3emoji': emojiMatches === 3
+                                            'message-text-3emoji': emojiMatches === 3,
+                                            'message-test-rtl': messageIsRTL
                                         })}>
                                         {text}
                                     </div>
