@@ -1733,7 +1733,7 @@ class MessagesList extends React.Component {
                 </div>
                 <Placeholder />
                 {scrollDownVisible && (
-                    <ScrollDownButton ref={this.scrollDownButtonRef} onClick={this.handleScrollDownClick} />
+                    <ScrollDownButton ref={this.scrollDownButtonRef} onClick={this.handleScrollDownClick} chatId={chatId}/>
                 )}
                 <FilesDropTarget />
                 <StickersHint />
