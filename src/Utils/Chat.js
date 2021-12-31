@@ -437,42 +437,42 @@ function getGroupChatTypingString(inputTypingManager) {
     return null;
 }
 
-function getPrivateChatTypingString(inputTypingManager) {
+function getPrivateChatTypingString(inputTypingManager, t = x => x) {
     if (!inputTypingManager) return null;
 
     if (inputTypingManager.actions.size >= 1) {
         let action = inputTypingManager.actions.values().next().value.action;
         switch (action['@type']) {
             case 'chatActionRecordingVideo':
-                return 'recording a video';
+                return t('RecordingAVideo');
             case 'chatActionRecordingVideoNote':
-                return 'recording a video message';
+                return t('RecordingAVideoMessage');
             case 'chatActionRecordingVoiceNote':
-                return 'recording a voice message';
+                return t('RecordingAVoiceMessage');
             case 'chatActionStartPlayingGame':
-                return 'playing a game';
+                return t('PlayingAGame');
             case 'chatActionUploadingDocument':
-                return 'sending a file';
+                return t('SendingAFile');
             case 'chatActionUploadingPhoto':
-                return 'sending a photo';
+                return t('SendingAPhoto');
             case 'chatActionUploadingVideo':
-                return 'sending a video';
+                return t('SendingAVideo');
             case 'chatActionUploadingVideoNote':
-                return 'sending a video message';
+                return t('SendingAVideoMessage');
             case 'chatActionUploadingVoiceNote':
-                return 'sending a voice message';
+                return t('SendingAVoiceMessage');
             case 'chatActionChoosingContact':
             case 'chatActionChoosingLocation':
             case 'chatActionTyping':
             default:
-                return 'typing';
+                return t('Typing');
         }
     }
 
     return null;
 }
 
-function getChatTypingString(chatId) {
+function getChatTypingString(chatId, t) {
     const chat = ChatStore.get(chatId);
     if (!chat) return null;
     if (!chat.type) return null;
@@ -483,7 +483,7 @@ function getChatTypingString(chatId) {
     switch (chat.type['@type']) {
         case 'chatTypePrivate':
         case 'chatTypeSecret': {
-            const typingString = getPrivateChatTypingString(typingManager);
+            const typingString = getPrivateChatTypingString(typingManager, t);
             return typingString ? typingString + '...' : null;
         }
         case 'chatTypeBasicGroup':
@@ -729,12 +729,12 @@ function getChatSubtitleWithoutTyping(chatId) {
     return null;
 }
 
-function getChatSubtitle(chatId, showSavedMessages = false) {
+function getChatSubtitle(chatId, showSavedMessages = false, t) {
     if (isMeChat(chatId) && showSavedMessages) {
         return null;
     }
 
-    const chatTypingString = getChatTypingString(chatId);
+    const chatTypingString = getChatTypingString(chatId, t);
     if (chatTypingString) {
         return chatTypingString;
     }

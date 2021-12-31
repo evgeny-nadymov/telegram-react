@@ -8,6 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { withTranslation } from 'react-i18next';
 import { getChatSubtitle, isAccentChatSubtitle } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';
 import UserStore from '../../Stores/UserStore';
@@ -155,9 +156,9 @@ class HeaderChatSubtitle extends React.Component {
     };
 
     render() {
-        const { chatId } = this.props;
+        const { chatId, t } = this.props;
 
-        const subtitle = getChatSubtitle(chatId, true);
+        const subtitle = getChatSubtitle(chatId, true, t);
         const isAccentSubtitle = isAccentChatSubtitle(chatId);
 
         return (
@@ -172,4 +173,4 @@ HeaderChatSubtitle.propTypes = {
     chatId: PropTypes.number.isRequired
 };
 
-export default HeaderChatSubtitle;
+export default withTranslation()(HeaderChatSubtitle);
