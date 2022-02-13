@@ -1,4 +1,5 @@
 # Telegram Web App
+[![Build Status](https://travis-ci.com/evgeny-nadymov/telegram-react.svg?branch=master)](https://travis-ci.com/evgeny-nadymov/telegram-react)
 
 ### Interface
 ![Sample screenshot](/src/Assets/Screenshots/1x_Group.png)
