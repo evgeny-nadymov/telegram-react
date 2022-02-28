@@ -22,7 +22,6 @@ import SettingsMenuButton from './SettingsMenuButton';
 import UnmuteIcon from '../../../Assets/Icons/Unmute';
 import DataIcon from '../../../Assets/Icons/Data';
 import LanguageIcon from '../../../Assets/Icons/Language';
-import packageJson from '../../../../package.json';
 import { setProfileMediaViewerContent } from '../../../Actions/Client';
 import ChatStore from '../../../Stores/ChatStore';
 import './Main.css';
@@ -115,7 +114,7 @@ class Main extends React.Component {
                         <ListItemText primary={t('Language')} />
                     </ListItem>
                     <div className='settings-main-footer'>
-                        {packageJson.version}
+                        {process.env.REACT_APP_VERSION}
                     </div>
                 </div>
             </>

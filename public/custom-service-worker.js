@@ -5,7 +5,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 // import TdClient from 'tdweb/dist/tdweb';
-// import packageJson from '../package';
 // importScripts('./tdweb.js');
 // importScripts('./subworkers.js');
 
@@ -272,7 +271,7 @@ self.addEventListener('message', async e => {
 //         //                             system_language_code: 'en',
 //         //                             device_model: 'Web',
 //         //                             system_version: 'Unknown',
-//         //                             application_version: '0.0.1',//packageJson.version,
+//         //                             application_version: '0.0.1',//process.env.REACT_APP_VERSION,
 //         //                             use_secret_chats: false,
 //         //                             use_message_database: true,
 //         //                             use_file_database: false,

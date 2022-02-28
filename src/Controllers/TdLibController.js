@@ -6,7 +6,6 @@
  */
 
 import EventEmitter from '../Stores/EventEmitter';
-import packageJson from '../../package.json';
 import { stringToBoolean, getBrowser, getOSName } from '../Utils/Common';
 import {
     DATABASE_NAME, DATABASE_TEST_NAME,
@@ -210,7 +209,6 @@ class TdLibController extends EventEmitter {
         }
 
         const { useTestDC } = this.parameters;
-        const { version } = packageJson;
 
         this.send({
             '@type': 'setTdlibParameters',
@@ -222,7 +220,7 @@ class TdLibController extends EventEmitter {
                 system_language_code: navigator.language || 'en',
                 device_model: getBrowser(),
                 system_version: getOSName(),
-                application_version: version,
+                application_version: process.env.REACT_APP_VERSION,
                 use_secret_chats: false,
                 use_message_database: true,
                 use_file_database: false,

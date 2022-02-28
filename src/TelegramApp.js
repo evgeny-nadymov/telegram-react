@@ -17,7 +17,6 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import packageJson from '../package.json';
 import AuthForm from './Components/Auth/AuthForm';
 import InactivePage from './Components/InactivePage';
 import NativeAppPage from './Components/NativeAppPage';
@@ -46,7 +45,7 @@ class TelegramApp extends Component {
     constructor(props) {
         super(props);
 
-        console.log(`Start Telegram Web ${packageJson.version}`);
+        console.log(`Start Telegram Web ${process.env.REACT_APP_VERSION}`);
         console.log('[auth] ctor', props.location);
 
         this.state = {
