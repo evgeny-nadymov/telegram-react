@@ -23,6 +23,7 @@ import { getCyrillicInput, getLatinInput } from '../../../Utils/Language';
 import { orderCompare } from '../../../Utils/Common';
 import { getChatOrder } from '../../../Utils/Chat';
 import { modalManager } from '../../../Utils/Modal';
+import { isTelegramLink } from '../../../Utils/Url';
 import { SCROLL_PRECISION, SEARCH_GLOBAL_TEXT_MIN, USERNAME_LENGTH_MIN } from '../../../Constants';
 import ChatStore from '../../../Stores/ChatStore';
 import FileStore from '../../../Stores/FileStore';
@@ -257,7 +258,7 @@ class Search extends React.Component {
         MessageStore.setItems(messages.messages);
 
         let linkMessage = null;
-        if (!chatId) {
+        if (!chatId && isTelegramLink(text)) {
             try {
                 const messageLinkInfo = await TdLibController.send({
                     '@type': 'getMessageLinkInfo',
