@@ -11,11 +11,11 @@ import { withTranslation } from 'react-i18next';
 import classNames from 'classnames';
 import Animator from '../../Utils/Animatior';
 import { clamp, getFirstLetter, throttle } from '../../Utils/Common';
-import { openChatList } from '../../Actions/Chat';
 import AppStore from '../../Stores/ApplicationStore';
 import CacheStore from '../../Stores/CacheStore';
 import FilterStore from '../../Stores/FilterStore';
 import LocalizationStore from '../../Stores/LocalizationStore';
+import TdLibController from '../../Controllers/TdLibController';
 import './Filters.css';
 
 class Filters extends React.Component {
@@ -206,13 +206,24 @@ class Filters extends React.Component {
     handleMainClick = event => {
         if (event && event.button !== 0) return;
 
-        openChatList({ '@type': 'chatListMain' });
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateChatList',
+            chatList: {
+                '@type': 'chatListMain'
+            }
+        });
     };
 
     handleFilterClick = (event, id) => {
         if (event && event.button !== 0) return;
 
-        openChatList({ '@type': 'chatListFilter', chat_filter_id: id });
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateChatList',
+            chatList: {
+                '@type': 'chatListFilter',
+                chat_filter_id: id
+            }
+        });
     };
 
     handleWheel = event => {
@@ -233,27 +244,24 @@ class Filters extends React.Component {
 
         this.filterRef = new Map();
         return (
-            <div className='tabs'>
-                <div className='tabs-bottom-border'/>
-                <div ref={this.filtersRef} className='filters' onWheel={this.handleWheel}>
-                    <div
-                        ref={r => this.filterRef.set('chatListMain', r)}
-                        className={classNames('filter', { 'item-selected': chatList['@type'] === 'chatListMain'})}
-                        onMouseDown={this.handleMainClick}
-                        title={isSmallWidth ? t('FilterAllChats') : null}>
-                        <span>{isSmallWidth ? getFirstLetter(t('FilterAllChats')) : t('FilterAllChats')}</span>
-                    </div>
-                    {filters.map(x => (
-                        <div
-                            key={x.id}
-                            ref={r => this.filterRef.set('chatListFilter_id=' + x.id, r)}
-                            className={classNames('filter', { 'item-selected': chatList.chat_filter_id === x.id})}
-                            onMouseDown={e => this.handleFilterClick(e, x.id)}
-                            title={isSmallWidth ? x.title : null}>
-                            <span>{isSmallWidth ? getFirstLetter(x.title) : x.title}</span>
-                        </div>))}
-                    <div ref={this.filterSelectionRef} className='filter-selection'/>
+            <div ref={this.filtersRef} className='filters' onWheel={this.handleWheel}>
+                <div
+                    ref={r => this.filterRef.set('chatListMain', r)}
+                    className={classNames('filter', { 'item-selected': chatList['@type'] === 'chatListMain'})}
+                    onMouseDown={this.handleMainClick}
+                    title={isSmallWidth ? t('FilterAllChats') : null}>
+                    <span>{isSmallWidth ? getFirstLetter(t('FilterAllChats')) : t('FilterAllChats')}</span>
                 </div>
+                {filters.map(x => (
+                    <div
+                        key={x.id}
+                        ref={r => this.filterRef.set('chatListFilter_id=' + x.id, r)}
+                        className={classNames('filter', { 'item-selected': chatList.chat_filter_id === x.id})}
+                        onMouseDown={e => this.handleFilterClick(e, x.id)}
+                        title={isSmallWidth ? x.title : null}>
+                        <span>{isSmallWidth ? getFirstLetter(x.title) : x.title}</span>
+                    </div>))}
+                <div ref={this.filterSelectionRef} className='filter-selection'/>
             </div>
         );
     }

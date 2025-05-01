@@ -23,12 +23,12 @@
 .poll-option-text-wrapper {
     display: flex;
     flex-direction: row;
-    align-items: baseline;
+    /* align-items: baseline; */
     padding: 7px 0;
 }
 
 .poll-option-text {
-    margin-left: 4px;
+    margin-left: 41px;
 }
 
 .poll-option-bottom-border {

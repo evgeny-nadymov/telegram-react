@@ -18,6 +18,7 @@ import './Document.css';
 class Document extends React.Component {
     render() {
         const { document, openMedia, width, height, meta, title, caption, date } = this.props;
+        // console.log("props", this.props);
         if (!document) return null;
 
         const { minithumbnail, thumbnail, file_name } = document;
@@ -31,6 +32,8 @@ class Document extends React.Component {
                     <div className='document-tile-file-ext'>{getExtension(file_name)}</div>
                 </div>
             );
+        
+            // console.log("Doc:", document);
 
         return (
             <div className={classNames('document', { 'media-title': title })} style={style}>

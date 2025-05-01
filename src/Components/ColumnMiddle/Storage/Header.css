@@ -1,0 +1,36 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+
+.header-details {
+    height: 55px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    /*box-sizing: border-box;*/
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    background: var(--panel-background);
+    border-color: var(--border);
+    padding: 0 8px;
+}
+
+.backButton {
+    width: 30px;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.operations {
+    width: 100%;
+    text-align: right;
+}
+.operations .MuiButton-root {
+    min-width: 0;
+    padding: 10px;
+    border-radius: 50%;
+}

@@ -8,14 +8,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import EditIcon from '@material-ui/icons/Edit';
-import IconButton from '@material-ui/core/IconButton';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Radio from '@material-ui/core/Radio';
-import RadioGroup from '@material-ui/core/RadioGroup';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import EditIcon from '@mui/icons-material/Edit';
+import IconButton from '@mui/material/IconButton';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
 import EditUrlDialog from './EditUrlDialog';
 import { focusInput } from '../../Utils/DOM';
 import { editMessage as editMessageAction } from '../../Actions/Client';
@@ -566,7 +566,7 @@ class EditMediaDialog extends React.Component {
         } else if (newItem) {
             media = getMedia({ content: newItem.media });
         }
-        const doneLabel = isEditing ? t('Save') : t('Send');
+        const doneLabel = isEditing ? t('Edit') : t('Send');
 
         return (
             <Dialog

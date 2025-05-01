@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import { withRestoreRef, withSaveRef, compose } from '../../Utils/HOC';
 import { withTranslation } from 'react-i18next';
 import classNames from 'classnames';
@@ -17,11 +16,10 @@ import { openMedia } from '../../Utils/Message';
 import { getServiceMessageContent } from '../../Utils/ServiceMessage';
 import MessageStore from '../../Stores/MessageStore';
 import './ServiceMessage.css';
-import MessageMenu from './MessageMenu';
 
 const chatPhotoStyle = {
-    width: 96,
-    height: 96,
+    width: 64,
+    height: 64,
     borderRadius: '50%',
     margin: '0 auto 5px'
 };
@@ -33,18 +31,13 @@ class ServiceMessage extends React.Component {
         const { chatId, messageId } = this.props;
         this.state = {
             message: MessageStore.get(chatId, messageId),
-            highlighted: false,
-            contextMenu: false,
+            highlighted: false
         };
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        const { chatId, messageId, sendingState, showUnreadSeparator, t } = this.props;
-        const { highlighted, contextMenu } = this.state;
-
-        if (nextProps.t !== t) {
-            return true;
-        }
+        const { chatId, messageId, sendingState, showUnreadSeparator } = this.props;
+        const { highlighted } = this.state;
 
         if (nextProps.chatId !== chatId) {
             return true;
@@ -63,10 +56,6 @@ class ServiceMessage extends React.Component {
         }
 
         if (nextState.highlighted !== highlighted) {
-            return true;
-        }
-
-        if (nextState.contextMenu !== contextMenu) {
             return true;
         }
 
@@ -117,53 +106,15 @@ class ServiceMessage extends React.Component {
         openMedia(chatId, messageId);
     };
 
-    handleOpenContextMenu = async event => {
-        if (event) {
-            event.preventDefault();
-            event.stopPropagation();
-        }
-
-        const { contextMenu } = this.state;
-
-        if (contextMenu) {
-            this.setState({ contextMenu: false });
-        } else {
-            if (MessageStore.selectedItems.size > 1) {
-                return;
-            }
-
-            const left = event.clientX;
-            const top = event.clientY;
-            const copyLink =
-                event.target && event.target.tagName === 'A' && event.target.href ? event.target.href : null;
-
-            this.setState({
-                contextMenu: true,
-                copyLink,
-                left,
-                top
-            });
-        }
-    };
-
-    handleCloseContextMenu = event => {
-        if (event) {
-            event.stopPropagation();
-        }
-
-        this.setState({ contextMenu: false });
-    };
-
     render() {
         const { chatId, messageId, showUnreadSeparator, showDate } = this.props;
-        const { highlighted, contextMenu, left, top } = this.state;
+        const { highlighted } = this.state;
 
         const message = MessageStore.get(chatId, messageId);
         if (!message) return null;
 
         const { content, date } = message;
         if (!content) return null;
-        if (content['@type'] === 'messageChatUpgradeTo') return null;
 
         const { photo } = content;
 
@@ -174,8 +125,7 @@ class ServiceMessage extends React.Component {
                 {showDate && <DayMeta date={date} />}
                 <div
                     className={classNames('service-message', { 'message-highlighted': highlighted })}
-                    onAnimationEnd={this.handleAnimationEnd}
-                    onContextMenu={this.handleOpenContextMenu}>
+                    onAnimationEnd={this.handleAnimationEnd}>
                     {showUnreadSeparator && <UnreadSeparator />}
                     <div className='service-message-wrapper'>
                         <div className='service-message-content'>
@@ -187,36 +137,15 @@ class ServiceMessage extends React.Component {
                             chatId={chatId}
                             messageId={messageId}
                             photo={photo}
-                            displaySize={96}
+                            displaySize={64}
                             style={chatPhotoStyle}
                             openMedia={this.openMedia}
                         />
                     )}
                 </div>
-                <MessageMenu
-                    chatId={chatId}
-                    messageId={messageId}
-                    anchorPosition={{ top, left }}
-                    open={contextMenu}
-                    onClose={this.handleCloseContextMenu}
-                    copyLink={null}
-                    source={'chat'}
-                />
             </div>
         );
     }
-}
-
-ServiceMessage.propTypes = {
-    chatId: PropTypes.number.isRequired,
-    messageId: PropTypes.number.isRequired,
-    showUnreadSeparator: PropTypes.bool
-}
-
-ServiceMessage.defaultProps = {
-    showTitle: false,
-    showTail: false,
-    showUnreadSeparator: false
 }
 
 const enhance = compose(

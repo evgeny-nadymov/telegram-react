@@ -8,11 +8,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
-import IconButton from '@material-ui/core/IconButton';
+import IconButton from '@mui/material/IconButton';
 import ArrowBackIcon from '../../../Assets/Icons/Back';
 import CloseIcon from '../../../Assets/Icons/Close';
 import SearchIcon from '../../../Assets/Icons/Search';
-import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon';
+import SpeedDialIcon from '@mui/material/SpeedDialIcon';
 import { ANIMATION_DURATION_200MS } from '../../../Constants';
 import './SharedMediaHeader.css';
 

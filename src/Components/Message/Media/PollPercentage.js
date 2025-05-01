@@ -103,7 +103,7 @@ class PollPercentage extends React.Component {
     };
 
     render() {
-        const { chosen, closed, onClick } = this.props;
+        // const { chosen, closed, onClick } = this.props;
         const { animated } = this.state;
 
         return (

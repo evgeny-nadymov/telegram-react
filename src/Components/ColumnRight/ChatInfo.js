@@ -258,7 +258,9 @@ class ChatInfo extends React.Component {
         } = this.state;
 
         const currentChatId = chatId || userChatId;
-        const minHeight = this.detailsRef && this.detailsRef.current ? this.detailsRef.current.getContentHeight() : 0;
+        const minHeight = this.detailsRef && this.detailsRef.current && typeof this.detailsRef.current.getContentHeight === 'function' 
+            ? this.detailsRef.current.getContentHeight() 
+            : 0;
 
         let content = null;
         if (openSharedMedia) {

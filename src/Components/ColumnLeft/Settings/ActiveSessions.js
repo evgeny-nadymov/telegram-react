@@ -9,12 +9,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
 import { compose, withRestoreRef, withSaveRef } from '../../../Utils/HOC';
-import Button from '@material-ui/core/Button';
-import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import ListItem from '@material-ui/core/ListItem';
-import IconButton from '@material-ui/core/IconButton';
+import Button from '@mui/material/Button';
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import ListItem from '@mui/material/ListItem';
+import IconButton from '@mui/material/IconButton';
 import ArrowBackIcon from '../../../Assets/Icons/Back';
 import Session from '../../Tile/Session';
 import StopIcon from '../../../Assets/Icons/Stop';
@@ -51,7 +51,7 @@ class ActiveSessions extends React.Component {
     };
 
     handleDoneConfirmation = async () => {
-        const { sessions, t } = this.props;
+        const { sessions } = this.props;
         const { session } = this.state;
         if (!session) return;
 

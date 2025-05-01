@@ -16,13 +16,12 @@
     position: absolute;
     left: 0;
     right: 0;
-    bottom: 4px;
+    bottom: 0;
     max-height: 190px;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     display: flex;
     flex-wrap: wrap;
-    z-index: 2;
 }
 
 .sticker-hints-item {

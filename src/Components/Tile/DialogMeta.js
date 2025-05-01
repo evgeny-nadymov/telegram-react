@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { withTranslation } from 'react-i18next';
 import Status from '../Message/Status';
 import { getLastMessageDate, isMeChat } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';
@@ -14,13 +13,9 @@ import './DialogMeta.css';
 
 class DialogMeta extends React.Component {
     shouldComponentUpdate(nextProps, nextState) {
-        const { chatId, t } = this.props;
+        const { chatId } = this.props;
 
         if (nextProps.chatId !== chatId) {
-            return true;
-        }
-
-        if (nextProps.t !== t) {
             return true;
         }
 
@@ -100,4 +95,4 @@ class DialogMeta extends React.Component {
     }
 }
 
-export default withTranslation()(DialogMeta);
+export default DialogMeta;

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import IconButton from '@material-ui/core/IconButton';
+import IconButton from '@mui/material/IconButton';
 import ArrowBackIcon from '../../Assets/Icons/Back';
 import './SharedMediaHeader.css';
 

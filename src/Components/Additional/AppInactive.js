@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import Button from '@material-ui/core/Button/Button';
+import Button from '@mui/material/Button';
 import './AppInactive.css';
 
 class AppInactive extends React.Component {

@@ -13,6 +13,9 @@ import { isAuthorizationReady } from '../../Utils/Common';
 import AppStore from '../../Stores/ApplicationStore';
 import '../ColumnMiddle/Header.css';
 
+import FolderIcon from '@mui/icons-material/Folder';
+import TelegramIcon from '@mui/icons-material/Telegram';
+
 class DialogsHeader extends React.Component {
     constructor(props) {
         super(props);
@@ -114,6 +117,11 @@ class DialogsHeader extends React.Component {
         this.handleSearch();
     };
 
+    storage_selected = () => {
+        this.setState({page: "stoarge"});
+        // console.log(this.state);
+    }
+
     render() {
         const { openSearch, timeout, popup } = this.props;
 
@@ -133,10 +141,16 @@ class DialogsHeader extends React.Component {
         }
 
         return (
-            <div className='header-master'>
-                <MainMenuButton timeout={timeout} showClose={showBack} popup={popup} onClose={this.handleCloseSearch} />
-                {content}
-            </div>
+            <>
+                <div className='header-master'>
+                    <MainMenuButton timeout={timeout} showClose={showBack} popup={popup} onClose={this.handleCloseSearch} />
+                    {content}
+                </div>
+                <div className='header-redirects'>                    
+                    <TelegramIcon className="redirectIcon" fontSize="large" onClick={()=> this.props.page_change("chats")} />
+                    <FolderIcon className="redirectIcon" fontSize="large" onClick={()=> this.props.page_change("storage")} />
+                </div>
+            </>
         );
     }
 }

@@ -8,9 +8,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import VolumeOffIcon from '@material-ui/icons/VolumeOff';
+import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import DownloadIcon from '../../../Assets/Icons/Download';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import CircularProgress from '@mui/material/CircularProgress';
 import FileProgress from '../../Viewer/FileProgress';
 import MediaStatus from './MediaStatus';
 import { getFileSize, getSrc } from '../../../Utils/File';

@@ -1,0 +1,35 @@
+.folder-container {
+    width: 70px;
+    float: left;
+    padding: 10px 15px;
+    text-align: center;
+    user-select: none;
+}
+
+.folder-icon {
+    width: 50px;
+}
+
+.folder-name {
+    width: 60px;
+    display: inline-block;
+    text-overflow: ellipsis;
+    overflow-x: hidden;
+    white-space: nowrap;
+}
+
+.folderSelected {
+    background-color: #1a3648;
+}
+.storage {
+    width: 75%;
+    background-color: var(--chat-background);
+}
+
+.storage-container {
+    padding: 20px;
+}
+
+.dialog {
+    cursor: default;
+}

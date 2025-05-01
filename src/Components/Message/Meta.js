@@ -9,11 +9,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
-import PinIcon from '../../Assets/Icons/PinFilled';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import Status from './Status';
-import { albumHistoryEquals } from '../../Utils/Common';
-import { getDate, getDateHint, getViews, isCallMessage } from '../../Utils/Message';
+import { getDate, getDateHint, getViews } from '../../Utils/Message';
 import MessageStore from '../../Stores/MessageStore';
 import './Meta.css';
 
@@ -22,30 +20,23 @@ class Meta extends React.Component {
     state = { };
 
     static getDerivedStateFromProps(props, state) {
-        const { chatId, messageId, messageIds } = props;
-        const { prevChatId, prevMessageId, prevMessageIds } = state;
+        const { chatId, messageId } = props;
+        const { prevChatId, prevMessageId } = state;
 
-        if (prevChatId !== chatId || prevMessageId !== messageId || albumHistoryEquals(prevMessageIds, messageIds)) {
-
-            const ids = [messageId, ...(messageIds || [])].filter(x => Boolean(x));
-            const id = ids[ids.length - 1];
-
-            const message = MessageStore.get(chatId, id);
+        if (prevChatId !== chatId || prevMessageId !== messageId) {
+            const message = MessageStore.get(chatId, messageId);
             if (!message) return null;
 
-            const { date, edit_date: editDate, interaction_info: interactionInfo, is_outgoing: isOutgoing } = message;
+            const { date, edit_date: editDate, views, is_outgoing: isOutgoing } = message;
 
             return {
                 prevChatId: chatId,
                 prevMessageId: messageId,
-                prevMessageIds: messageIds,
 
-                message,
                 date,
                 editDate,
-                interactionInfo,
-                isOutgoing,
-                isPinned: ids.some(x => MessageStore.get(chatId, x).is_pinned)
+                views,
+                isOutgoing
             };
         }
 
@@ -54,61 +45,45 @@ class Meta extends React.Component {
 
     componentDidMount() {
         MessageStore.on('updateMessageEdited', this.onUpdateMessageEdited);
-        MessageStore.on('updateMessageInteractionInfo', this.onUpdateMessageInteractionInfo);
-        MessageStore.on('updateMessageIsPinned', this.onUpdateMessageIsPinned);
+        MessageStore.on('updateMessageViews', this.onUpdateMessageViews);
     }
 
     componentWillUnmount() {
         MessageStore.off('updateMessageEdited', this.onUpdateMessageEdited);
-        MessageStore.off('updateMessageInteractionInfo', this.onUpdateMessageInteractionInfo);
-        MessageStore.off('updateMessageIsPinned', this.onUpdateMessageIsPinned);
+        MessageStore.off('updateMessageViews', this.onUpdateMessageViews);
     }
-
-    onUpdateMessageIsPinned = update => {
-        const { chat_id, message_id } = update;
-        const { chatId, messageId, messageIds } = this.props;
-
-        const ids = [messageId, ...(messageIds || [])].filter(x => Boolean(x));
-
-        if (chat_id !== chatId) return;
-        if (!ids.some(x => x === message_id)) return;
-
-        this.setState({ isPinned: ids.some(x => MessageStore.get(chatId, x).is_pinned) });
-    };
 
     onUpdateMessageEdited = update => {
         const { chat_id, message_id, edit_date: editDate } = update;
-        const { message } = this.state;
+        const { chatId, messageId } = this.props;
 
-        if (!message) return;
-        if (message.chat_id !== chat_id) return;
-        if (message.id !== message_id) return;
+        if (chat_id !== chatId) return;
+        if (message_id !== messageId) return;
 
-        this.setState({ editDate });
+        this.setState({
+            editDate
+        });
     };
 
-    onUpdateMessageInteractionInfo = update => {
-        const { chat_id, message_id, interaction_info } = update;
-        const { message } = this.state;
+    onUpdateMessageViews = update => {
+        const { chat_id, message_id, views } = update;
+        const { chatId, messageId } = this.props;
 
-        if (!message) return;
-        if (message.chat_id !== chat_id) return;
-        if (message.id !== message_id) return;
+        if (chat_id !== chatId) return;
+        if (message_id !== messageId) return;
 
-        this.setState({ interactionInfo: interaction_info });
+        this.setState({
+            views
+        });
     };
 
     render() {
         const { className, chatId, messageId, onDateClick, t, style } = this.props;
-        const { date, editDate, isOutgoing, isPinned, interactionInfo } = this.state;
-
-        const { view_count: views } = interactionInfo || { view_count: 0, forward_count: 0 };
+        const { date, editDate, views, isOutgoing } = this.state;
 
         const dateStr = getDate(date);
         const dateHintStr = getDateHint(date);
         const viewsStr = getViews(views);
-
-        const isCall = isCallMessage(chatId, messageId);
 
         return (
             <div className={classNames('meta', className)} style={style}>
@@ -123,17 +98,11 @@ class Meta extends React.Component {
                         </span>
                     </>
                 )}
-                {isPinned && (
-                    <>
-                        <PinIcon className='meta-pin-icon' />
-                        <span>&nbsp;</span>
-                    </>
-                )}
                 {editDate > 0 && <span>{t('EditedMessage')}&nbsp;</span>}
                 <a onClick={onDateClick}>
                     <span title={dateHintStr}>{dateStr}</span>
                 </a>
-                {isOutgoing && !isCall && <Status chatId={chatId} messageId={messageId} />}
+                {isOutgoing && <Status chatId={chatId} messageId={messageId} />}
             </div>
         );
     }
@@ -141,8 +110,7 @@ class Meta extends React.Component {
 
 Meta.propTypes = {
     chatId: PropTypes.number.isRequired,
-    messageId: PropTypes.number,
-    messageIds: PropTypes.arrayOf(PropTypes.number),
+    messageId: PropTypes.number.isRequired,
     onDateClick: PropTypes.func
 };
 

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { withTranslation } from 'react-i18next';
-import IconButton from '@material-ui/core/IconButton';
+import IconButton from '@mui/material/IconButton';
 import ArrowBackIcon from '../../Assets/Icons/Back';
 import CloseIcon from '../../Assets/Icons/Close';
 import { isChannelChat, isPrivateChat } from '../../Utils/Chat';

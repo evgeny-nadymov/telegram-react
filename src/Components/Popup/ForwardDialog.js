@@ -7,14 +7,13 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { compose } from '../../Utils/HOC';
 import { withTranslation } from 'react-i18next';
-import { withSnackbar } from 'notistack';
-import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogTitle from '@material-ui/core/DialogTitle';
+import { useSnackbar } from 'notistack';
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogTitle from '@mui/material/DialogTitle';
 import CloseIcon from '../../Assets/Icons/Close';
 import ForwardTargetChat from '../Tile/ForwardTargetChat';
 import { copy } from '../../Utils/Text';
@@ -28,8 +27,8 @@ import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
 import UserStore from '../../Stores/UserStore';
 import TdLibController from '../../Controllers/TdLibController';
+import { withSnackbarCompat } from '../../withSnackbarCompat';
 import './ForwardDialog.css';
-import AppStore from '../../Stores/ApplicationStore';
 
 class ForwardDialog extends React.Component {
     constructor(props) {
@@ -58,6 +57,8 @@ class ForwardDialog extends React.Component {
         const promises = [];
         const getChatsPromise = TdLibController.send({
             '@type': 'getChats',
+            offset_order: '9223372036854775807',
+            offset_chat_id: 0,
             limit: 100
         });
         promises.push(getChatsPromise);
@@ -89,11 +90,10 @@ class ForwardDialog extends React.Component {
         if (!getChatUsername(chatId)) return;
 
         const result = await TdLibController.send({
-            '@type': 'getMessageLink',
+            '@type': 'getPublicMessageLink',
             chat_id: chatId,
             message_id: messageIds[0],
-            for_album: false,
-            for_comment: false
+            for_album: false
         });
 
         this.setState({
@@ -165,11 +165,8 @@ class ForwardDialog extends React.Component {
 
         const text = this.getInnerText(this.messageRef.current);
 
-        messageIds.sort();
-
-        this.targetChats.forEach(async targetChatId => {
+        this.targetChats.forEach(targetChatId => {
             if (inputMessageContent) {
-                await AppStore.invokeScheduledAction(`clientUpdateClearHistory chatId=${chatId}`);
                 if (text) {
                     if ('caption' in inputMessageContent) {
                         inputMessageContent.caption = {
@@ -216,7 +213,6 @@ class ForwardDialog extends React.Component {
             if (size) {
                 const { width, height, photo } = size;
 
-                await AppStore.invokeScheduledAction(`clientUpdateClearHistory chatId=${chatId}`);
                 TdLibController.send({
                     '@type': 'sendMessage',
                     chat_id: targetChatId,
@@ -247,7 +243,6 @@ class ForwardDialog extends React.Component {
             }
 
             if (text) {
-                await AppStore.invokeScheduledAction(`clientUpdateClearHistory chatId=${chatId}`);
                 TdLibController.send({
                     '@type': 'sendMessage',
                     chat_id: targetChatId,
@@ -518,9 +513,7 @@ ForwardDialog.propTypes = {
     inputMessageContent: PropTypes.object
 };
 
-const enhance = compose(
-    withTranslation(),
-    withSnackbar
-);
+const TranslatedForwardDialog = withTranslation()(ForwardDialog);
+const EnhancedForwardDialog = withSnackbarCompat(TranslatedForwardDialog);
 
-export default enhance(ForwardDialog);
+export default EnhancedForwardDialog;

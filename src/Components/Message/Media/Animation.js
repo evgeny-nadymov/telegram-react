@@ -70,7 +70,7 @@ class Animation extends React.Component {
     }
 
     componentWillUnmount() {
-        AnimationStore.off('clientUpdateAnimationsInView', this.onClientUpdateAnimationsInView);
+        AnimationStore.on('clientUpdateAnimationsInView', this.onClientUpdateAnimationsInView);
         AppStore.off('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
         AppStore.off('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
         AppStore.off('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
@@ -205,7 +205,7 @@ class Animation extends React.Component {
         if (!fitPhotoSize) return null;
 
         const animationStyle = {
-            // background: 'black',
+            background: 'black',
             minWidth: stretch ? fitPhotoSize.width : null,
             width: !stretch ? fitPhotoSize.width : null,
             height: fitPhotoSize.height,

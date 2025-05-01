@@ -9,35 +9,32 @@ import React, { Component } from 'react';
 import { compose } from './Utils/HOC';
 import withLanguage from './Language';
 import withTelegramTheme from './Theme';
-import withTheme from '@material-ui/core/styles/withTheme';
+import withTheme from '@mui/styles/withTheme';
 import { withTranslation } from 'react-i18next';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 import packageJson from '../package.json';
 import AuthForm from './Components/Auth/AuthForm';
 import InactivePage from './Components/InactivePage';
 import NativeAppPage from './Components/NativeAppPage';
 // import StubPage from './Components/StubPage';
-import registerServiceWorker from './registerServiceWorker';
 import { isMobile } from './Utils/Common';
 import { loadData } from './Utils/Phone';
 import KeyboardManager, { KeyboardHandler } from './Components/Additional/KeyboardManager';
-import { openChatList, openPinnedChat } from './Actions/Chat';
+import { openPinnedChat } from './Actions/Chat';
 import { modalManager } from './Utils/Modal';
-import { clearSelection, editMessage, replyMessage, searchChat } from './Actions/Client';
-import { isSafari } from './Utils/Common';
-import { OPTIMIZATIONS_FIRST_START, STORAGE_REGISTER_KEY, STORAGE_REGISTER_TEST_KEY } from './Constants';
+import { editMessage, replyMessage, searchChat } from './Actions/Client';
+import { OPTIMIZATIONS_FIRST_START } from './Constants';
 import UserStore from './Stores/UserStore';
 import AppStore from './Stores/ApplicationStore';
 import AuthorizationStore from './Stores/AuthorizationStore';
-import FilterStore from './Stores/FilterStore';
 import MessageStore from './Stores/MessageStore';
 import TdLibController from './Controllers/TdLibController';
-import './TelegramApp.css';
+// import './TelegramApp.css';
 
 // import MainPage from './Components/MainPage';
 const MainPage = React.lazy(() => import('./Components/MainPage'));
@@ -46,8 +43,7 @@ class TelegramApp extends Component {
     constructor(props) {
         super(props);
 
-        console.log(`Start Telegram Web ${packageJson.version}`);
-        console.log('[auth] ctor', props.location);
+        console.log(`Running Telegram Web ${packageJson.version}`);
 
         this.state = {
             prevAuthorizationState: AuthorizationStore.current,
@@ -74,7 +70,6 @@ class TelegramApp extends Component {
 
         this.keyMap.set(key, key);
 
-        const { chatList } = FilterStore;
         const { authorizationState, chatId } = AppStore;
         if (!authorizationState) return;
         if (authorizationState['@type'] !== 'authorizationStateReady') return;
@@ -95,22 +90,18 @@ class TelegramApp extends Component {
                     if (this.editMessageId) {
                         editMessage(chatId, 0);
                         return;
-                    } else if (this.replyMessageId) {
+                    }
+                    else if (this.replyMessageId) {
                         replyMessage(chatId, 0);
                         return;
-                    } else if (MessageStore.selectedItems.size > 0) {
-                        clearSelection();
-                        return;
-                    } else if (chatId) {
-                        TdLibController.setChatId(0);
-                        return;
-                    } else if (chatList && chatList['@type'] !== 'chatListMain') {
-                        openChatList({ '@type': 'chatListMain' });
+                    }
+                    else if (!chatId) {
+                        // open search if no one dialog opened
+                        searchChat(0, null);
                         return;
                     }
 
-                    // open search if no one dialog opened
-                    searchChat(0, null);
+                    TdLibController.setChatId(0);
 
                     event.preventDefault();
                     event.stopPropagation();
@@ -155,7 +146,9 @@ class TelegramApp extends Component {
     };
 
     componentWillMount() {
-        TdLibController.init();
+        const { location } = this.props;
+
+        TdLibController.init(location);
     }
 
     componentDidMount() {
@@ -219,11 +212,11 @@ class TelegramApp extends Component {
             if (!this.checkServiceWorker) {
                 this.checkServiceWorker = true;
 
-                const { useTestDC } = TdLibController.parameters;
-                const registerKey = useTestDC ? STORAGE_REGISTER_TEST_KEY : STORAGE_REGISTER_KEY;
-                const register = localStorage.getItem(registerKey);
+                const register = localStorage.getItem('register');
                 if (!register) {
-                    registerServiceWorker();
+                    import('./registerServiceWorker').then(module => {
+                        module.default();
+                    });
                 }
             }
         }
@@ -235,18 +228,8 @@ class TelegramApp extends Component {
 
     onUpdateAuthorizationState = update => {
         const { authorization_state: authorizationState } = update;
-        let { prevAuthorizationState } = this.state;
 
-        if (authorizationState && (
-            authorizationState['@type'] === 'authorizationStateLoggingOut' ||
-            authorizationState['@type'] === 'authorizationStateClosed')) {
-            prevAuthorizationState = null;
-        }
-
-        this.setState({
-            authorizationState,
-            prevAuthorizationState
-        });
+        this.setState({ authorizationState });
 
         if (!window.hasFocus) return;
         if (!authorizationState) return;
@@ -310,8 +293,8 @@ class TelegramApp extends Component {
         if (changePhone) {
             state = { '@type': 'authorizationStateWaitPhoneNumber' };
         } else if (!state ||
-            state['@type'] === 'authorizationStateClosed' ||
             state['@type'] === 'authorizationStateWaitEncryptionKey' ||
+            state['@type'] === 'authorizationStateWaitTdlibParameters' ||
             state['@type'] === 'authorizationStateWaitTdlibParameters'
         ) {
             if (prevAuthorizationState) {
@@ -358,7 +341,8 @@ class TelegramApp extends Component {
         return (
             <div
                 id='app'
-                className={theme.palette.type === 'dark' ? 'dark' : 'light'}
+                // className='dark'
+                className={theme && theme.palette ? ((theme.palette.mode || theme.palette.type) === 'dark' ? 'dark' : 'light') : 'light'}
                 onDragOver={this.handleDragOver}
                 onDrop={this.handleDrop}
                 // onKeyDown={KeyboardManager.handleKeyDown} tabIndex={-1}
@@ -420,22 +404,6 @@ window.history.pushState(null, null, window.location.href);
 window.onpopstate = function() {
     window.history.go(1);
 };
-
-async function unlockAudio() {
-    try {
-        const sound = new Audio('sounds/sound_a.mp3');
-        sound.autoplay = true;
-        sound.pause();
-    } finally {
-        document.body.removeEventListener('click', unlockAudio)
-        document.body.removeEventListener('touchstart', unlockAudio)
-    }
-}
-
-// if (isSafari()) {
-    document.body.addEventListener('click', unlockAudio);
-    document.body.addEventListener('touchstart', unlockAudio);
-// }
 
 const enhance = compose(
     withLanguage,

@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
-import ArchiveIcon from '@material-ui/icons/Archive';
+import ArchiveIcon from '@mui/icons-material/Archive';
 import { openArchive } from '../../Actions/Client';
 import './Archive.css';
 

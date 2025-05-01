@@ -7,8 +7,8 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
-import IconButton from '@material-ui/core/IconButton';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import IconButton from '@mui/material/IconButton';
 import './ScrollDownButton.css';
 
 class ScrollDownButton extends React.Component {

@@ -10,7 +10,7 @@ article {
     font-family: 'Helvetica Neue';
     font-size: 17px;
     line-height: 25px;
-    padding-bottom: 1em;
+    padding: 0;
     margin: 0 auto;
     height: 100%;
     max-width: 800px;

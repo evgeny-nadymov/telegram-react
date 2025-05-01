@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
-import Tooltip from '@material-ui/core/Tooltip';
+import Tooltip from '@mui/material/Tooltip';
 import { getForwardTitle, isForwardOriginHidden } from '../../Utils/Message';
 import { openUser, openChat } from '../../Actions/Client';
 import './Forward.css';

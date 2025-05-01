@@ -8,11 +8,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
-import Button from '@material-ui/core/Button';
+import Button from '@mui/material/Button';
 import CloseIcon from '../../Assets/Icons/Close';
-import IconButton from '@material-ui/core/IconButton';
-import { getChatSender, getChatUserId } from '../../Utils/Chat';
-import { requestBlockSender } from '../../Actions/Message';
+import IconButton from '@mui/material/IconButton';
+import { getChatUserId } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';
 import UserStore from '../../Stores/UserStore';
 import TdLibController from '../../Controllers/TdLibController';
@@ -49,14 +48,32 @@ class ActionBar extends React.Component {
 
     handleReportSpam = () => {
         const { chatId } = this.props;
+        const chat = ChatStore.get(chatId);
+        if (!chat) return null;
 
-        requestBlockSender(getChatSender(chatId));
+        TdLibController.send({
+            '@type': 'reportChat',
+            chat_id: chatId,
+            reason: {
+                '@type': 'chatReportReasonSpam'
+            },
+            message_ids: []
+        });
     };
 
     handleReportUnrelatedLocation = () => {
         const { chatId } = this.props;
+        const chat = ChatStore.get(chatId);
+        if (!chat) return null;
 
-        requestBlockSender(getChatSender(chatId));
+        TdLibController.send({
+            '@type': 'reportChat',
+            chat_id: chatId,
+            reason: {
+                '@type': 'chatReportReasonUnrelatedLocation'
+            },
+            message_ids: []
+        });
     };
 
     handleSharePhoneNumber = () => {
@@ -96,8 +113,13 @@ class ActionBar extends React.Component {
 
     handleBlockUser = () => {
         const { chatId } = this.props;
+        const userId = getChatUserId(chatId);
+        if (!userId) return;
 
-        requestBlockSender(getChatSender(chatId));
+        TdLibController.send({
+            '@type': 'blockUser',
+            user_id: userId
+        });
     };
 
     render() {
@@ -160,12 +182,6 @@ class ActionBar extends React.Component {
                 );
                 break;
             }
-            case 'chatActionBarInviteMembers': {
-                break;
-            }
-        }
-        if (!content) {
-            return null;
         }
 
         return (

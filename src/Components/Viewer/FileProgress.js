@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import CircularProgress from '@mui/material/CircularProgress';
 import CloseIcon from '../../Assets/Icons/Close';
 import { ANIMATION_DURATION_300MS } from '../../Constants';
 import FileStore from '../../Stores/FileStore';

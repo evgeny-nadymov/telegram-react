@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import Slider from '@material-ui/core/Slider';
+import Slider from '@mui/material/Slider';
 import CloseIcon from '../../Assets/Icons/Close';
 import PauseIcon from '../../Assets/Icons/Pause';
 import PlayIcon from '../../Assets/Icons/PlayArrow';
@@ -283,6 +283,7 @@ class PipPlayer extends React.Component {
     };
 
     onWindowResize = () => {
+
         const fullscreenElement = document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement;
         if (fullscreenElement) return;
 

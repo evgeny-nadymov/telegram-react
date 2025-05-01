@@ -8,22 +8,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import ListItem from '@material-ui/core/ListItem';
-import User from '../../Tile/User';
 import SharedPhoto from '../../Tile/SharedMedia/SharedPhoto';
 import SharedDocument from '../../Tile/SharedMedia/SharedDocument';
 import SharedLink from '../../Tile/SharedMedia/SharedLink';
 import SharedVoiceNote from '../../Tile/SharedMedia/SharedVoiceNote';
 import SharedVideo from '../../Tile/SharedMedia/SharedVideo';
-import { loadChatsContent, loadMessageContents, loadUsersContent } from '../../../Utils/File';
+import { loadMessageContents } from '../../../Utils/File';
 import { openMedia } from '../../../Utils/Message';
-import { openChat, openUser } from '../../../Actions/Client';
 import { SHARED_MESSAGE_SLICE_LIMIT } from '../../../Constants';
 import FileStore from '../../../Stores/FileStore';
 import MessageStore from '../../../Stores/MessageStore';
 import TdLibController from '../../../Controllers/TdLibController';
 import './SharedMediaContent.css';
-import Chat from '../../Tile/Chat';
 
 const overScanCount = 5;
 
@@ -40,37 +36,24 @@ class SharedMediaContent extends React.Component {
         // this.onWindowResize = throttle(this.onWindowResize, 250);
     }
 
-    static getItemHeight(item) {
-        if (!item) return undefined;
+    static getItemHeight(message) {
+        if (!message) return undefined;
 
-        switch (item['@type']) {
-            case 'message': {
-                const { content } = item;
-                switch (content['@type']) {
-                    case 'messagePhoto': {
-                        return undefined;
-                    }
-                    case 'messageVideo': {
-                        return undefined;
-                    }
-                    case 'messageDocument': {
-                        return 78;
-                    }
-                    case 'messageAudio': {
-                        return 94;
-                    }
-                    case 'messageVoiceNote': {
-                        return 74;
-                    }
-                    default: {
-                        return undefined;
-                    }
-                }
+        const { content } = message;
+        switch (content['@type']) {
+            case 'messagePhoto': {
+                return undefined;
             }
-            case 'chat': {
-                return 74;
+            case 'messageVideo': {
+                return undefined;
             }
-            case 'user': {
+            case 'messageDocument': {
+                return 78;
+            }
+            case 'messageAudio': {
+                return 94;
+            }
+            case 'messageVoiceNote': {
                 return 74;
             }
             default: {
@@ -81,9 +64,6 @@ class SharedMediaContent extends React.Component {
 
     static getRowHeight(selectedIndex) {
         switch (selectedIndex) {
-            case 0: {
-                return 74;
-            }
             case 1: {
                 return undefined;
             }
@@ -99,31 +79,17 @@ class SharedMediaContent extends React.Component {
             case 5: {
                 return 74;
             }
-            case 6: {
-                return 74;
-            }
         }
 
         return undefined;
     }
 
-    static getItemTemplate = (selectedIndex, item, onOpen) => {
+    static getItemTemplate = (selectedIndex, message) => {
+        const { chat_id, id, content } = message;
         const migratedChatId = -1;
 
         switch (selectedIndex) {
-            case 0: {
-                const { user_id: id } = item;
-                return (
-                    <ListItem
-                        button
-                        key={`user_id=${id}`}
-                        className='groups-in-common-item'>
-                        <User userId={id} onSelect={onOpen}/>
-                    </ListItem>
-                );
-            }
             case 1: {
-                const { chat_id, id, content } = item;
                 if (content['@type'] === 'messageVideo') {
                     return (
                         <SharedVideo
@@ -131,7 +97,7 @@ class SharedMediaContent extends React.Component {
                             chatId={chat_id}
                             messageId={id}
                             video={content.video}
-                            openMedia={onOpen}
+                            openMedia={() => openMedia(chat_id, id, false)}
                             showOpenMessage={chat_id !== migratedChatId}
                         />
                     );
@@ -143,13 +109,12 @@ class SharedMediaContent extends React.Component {
                         chatId={chat_id}
                         messageId={id}
                         photo={content.photo}
-                        openMedia={onOpen}
+                        openMedia={() => openMedia(chat_id, id, false)}
                         showOpenMessage={chat_id !== migratedChatId}
                     />
                 );
             }
             case 2: {
-                const { chat_id, id } = item;
                 return (
                     <SharedDocument
                         key={`chat_id=${chat_id}_message_id=${id}`}
@@ -160,7 +125,6 @@ class SharedMediaContent extends React.Component {
                 );
             }
             case 3: {
-                const { chat_id, id, content } = item;
                 return (
                     <SharedDocument
                         key={`chat_id=${chat_id}_message_id=${id}`}
@@ -171,7 +135,6 @@ class SharedMediaContent extends React.Component {
                 );
             }
             case 4: {
-                const { chat_id, id, content } = item;
                 return (
                     <SharedLink
                         key={`chat_id=${chat_id}_message_id=${id}`}
@@ -179,33 +142,21 @@ class SharedMediaContent extends React.Component {
                         messageId={id}
                         webPage={content.web_page}
                         caption={content.caption}
-                        openMedia={onOpen}
+                        openMedia={() => openMedia(chat_id, id, false)}
                         showOpenMessage={chat_id !== migratedChatId}
                     />
                 );
             }
             case 5: {
-                const { chat_id, id, content } = item;
                 return (
                     <SharedVoiceNote
                         key={`chat_id=${chat_id}_message_id=${id}`}
                         chatId={chat_id}
                         messageId={id}
                         voiceNote={content.voice_note}
-                        openMedia={onOpen}
+                        openMedia={() => openMedia(chat_id, id, false)}
                         showOpenMessage={chat_id !== migratedChatId}
                     />
-                );
-            }
-            case 6: {
-                const { id } = item;
-                return (
-                    <ListItem
-                        button
-                        key={`chat_id=${id}`}
-                        className='groups-in-common-item'>
-                        <Chat chatId={id} onSelect={onOpen} />
-                    </ListItem>
                 );
             }
         }
@@ -221,9 +172,6 @@ class SharedMediaContent extends React.Component {
 
     static isValidContent(selectedIndex, content) {
         switch (selectedIndex) {
-            case 0: {
-                return true;
-            }
             case 1: {
                 return SharedMediaContent.isValidPhotoAndVideoContent(content);
             }
@@ -238,9 +186,6 @@ class SharedMediaContent extends React.Component {
             }
             case 5: {
                 return SharedMediaContent.isValidVoiceNoteContent(content);
-            }
-            case 6: {
-                return true;
             }
         }
 
@@ -283,9 +228,6 @@ class SharedMediaContent extends React.Component {
 
     static getFilter(selectedIndex) {
         switch (selectedIndex) {
-            case 0: {
-                return null;
-            }
             case 1: {
                 return { '@type': 'searchMessagesFilterPhotoAndVideo' };
             }
@@ -301,9 +243,6 @@ class SharedMediaContent extends React.Component {
             case 5: {
                 return { '@type': 'searchMessagesFilterVoiceNote' };
             }
-            case 6: {
-                return null;
-            }
         }
 
         return null;
@@ -315,9 +254,6 @@ class SharedMediaContent extends React.Component {
         }
 
         switch (selectedIndex) {
-            case 0: {
-                return (media.supergroupMembers && media.supergroupMembers.members) || media.fullInfo.members || [];
-            }
             case 1: {
                 return media.photoAndVideo || [];
             }
@@ -333,9 +269,6 @@ class SharedMediaContent extends React.Component {
             case 5: {
                 return media.voiceNote || [];
             }
-            case 6: {
-                return media.groupsInCommon || [];
-            }
         }
 
         return [];
@@ -347,18 +280,14 @@ class SharedMediaContent extends React.Component {
         if (chatId !== state.prevChatId) {
             const media = MessageStore.getMedia(props.chatId);
 
-            const members = media ? (media.supergroupMembers && media.supergroupMembers.members) || media.fullInfo.members || [] : [];
             const photoAndVideo = media ? media.photoAndVideo : [];
             const document = media ? media.document : [];
             const audio = media ? media.audio : [];
             const url = media ? media.url : [];
             const voiceNote = media ? media.voiceNote : [];
-            const groupsInCommon = media ? media.groupsInCommon : [];
 
             let selectedIndex = -1;
-            if (members.length > 0) {
-                selectedIndex = 0;
-            } else if (photoAndVideo.length > 0) {
+            if (photoAndVideo.length > 0) {
                 selectedIndex = 1;
             } else if (document.length > 0) {
                 selectedIndex = 2;
@@ -368,8 +297,6 @@ class SharedMediaContent extends React.Component {
                 selectedIndex = 4;
             } else if (voiceNote.length > 0) {
                 selectedIndex = 5;
-            } else if (groupsInCommon.length > 0) {
-                selectedIndex = 6;
             }
             const source = SharedMediaContent.getSource(selectedIndex, media).filter(x => SharedMediaContent.isValidContent(selectedIndex, x.content));
 
@@ -379,13 +306,11 @@ class SharedMediaContent extends React.Component {
                 renderIds: new Map(),
                 rowHeight: SharedMediaContent.getRowHeight(selectedIndex),
                 items: source.slice(0, SHARED_MESSAGE_SLICE_LIMIT),
-                members,
                 photoAndVideo,
                 document,
                 audio,
                 url,
                 voiceNote,
-                groupsInCommon,
                 isSmallWidth: false,
                 params: {
                     loading: false,
@@ -406,7 +331,7 @@ class SharedMediaContent extends React.Component {
         MessageStore.on('clientUpdateChatMedia', this.onClientUpdateChatMedia);
         MessageStore.on('updateNewMessage', this.onUpdateNewMessage);
         MessageStore.on('updateDeleteMessages', this.onUpdateDeleteMessages);
-        MessageStore.on('updateMessageContent', this.onUpdateMessageContent);
+        // MessageStore.on('updateMessageContent', this.onUpdateMessageContent);
         MessageStore.on('updateMessageSendSucceeded', this.onUpdateMessageSend);
         MessageStore.on('updateMessageSendFailed', this.onUpdateMessageSend);
     }
@@ -418,23 +343,10 @@ class SharedMediaContent extends React.Component {
         MessageStore.off('clientUpdateChatMedia', this.onClientUpdateChatMedia);
         MessageStore.off('updateNewMessage', this.onUpdateNewMessage);
         MessageStore.off('updateDeleteMessages', this.onUpdateDeleteMessages);
-        MessageStore.off('updateMessageContent', this.onUpdateMessageContent);
+        // MessageStore.off('updateMessageContent', this.onUpdateMessageContent);
         MessageStore.off('updateMessageSendSucceeded', this.onUpdateMessageSend);
         MessageStore.off('updateMessageSendFailed', this.onUpdateMessageSend);
     }
-
-    onUpdateMessageContent = update => {
-        const { chat_id, message_id } = update;
-        const { chatId } = this.props;
-
-        if (chatId !== chat_id) return;
-
-        const { items, selectedIndex } = this.state;
-        if (!items.some(x => x.id === message_id)) return;
-
-        const media = MessageStore.getMedia(chatId);
-        this.setMediaState(media, selectedIndex);
-    };
 
     onWindowResize = event => {
         const { items, scrollTop } = this.state;
@@ -489,35 +401,27 @@ class SharedMediaContent extends React.Component {
     setMediaState = (media, selectedIndex) => {
         const { scrollTop } = this.state;
 
-        const members = media ? (media.supergroupMembers && media.supergroupMembers.members) || media.fullInfo.members || [] : [];
         const photoAndVideo = media ? media.photoAndVideo : [];
         const document = media ? media.document : [];
         const audio = media ? media.audio : [];
         const url = media ? media.url : [];
         const voiceNote = media ? media.voiceNote : [];
-        const groupsInCommon = media ? media.groupsInCommon : [];
 
-        const hasMembers = members.length > 0;
         const hasPhotoAndVideo = photoAndVideo.length > 0;
         const hasDocument = document.length > 0;
         const hasAudio = audio.length > 0;
         const hasUrl = url.length > 0;
         const hasVoiceNote = voiceNote.length > 0;
-        const hasGroupsInCommon = groupsInCommon.length > 0;
 
         const replaceSelectedIndex =
             selectedIndex === -1
-            || selectedIndex === 0 && !hasMembers
             || selectedIndex === 1 && !hasPhotoAndVideo
             || selectedIndex === 2 && !hasDocument
             || selectedIndex === 3 && !hasAudio
             || selectedIndex === 4 && !hasUrl
-            || selectedIndex === 5 && !hasVoiceNote
-            || selectedIndex === 6 && !hasGroupsInCommon;
+            || selectedIndex === 5 && !hasVoiceNote;
         if (replaceSelectedIndex) {
-            if (hasMembers) {
-                selectedIndex = 0;
-            } else if (hasPhotoAndVideo) {
+            if (hasPhotoAndVideo) {
                 selectedIndex = 1;
             } else if (hasDocument) {
                 selectedIndex = 2;
@@ -527,8 +431,6 @@ class SharedMediaContent extends React.Component {
                 selectedIndex = 4;
             } else if (hasVoiceNote) {
                 selectedIndex = 5;
-            } else if (hasGroupsInCommon) {
-                selectedIndex = 6;
             }
         }
 
@@ -552,13 +454,11 @@ class SharedMediaContent extends React.Component {
                 migrateCompleted: false,
                 filter: SharedMediaContent.getFilter(selectedIndex)
             },
-            members,
             photoAndVideo,
             document,
             audio,
             url,
-            voiceNote,
-            groupsInCommon
+            voiceNote
         });
     }
 
@@ -567,24 +467,7 @@ class SharedMediaContent extends React.Component {
             const { items } = this.state;
 
             const store = FileStore.getStore();
-            switch (this.state.selectedIndex) {
-                case 0: {
-                    loadUsersContent(store, items.map(x => x.user_id));
-                    break;
-                }
-                case 1:
-                case 2:
-                case 3:
-                case 4:
-                case 5: {
-                    loadMessageContents(store, items);
-                    break;
-                }
-                case 6: {
-                    loadChatsContent(store, items);
-                    break;
-                }
-            }
+            loadMessageContents(store, items);
         }
 
         // this.unobserveResize();
@@ -598,18 +481,14 @@ class SharedMediaContent extends React.Component {
 
         const media = MessageStore.getMedia(currentChatId);
 
-        const members = media ? (media.supergroupMembers && media.supergroupMembers.members) || media.fullInfo.members || [] : [];
         const photoAndVideo = media ? media.photoAndVideo : [];
         const document = media ? media.document : [];
         const audio = media ? media.audio : [];
         const url = media ? media.url : [];
         const voiceNote = media ? media.voiceNote : [];
-        const groupsInCommon = media ? media.groupsInCommon : [];
 
         let source = [];
-        if (selectedIndex === 0) {
-            source = members;
-        } else if (selectedIndex === 1) {
+        if (selectedIndex === 1) {
             source = photoAndVideo;
         } else if (selectedIndex === 2) {
             source = document;
@@ -619,8 +498,6 @@ class SharedMediaContent extends React.Component {
             source = url;
         } else if (selectedIndex === 5) {
             source = voiceNote;
-        } else if (selectedIndex === 6) {
-            source = groupsInCommon;
         }
         source = source.filter(x => SharedMediaContent.isValidContent(selectedIndex, x.content));
 
@@ -629,13 +506,11 @@ class SharedMediaContent extends React.Component {
             renderIds: new Map(),
             rowHeight: SharedMediaContent.getRowHeight(selectedIndex),
             items: source.slice(0, SHARED_MESSAGE_SLICE_LIMIT),
-            members,
             photoAndVideo,
             document,
             audio,
             url,
             voiceNote,
-            groupsInCommon,
             params: {
                 loading: false,
                 completed: false,
@@ -722,8 +597,6 @@ class SharedMediaContent extends React.Component {
         const { items, selectedIndex } = this.state;
         const { completed, filter, loading, messages: lastMessages } = params;
 
-        if (selectedIndex === 0) return;
-        if (selectedIndex === 6) return;
         if (!filter) return;
         if (loading) return;
         if (completed) return;
@@ -787,67 +660,27 @@ class SharedMediaContent extends React.Component {
 
     }
 
-    handleOpen = item => {
-        const { popup } = this.props;
-
-        switch (item['@type']) {
-            case 'message': {
-                const { chat_id, id } = item;
-
-                openMedia(chat_id, id, false);
-                break;
-            }
-            case 'chat': {
-                const { id } = item;
-                openChat(id);
-
-                if (popup) {
-                    TdLibController.clientUpdate({
-                        '@type': 'clientUpdateDialogChatId',
-                        chatId: 0
-                    });
-                }
-                break;
-            }
-            case 'chatMember': {
-                const { user_id } = item;
-                openUser(user_id, true);
-
-                if (popup) {
-                    TdLibController.clientUpdate({
-                        '@type': 'clientUpdateDialogChatId',
-                        chatId: 0
-                    });
-                }
-            }
-        }
-    };
-
     render() {
         const {
             selectedIndex,
             items = [],
             renderIds,
-            members,
             photoAndVideo,
             document,
             audio,
             url,
-            voiceNote,
-            groupsInCommon
+            voiceNote
         } = this.state;
 
-        // console.log('[vlist] render', [selectedIndex, items, renderIds]);
+        console.log('[vlist] render', [selectedIndex, items, renderIds]);
 
-        const hasItems = members && members.length > 0
-            || photoAndVideo && photoAndVideo.length > 0
+        const hasItems = photoAndVideo && photoAndVideo.length > 0
             || document && document.length > 0
             || audio && audio.length > 0
             || url && url.length > 0
-            || voiceNote && voiceNote.length > 0
-            || groupsInCommon && groupsInCommon.length > 0;
+            || voiceNote && voiceNote.length > 0;
         if (!hasItems) {
-            return (<div ref={this.listRef}/>);
+            return null;
         }
 
         if (selectedIndex === 2 || selectedIndex === 3 || selectedIndex === 5) {
@@ -862,7 +695,7 @@ class SharedMediaContent extends React.Component {
 
                 return ((!renderIds.size || renderIds.has(index)) && (
                     <div key={`chat_id=${chat_id}_message_id=${id}`} className='shared-media-virt-item' style={{ top: contentHeight - itemHeight }}>
-                        {SharedMediaContent.getItemTemplate(selectedIndex, x, () => this.handleOpen(x))}
+                        {SharedMediaContent.getItemTemplate(selectedIndex, x)}
                     </div>
                 ));
             });
@@ -876,7 +709,7 @@ class SharedMediaContent extends React.Component {
 
         return (
             <div ref={this.listRef} className={classNames('shared-media-content', { 'shared-photos-list': selectedIndex === 1 })}>
-                {items.map(x => SharedMediaContent.getItemTemplate(selectedIndex, x, () => this.handleOpen(x)))}
+                {items.map(x => SharedMediaContent.getItemTemplate(selectedIndex, x))}
             </div>
         );
     }

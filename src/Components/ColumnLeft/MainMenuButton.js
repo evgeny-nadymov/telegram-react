@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { withTranslation } from 'react-i18next';
-import IconButton from '@material-ui/core/IconButton';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
-import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon';
+import IconButton from '@mui/material/IconButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import SpeedDialIcon from '@mui/material/SpeedDialIcon';
 import ArrowBackIcon from '../../Assets/Icons/Back';
 import ChannelIcon from '../../Assets/Icons/Channel';
 import CloseIcon from '../../Assets/Icons/Close';
@@ -26,7 +26,6 @@ import SettingsIcon from '../../Assets/Icons/Settings';
 import UserIcon from '../../Assets/Icons/User';
 import { isAuthorizationReady } from '../../Utils/Common';
 import { openArchive, openChat, searchChat } from '../../Actions/Client';
-import { openSupportChat } from '../../Actions/Chat';
 import AppStore from '../../Stores/ApplicationStore';
 import CacheStore from '../../Stores/CacheStore';
 import UserStore from '../../Stores/UserStore';
@@ -154,8 +153,7 @@ class MainMenuButton extends React.Component {
 
     handleHelp = async event => {
         this.handleMenuClose();
-
-        openSupportChat();
+        // unregister();
     };
 
     handleSearch = () => {

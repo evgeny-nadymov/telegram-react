@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import RoomIcon from '@material-ui/icons/Room';
+import RoomIcon from '@mui/icons-material/Room';
 import { getLocationId } from '../../../Utils/Message';
 import { getSrc } from '../../../Utils/File';
 import { LOCATION_HEIGHT, LOCATION_SCALE, LOCATION_WIDTH, LOCATION_ZOOM } from '../../../Constants';

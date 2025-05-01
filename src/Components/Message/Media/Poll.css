@@ -52,7 +52,7 @@
     white-space: pre-wrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    height: 33px;
+    height: 36px;
     display: flex;
     align-items: center;
     /*justify-content: center;*/

@@ -8,10 +8,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { compose } from '../../../Utils/HOC';
-import { withSnackbar } from 'notistack';
+import { useSnackbar } from 'notistack';
 import { withTranslation } from 'react-i18next';
-import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
 import AddIcon from '../../../Assets/Icons/Add';
 import ArrowBackIcon from '../../../Assets/Icons/Back';
 import CloseIcon from '../../../Assets/Icons/Close';
@@ -23,6 +23,7 @@ import SidebarPage from '../SidebarPage';
 import { FILTER_COUNT_MAX, NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../../Constants';
 import FilterStore from '../../../Stores/FilterStore';
 import TdLibController from '../../../Controllers/TdLibController';
+import { withSnackbarCompat } from '../../../withSnackbarCompat';
 import './Filters.css';
 
 const RLottie = React.lazy(() => import('../../Viewer/RLottie'));
@@ -66,6 +67,8 @@ class Filters extends React.Component {
         const chats = await TdLibController.send({
             '@type': 'getChats',
             chat_list: { '@type': 'chatListMain' },
+            offset_chat_id: 0,
+            offset_order: '9223372036854775807',
             limit: 1000
         });
 
@@ -294,9 +297,7 @@ Filters.propTypes = {
     onClose: PropTypes.func
 };
 
-const enhance = compose(
-    withTranslation(),
-    withSnackbar,
-);
+// Apply HOCs sequentially
+const EnhancedFilters = withSnackbarCompat(withTranslation()(Filters));
 
-export default enhance(Filters);
+export default EnhancedFilters;

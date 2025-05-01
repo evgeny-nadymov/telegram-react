@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import blue from '@material-ui/core/colors/blue';
-import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
-import { ThemeProvider as MuiThemeProvider } from '@material-ui/core/styles';
-import { StylesProvider } from '@material-ui/core/styles';
-import { getBadgeSelectedColor } from './Utils/Color';
+import blue from '@mui/material/colors/blue';
+import createMuiTheme from '@mui/material/styles/createTheme';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
+import { StyledEngineProvider } from '@mui/material/styles';
 import { getDisplayName } from './Utils/HOC';
-import AppStore from './Stores/ApplicationStore';
+import ApplicationStore from './Stores/ApplicationStore';
+import { getBadgeSelectedColor } from './Utils/Color';
 
 function updateLightTheme(theme) {
     // const root = document.querySelector(':root');
@@ -34,8 +34,7 @@ function updateLightTheme(theme) {
     style.setProperty('--z-index-modal', theme.zIndex.modal);
 
     style.setProperty('--color-accent-main', theme.palette.primary.main);
-    style.setProperty('--color-accent-main44', theme.palette.primary.main + '44');
-    style.setProperty('--color-accent-main88', theme.palette.primary.main + '88');
+    style.setProperty('--color-accent-main22', theme.palette.primary.main + '44');
     style.setProperty('--color-accent-dark', theme.palette.primary.dark);
     style.setProperty('--color-accent-light', theme.palette.primary.light);
     style.setProperty('--color-grey700', theme.palette.grey[700]);
@@ -53,9 +52,6 @@ function updateLightTheme(theme) {
     style.setProperty('--badge-item-selected', getBadgeSelectedColor(theme.palette.primary.main));
 
     style.setProperty('--online-indicator', '#0AC630');
-
-    style.setProperty('--message-keyboard-button', '#00000033');
-    style.setProperty('--message-keyboard-button-hover', '#00000022');
 
     style.setProperty('--message-service-color', '#FFFFFF');
     style.setProperty('--message-service-background', '#00000033');
@@ -122,8 +118,7 @@ function updateDarkTheme(theme) {
     style.setProperty('--z-index-modal', theme.zIndex.modal);
 
     style.setProperty('--color-accent-main', theme.palette.primary.main);
-    style.setProperty('--color-accent-main44', theme.palette.primary.main + '44');
-    style.setProperty('--color-accent-main88', theme.palette.primary.main + '88');
+    style.setProperty('--color-accent-main22', theme.palette.primary.main + '44');
     style.setProperty('--color-accent-dark', theme.palette.primary.dark);
     style.setProperty('--color-accent-light', theme.palette.primary.light);
     style.setProperty('--color-grey700', theme.palette.grey[700]);
@@ -142,15 +137,12 @@ function updateDarkTheme(theme) {
 
     style.setProperty('--online-indicator', '#0AC630');
 
-    style.setProperty('--message-keyboard-button', '#303030');
-    style.setProperty('--message-keyboard-button-hover', '#30303088');
-
     style.setProperty('--message-service-color', '#FFFFFF');
-    style.setProperty('--message-service-background', '#303030');
+    style.setProperty('--message-service-background', 'rgb(23, 33, 43)');
 
-    style.setProperty('--panel-background', '#303030');
+    style.setProperty('--panel-background', 'rgb(23, 33, 43)');
     style.setProperty('--border', theme.palette.divider);
-    style.setProperty('--chat-background', theme.palette.grey[900]);
+    style.setProperty('--chat-background', "rgb(14, 22, 33)");
     style.setProperty('--background', theme.palette.grey[900]);
     style.setProperty('--background-paper', theme.palette.background.paper);
     style.setProperty('--shared-media-background', theme.palette.background.paper);
@@ -165,7 +157,7 @@ function updateDarkTheme(theme) {
 
     style.setProperty('--message-in-link', theme.palette.primary.main);
     style.setProperty('--message-in-author', theme.palette.primary.main);
-    style.setProperty('--message-in-background', '#303030'); // background.default
+    style.setProperty('--message-in-background', 'rgb(24, 37, 51)'); // background.default
     style.setProperty('--message-in-color', '#FFFFFF');
     style.setProperty('--message-in-subtle-color', 'rgba(255, 255, 255, 0.7)');
     style.setProperty('--message-in-meta-color', 'rgba(255, 255, 255, 0.7)');
@@ -178,7 +170,7 @@ function updateDarkTheme(theme) {
 
     style.setProperty('--message-out-link', theme.palette.primary.main);
     style.setProperty('--message-out-author', theme.palette.primary.main);
-    style.setProperty('--message-out-background', '#303030'); // background.default
+    style.setProperty('--message-out-background', 'rgb(43, 82, 120)'); // background.default
     style.setProperty('--message-out-color', '#FFFFFF');
     style.setProperty('--message-out-subtle-color', 'rgba(255, 255, 255, 0.7)');
     style.setProperty('--message-out-meta-color', 'rgba(255, 255, 255, 0.7)'); // text.secondary
@@ -190,22 +182,7 @@ function updateDarkTheme(theme) {
     style.setProperty('--message-out-control-border-hover', theme.palette.primary.main);
 }
 
-function getSystemThemeType() {
-    if (window.matchMedia) {
-        if(window.matchMedia('(prefers-color-scheme: dark)').matches){
-            return 'dark';
-        } else {
-            return 'light';
-        }
-    }
-    return 'light';
-}
-
 function createTheme(type, primary) {
-    if (type === 'default') {
-        type = getSystemThemeType();
-    }
-
     let MuiTouchRipple = {};
     let action = {};
     if (type === 'light') {
@@ -235,10 +212,18 @@ function createTheme(type, primary) {
 
     const theme = createMuiTheme({
         palette: {
-            type: type,
+            mode: type,
             primary: primary,
             secondary: { main: '#E53935' },
-            action
+            action,
+            background: {
+                default: type === 'dark' ? '#0e1621' : '#ffffff',
+                paper: type === 'dark' ? '#17212b' : '#ffffff'
+            },
+            text: {
+                primary: type === 'dark' ? '#ffffff' : '#000000',
+                secondary: type === 'dark' ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)'
+            }
         },
         typography: {
             useNextVariants: true
@@ -308,16 +293,7 @@ function createTheme(type, primary) {
                     paddingBottom: 10
                 }
             },
-            MuiTouchRipple,
-            MuiSnackbarContent: {
-                root: {
-                    flexWrap: 'nowrap',
-                    fontSize: 'inherit'
-                },
-                message: {
-                    maxWidth: 512
-                }
-            }
+            MuiTouchRipple
         }
     });
 
@@ -335,7 +311,7 @@ function withTheme(WrappedComponent) {
         constructor(props) {
             super(props);
 
-            let { type, primary } = { type: 'light', primary: { main: '#50A2E9' } };
+            let { type, primary } = { type: 'dark', primary: { main: '#50A2E9' } };
             try {
                 const themeOptions = JSON.parse(localStorage.getItem('themeOptions'));
                 if (themeOptions) {
@@ -346,34 +322,14 @@ function withTheme(WrappedComponent) {
             const theme = createTheme(type, primary);
 
             this.state = { theme };
-
-            if (window.matchMedia) {
-                const colorSchemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
-                colorSchemeQuery.addEventListener('change', this.onSystemThemeChange);
-            }
         }
 
-        onSystemThemeChange = () => {
-            let { type, primary } = { type: 'light', primary: { main: '#50A2E9' } };
-            try {
-                const themeOptions = JSON.parse(localStorage.getItem('themeOptions'));
-                if (themeOptions && themeOptions.type !== 'default') {
-                    return;
-                }
-                type = themeOptions.type;
-                primary = themeOptions.primary;
-            } catch {}
-
-            const theme = createTheme(type, primary);
-            this.setState({ theme }, () => AppStore.emit('clientUpdateThemeChange'));
-        };
-
         componentDidMount() {
-            AppStore.on('clientUpdateThemeChanging', this.onClientUpdateThemeChanging);
+            ApplicationStore.on('clientUpdateThemeChanging', this.onClientUpdateThemeChanging);
         }
 
         componentWillUnmount() {
-            AppStore.off('clientUpdateThemeChanging', this.onClientUpdateThemeChanging);
+            ApplicationStore.off('clientUpdateThemeChanging', this.onClientUpdateThemeChanging);
         }
 
         onClientUpdateThemeChanging = update => {
@@ -382,18 +338,18 @@ function withTheme(WrappedComponent) {
             const theme = createTheme(type, primary);
             localStorage.setItem('themeOptions', JSON.stringify({ type, primary }));
 
-            this.setState({ theme }, () => AppStore.emit('clientUpdateThemeChange'));
+            this.setState({ theme }, () => ApplicationStore.emit('clientUpdateThemeChange'));
         };
 
         render() {
             const { theme } = this.state;
 
             return (
-                <StylesProvider injectFirst={true}>
+                <StyledEngineProvider injectFirst={true}>
                     <MuiThemeProvider theme={theme}>
                         <WrappedComponent {...this.props} />
                     </MuiThemeProvider>
-                </StylesProvider>
+                </StyledEngineProvider>
             );
         }
     }

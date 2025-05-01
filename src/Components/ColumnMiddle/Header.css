@@ -6,7 +6,7 @@
  */
 
 .header-master {
-    /*height: 60px;*/
+    height: 60px;
     display: flex;
     align-items: center;
     overflow: hidden;
@@ -25,29 +25,6 @@
     background: var(--panel-background);
     border-color: var(--border);
     padding: 0 8px;
-    z-index: 1;
-}
-
-.header-details-content {
-    display: flex;
-    flex-direction: column;
-    height: 120px;
-    width: 100%;
-    align-self: flex-end;
-    will-change: transform;
-    transition: transform 0.15s ease-in-out;
-    transform: translateY(0);
-}
-
-.header-details-selection .header-details-content {
-    transform: translateY(60px);
-}
-
-.header-details-row {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    height: 60px;
 }
 
 .header-title {
@@ -61,7 +38,7 @@
     background: transparent;
     overflow: hidden;
     display: flex;
-    align-items: center;
+    align-items: baseline;
 }
 
 .header-status-content {
@@ -100,12 +77,7 @@
 }
 
 .header-right-second-button {
-    margin: 6px 0 6px 20px;
-}
-
-.header-right-buttons {
-    margin: 6px 6px 6px 20px;
-    display: flex;
+    margin: 6px 0 6px 12px;
 }
 
 .cursor-pointer {
@@ -169,4 +141,21 @@
     border: 0;
     outline: none;
     box-shadow: 0 0 0 0;
+}
+
+.header-redirects {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    flex-shrink: 0;
+    /* padding: 0 10x !important; */
+    margin: 0 10px;
+}
+
+.header-redirects .redirectIcon {
+    /* width: 40px; */
+    cursor: pointer;
+    margin-right: 10px;
+    margin-left: 10px;
 }

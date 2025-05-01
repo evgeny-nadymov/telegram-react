@@ -8,18 +8,18 @@
 import React from 'react';
 import classNames from 'classnames';
 import { compose } from '../../Utils/HOC';
-import withTheme from '@material-ui/core/styles/withTheme';
+import { withTheme } from '@mui/styles';
 import { withTranslation } from 'react-i18next';
-import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
+import IconButton from '@mui/material/IconButton';
 import InsertEmoticonIcon from '../../Assets/Icons/Smile';
-import { Picker as EmojiPicker } from 'emoji-mart';
+import { Picker } from 'emoji-mart';
 // import { NimblePicker as EmojiPicker } from 'emoji-mart';
 // import data from 'emoji-mart/data/messenger.json'
 import AnimationPreview from './AnimationPreview';
 import StickerPreview from './StickerPreview';
 import StickersPicker from './StickersPicker';
 import GifsPicker from './GifsPicker';
+import SafeButton from '../Common/SafeButton';
 import { isAppleDevice } from '../../Utils/Common';
 import { loadStickerThumbnailContent, loadStickerSetContent, loadRecentStickersContent, loadAnimationThumbnailContent } from '../../Utils/File';
 import { EMOJI_PICKER_TIMEOUT_MS } from '../../Constants';
@@ -136,7 +136,9 @@ class EmojiPickerButton extends React.Component {
         const previewSets = this.sets.slice(0, 5).reverse();
         previewSets.forEach(x => {
             loadStickerSetContent(store, x);
-            node.loadedSets.set(x.id, x.id);
+            if (node && node.loadedSets) {
+                node.loadedSets.set(x.id, x.id);
+            }
         });
 
         const previewStickers = this.sets.reduce((stickers, set) => {
@@ -329,15 +331,15 @@ class EmojiPickerButton extends React.Component {
                 }
             };
 
-            this.picker = (
-                <EmojiPicker
+            this.picker = enhance(
+                <Picker
                     ref={this.emojiPickerRef}
                     // data={data}
                     set='apple'
                     showPreview={false}
                     showSkinTones={false}
                     onSelect={this.props.onSelect}
-                    color={theme.palette.primary.dark}
+                    color={theme && theme.palette && theme.palette.primary ? theme.palette.primary.dark : '#3f51b5'}
                     i18n={i18n}
                     native={isAppleDevice()}
                     style={{ width: 338, overflowX: 'hidden', position: 'absolute', left: 0, top: 0 }}
@@ -368,7 +370,7 @@ class EmojiPickerButton extends React.Component {
                 <link
                     rel='stylesheet'
                     type='text/css'
-                    href={theme.palette.type === 'dark' ? 'emoji-mart.dark.css' : 'emoji-mart.light.css'}
+                    href={(theme && theme.palette ? (theme.palette.mode || theme.palette.type) : 'light') === 'dark' ? 'emoji-mart.dark.css' : 'emoji-mart.light.css'}
                 />
                 <IconButton
                     className='inputbox-icon-button'
@@ -387,24 +389,24 @@ class EmojiPickerButton extends React.Component {
                         {this.gifsPicker}
                     </div>
                     <div className='emoji-picker-header'>
-                        <Button
-                            color={tab === 0 ? 'primary' : 'default'}
+                        <SafeButton
+                            color={tab === 0 ? 'primary' : 'text'}
                             className='emoji-picker-header-button'
                             onClick={this.handleEmojiClick}>
                             {t('Emoji')}
-                        </Button>
-                        <Button
-                            color={tab === 1 ? 'primary' : 'default'}
+                        </SafeButton>
+                        <SafeButton
+                            color={tab === 1 ? 'primary' : 'text'}
                             className='emoji-picker-header-button'
                             onClick={this.handleStickersClick}>
                             {t('AccDescrStickers')}
-                        </Button>
-                        <Button
-                            color={tab === 2 ? 'primary' : 'default'}
+                        </SafeButton>
+                        <SafeButton
+                            color={tab === 2 ? 'primary' : 'text'}
                             className='emoji-picker-header-button'
                             onClick={this.handleGifsClick}>
                             {t('AttachGif')}
-                        </Button>
+                        </SafeButton>
                     </div>
                 </div>
                 {Boolean(sticker) && <StickerPreview sticker={sticker} />}

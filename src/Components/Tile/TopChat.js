@@ -9,12 +9,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
 import DeleteIcon from '../../Assets/Icons/Delete';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import MenuItem from '@material-ui/core/MenuItem';
-import MenuList from '@material-ui/core/MenuList';
-import Popover from '@material-ui/core/Popover';
+import ListItem from '@mui/material/ListItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import MenuItem from '@mui/material/MenuItem';
+import MenuList from '@mui/material/MenuList';
+import Popover from '@mui/material/Popover';
 import ChatTile from './ChatTile';
 import { getChatShortTitle } from '../../Utils/Chat';
 import './TopChat.css';
@@ -72,7 +72,7 @@ class TopChat extends React.PureComponent {
         return (
             <>
                 <ListItem button className='top-chat' onClick={onSelect} onContextMenu={this.handleContextMenu}>
-                    <ChatTile dialog chatId={chatId} showSavedMessages={showSavedMessages} showOnline showGroupCall/>
+                    <ChatTile dialog chatId={chatId} showSavedMessages={showSavedMessages} showOnline />
                     <div className='top-chat-title'>{shortTitle}</div>
                 </ListItem>
                 <Popover

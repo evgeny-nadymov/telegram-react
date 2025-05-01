@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
-import LinearProgress from '@material-ui/core/LinearProgress';
+import LinearProgress from '@mui/material/LinearProgress';
 import CheckIcon from '../../../Assets/Icons/Check';
 import CloseIcon from '../../../Assets/Icons/Close';
 import PollRadio from './PollRadio';

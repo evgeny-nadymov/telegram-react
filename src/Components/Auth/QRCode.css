@@ -6,6 +6,7 @@
  */
 
 #qr-canvas {
+    filter: grayscale(100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -22,18 +23,16 @@
     position: relative;
     width: 287px;
     height: 287px;
-    background: white;
-    padding: 12px;
-    border-radius: 12px;
 }
 
 .qr-telegram-logo {
+    display: none;
     width: 91px;
     height: 91px;
     background: white;
     position: absolute;
-    left: 110px;
-    top: 110px;
+    left: 98px;
+    top: 98px;
     box-sizing: border-box;
 }
 

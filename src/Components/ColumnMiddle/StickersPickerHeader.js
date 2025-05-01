@@ -9,7 +9,7 @@ import React from 'react';
 import * as ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import AccessTimeIcon from '@material-ui/icons/AccessTime';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import Animator from '../../Utils/Animatior';
 import Sticker from './../Message/Media/Sticker';
 import { StickerSourceEnum } from '../Message/Media/Sticker';

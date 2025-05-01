@@ -75,8 +75,6 @@ class Photo extends React.Component {
 
         const hasSrc = Boolean(src || thumbSrc);
 
-        // console.log('[photo] render', [thumbSize, thumbSrc, photoSize, src, minithumbnail]);
-
         return (
             <div
                 className={classNames(className, 'photo', {

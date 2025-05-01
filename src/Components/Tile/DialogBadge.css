@@ -5,8 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.dialog-badge {
-    font-size: 14px;
+ .dialog-badge {
+    font-size: 12.7px;
     line-height: normal;
     padding: 0 6px;
     border-radius: 12px;
@@ -18,7 +18,8 @@
     margin-left: 6px;
     font-weight: 500;
     color: #fff;
-    background: var(--badge-unmuted);
+    /* background: rgb(19, 185, 4); */
+    background: rgb(120, 58, 219);
     vertical-align: baseline;
     white-space: nowrap;
     flex-shrink: 0;
@@ -28,7 +29,10 @@
 }
 
 .dialog-badge-muted {
-    background: var(--badge-muted);
+    /* background: rgb(100, 104, 131); */
+    background: rgb(100, 104, 131);
+    /* min-width: 100px; */
+    font-size: 12.7px;
 }
 
 .dialog-badge-text {
@@ -45,7 +49,7 @@
     margin-top: -3px;
     margin-left: 6px;
     color: #fff;
-    background: var(--badge-muted);
+    background: rgb(104, 86, 195);
     vertical-align: baseline;
     display: flex;
     align-items: center;

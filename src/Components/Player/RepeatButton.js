@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import IconButton from '@material-ui/core/IconButton';
-import RepeatIcon from '@material-ui/icons/Repeat';
-import RepeatOneIcon from '@material-ui/icons/RepeatOne';
+import IconButton from '@mui/material/IconButton';
+import RepeatIcon from '@mui/icons-material/Repeat';
+import RepeatOneIcon from '@mui/icons-material/RepeatOne';
 import PlayerStore, { RepeatEnum } from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
 

@@ -8,9 +8,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import Radio from '@material-ui/core/Radio';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import RadioButtonCheckedIcon from '@material-ui/icons/RadioButtonChecked';
+import Radio from '@mui/material/Radio';
+import CircularProgress from '@mui/material/CircularProgress';
+import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
 import './PollRadio.css';
 
 class PollRadio extends React.Component {

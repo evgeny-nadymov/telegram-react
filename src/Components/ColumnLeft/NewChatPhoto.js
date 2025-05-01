@@ -9,9 +9,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
 import Cropper from 'react-cropper';
-import IconButton from '@material-ui/core/IconButton';
-import Dialog from '@material-ui/core/Dialog';
-import DialogContent from '@material-ui/core/DialogContent';
+import IconButton from '@mui/material/IconButton';
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
 import AddImageIcon from '../../Assets/Icons/AddImage';
 import CloseIcon from '../../Assets/Icons/Close';
 import CheckIcon from '../../Assets/Icons/Check';
@@ -41,7 +41,7 @@ class NewChatPhoto extends React.Component {
     }
 
     handleDone = () => {
-        const cropper = this.cropperRef.current.cropper;
+        const cropper = this.cropperRef.current;
         if (!cropper) return;
 
         cropper.getCroppedCanvas().toBlob(blob => {

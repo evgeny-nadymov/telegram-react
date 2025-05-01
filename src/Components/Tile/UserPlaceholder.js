@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import './UserPlaceholder.css';
-import UserStatus from './UserStatus';
+// import UserStatus from './UserStatus';
 
 class UserPlaceholder extends React.Component {
     render() {

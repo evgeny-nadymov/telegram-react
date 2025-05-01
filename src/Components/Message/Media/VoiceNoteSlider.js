@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import Slider from '@material-ui/core/Slider';
+import Slider from '@mui/material/Slider';
 import Player from '../../Player/Player';
 import Waveform from './Waveform';
 import { isCurrentSource } from '../../../Utils/Player';
@@ -238,11 +238,6 @@ class VoiceNoteSlider extends React.Component {
         });
     };
 
-    handleClick = event => {
-        event.stopPropagation();
-        event.preventDefault();
-    };
-
     render() {
         const { chatId, messageId, audio, waveform, className, style } = this.props;
         const { duration, value, dragging, buffered } = this.state;
@@ -276,7 +271,6 @@ class VoiceNoteSlider extends React.Component {
                     onChange={this.handleChange}
                     onChangeCommitted={this.handleChangeCommitted}
                     onMouseDown={this.handleMouseDown}
-                    onClick={this.handleClick}
                 />
             </div>
         );

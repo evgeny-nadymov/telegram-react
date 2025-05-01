@@ -340,13 +340,11 @@ class MediaViewerContent extends React.Component {
         }
 
         return (
-            <>
-                <div className='media-viewer-content'>
-                    {content}
-                    {!supportsStreaming && <FileProgress file={file} zIndex={2} />}
-                </div>
+            <div className='media-viewer-content'>
+                {content}
+                {!supportsStreaming && <FileProgress file={file} zIndex={2} />}
                 {text && text.length > 0 && !isVideo && !isEmbed && <MediaCaption text={text} />}
-            </>
+            </div>
         );
     }
 }

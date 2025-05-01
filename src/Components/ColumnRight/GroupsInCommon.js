@@ -7,7 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import ListItem from '@material-ui/core/ListItem';
+import ListItem from '@mui/material/ListItem';
 import Chat from '../Tile/Chat';
 import GroupsInCommonHeader from './GroupsInCommonHeader';
 import { getChatUserId } from '../../Utils/Chat';

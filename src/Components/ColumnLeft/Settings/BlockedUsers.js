@@ -8,20 +8,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation, withTranslation } from 'react-i18next';
-import IconButton from '@material-ui/core/IconButton';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import MenuList from '@material-ui/core/MenuList';
-import MenuItem from '@material-ui/core/MenuItem';
-import Popover from '@material-ui/core/Popover';
+import IconButton from '@mui/material/IconButton';
+import ListItem from '@mui/material/ListItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import MenuList from '@mui/material/MenuList';
+import MenuItem from '@mui/material/MenuItem';
+import Popover from '@mui/material/Popover';
 import ArrowBackIcon from '../../../Assets/Icons/Back';
 import SectionHeader from '../SectionHeader';
 import User from '../../Tile/User';
 import UnblockIcon from '../../../Assets/Icons/Unblock';
-import { loadChatsContent, loadUsersContent } from '../../../Utils/File';
+import { loadUsersContent } from '../../../Utils/File';
 import { openUser } from '../../../Actions/Client';
-import { unblockSender } from '../../../Actions/Message';
 import FileStore from '../../../Stores/FileStore';
 import TdLibController from '../../../Controllers/TdLibController';
 import './BlockedUsers.css';
@@ -113,12 +112,14 @@ class BlockedUsers extends React.Component {
 
         const store = FileStore.getStore();
 
-        loadUsersContent(store, users.senders.filter(x => x['@type'] === 'messageSenderUser').map(x => x.user_id));
-        loadChatsContent(store, users.senders.filter(x => x['@type'] === 'messageSenderChat').map(x => x.chat_id));
+        loadUsersContent(store, users.user_ids);
     }
 
-    handleUnblockUser = async userId => {
-        unblockSender({ '@type': 'messageSenderUser', user_id: userId });
+    handleUnblock = async userId => {
+        await TdLibController.send({
+           '@type': 'unblockUser',
+            user_id: userId
+        });
     };
 
     render() {
@@ -136,11 +137,11 @@ class BlockedUsers extends React.Component {
                 </div>
                 <div className='sidebar-page-content'>
                     <div className='sidebar-page-section'>
-                        { users.senders.length > 0 ? (
+                        { users.user_ids.length > 0 ? (
                             <>
                                 <SectionHeader multiline>{t('BlockedUsersInfo')}</SectionHeader>
                                 {
-                                    users.senders.filter(x => x['@type'] === 'messageSenderUser').map(x => <BlockedUser key={x.user_id} userId={x.user_id} onClick={openUser} onUnblock={this.handleUnblockUser}/>)
+                                    users.user_ids.map(x => <BlockedUser key={x} userId={x} onClick={openUser} onUnblock={this.handleUnblock}/>)
                                 }
                             </>
                         ) : (

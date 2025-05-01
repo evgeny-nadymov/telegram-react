@@ -9,7 +9,6 @@ import EventEmitter from '../Stores/EventEmitter';
 import packageJson from '../../package.json';
 import { stringToBoolean, getBrowser, getOSName } from '../Utils/Common';
 import {
-    DATABASE_NAME, DATABASE_TEST_NAME,
     VERBOSITY_JS_MAX,
     VERBOSITY_JS_MIN,
     VERBOSITY_MAX,
@@ -18,8 +17,8 @@ import {
     WASM_FILE_NAME
 } from '../Constants';
 import TdClient from 'tdweb/dist/tdweb';
+// import TdClient from '../Assets/TdLib/tdweb';
 // import TdClient from '@arseny30/tdweb/dist/tdweb';
-// import TdClient from '../../public/tdweb';
 
 function databaseExists(dbname, callback) {
     var req = indexedDB.open(dbname);
@@ -50,26 +49,25 @@ class TdLibController extends EventEmitter {
 
         this.disableLog = true;
         this.streaming = true;
-        this.calls = false;
-
-        this.setParameters(window.location);
     }
 
-    init = () => {
-        const { verbosity, jsVerbosity, useTestDC, readOnly, fastUpdating, useDatabase, mode } = this.parameters;
-        const instanceName = useTestDC ? DATABASE_TEST_NAME : DATABASE_NAME;
+    init = location => {
+        this.setParameters(location);
 
-        databaseExists(instanceName, exists => {
+        const { verbosity, jsVerbosity, useTestDC, readOnly, fastUpdating, useDatabase, mode } = this.parameters;
+        const dbName = useTestDC ? 'tdlib_test' : 'tdlib';
+
+        databaseExists(dbName, exists => {
             this.clientUpdate({ '@type': 'clientUpdateTdLibDatabaseExists', exists });
 
             let options = {
                 logVerbosityLevel: verbosity,
                 jsLogVerbosityLevel: jsVerbosity,
-                mode, // 'wasm-streaming', 'wasm', 'asmjs'
-                instanceName,
-                readOnly,
+                mode: mode, // 'wasm-streaming'/'wasm'/'asmjs'
+                prefix: useTestDC ? 'tdlib_test' : 'tdlib',
+                readOnly: readOnly,
                 isBackground: false,
-                useDatabase,
+                useDatabase: useDatabase,
                 wasmUrl: `${WASM_FILE_NAME}?_sw-precache=${WASM_FILE_HASH}`
                 // onUpdate: update => this.emit('update', update)
             };
@@ -162,15 +160,13 @@ class TdLibController extends EventEmitter {
         if (params.has('streaming')) {
             this.streaming = stringToBoolean(params.get('streaming'));
         }
-        if (params.has('calls')) {
-            this.calls = stringToBoolean(params.get('calls'));
-        }
     };
 
     send = request => {
+        console.log('send', request);
         if (!this.client) {
             console.log('send (none init)', request);
-            return Promise.reject('tdweb client is not ready yet');
+            return;
         }
 
         if (!this.disableLog) {
@@ -236,15 +232,6 @@ class TdLibController extends EventEmitter {
             // }
         });
 
-        this.send({
-            '@type': 'setOption',
-            name: 'use_quick_ack',
-            value: {
-                '@type': 'optionValueBoolean',
-                value: true
-            }
-        });
-
         if (this.parameters.tag && this.parameters.tagVerbosity) {
             for (let i = 0; i < this.parameters.tag.length; i++) {
                 let tag = this.parameters.tag[i];
@@ -265,12 +252,11 @@ class TdLibController extends EventEmitter {
         });
     }
 
-    setChatId = (chatId, messageId = null, options = { }) => {
+    setChatId = (chatId, messageId = null) => {
         const update = {
             '@type': 'clientUpdateChatId',
             chatId,
-            messageId,
-            options
+            messageId
         };
 
         this.clientUpdate(update);
@@ -282,8 +268,48 @@ class TdLibController extends EventEmitter {
             content: content
         });
     }
+
+    // initTdClient = (verbosity, jsVerbosity, useTestDC, readOnly, fastUpdating, clientMode) => {
+    //     let options = {
+    //         logVerbosityLevel: verbosity,
+    //         jsLogVerbosityLevel: jsVerbosity,
+    //         mode: clientMode,
+    //         prefix: useTestDC ? 'tdlib_test' : 'tdlib',
+    //         readOnly: readOnly,
+    //         isBackground: false,
+    //         useDatabase: false,
+    //         wasmUrl: `${WASM_FILE_NAME}?_sw-precache=${WASM_FILE_HASH}`
+    //     };
+
+    //     console.log(
+    //         `[TdLibController] (fast_updating=${fastUpdating}) Start client with params=${JSON.stringify(options)}`
+    //     );
+
+    //     try {
+    //         this.client = new TdClient(options);
+    //         this.client.onUpdate = update => {
+    //             if (!this.disableLog) {
+    //                 if (update['@type'] === 'updateFile') {
+    //                     console.log('receive updateFile file_id=' + update.file.id, update);
+    //                 } else {
+    //                     console.log('receive update', update);
+    //                 }
+    //             }
+    //             this.emit('update', update);
+    //         };
+    //     } catch (error) {
+    //         console.error(`[TdLibController] Failed to initialize TDLib client with mode ${clientMode}:`, error);
+            
+    //         if (clientMode === 'wasm') {
+    //             console.log('[TdLibController] Trying fallback to asmjs mode');
+    //             this.initTdClient(verbosity, jsVerbosity, useTestDC, readOnly, fastUpdating, 'asmjs');
+    //         } else {
+    //             this.clientUpdate({ '@type': 'clientUpdateTdLibInitFailed', error: error.message });
+    //         }
+    //     }
+    // };
 }
 
 const controller = new TdLibController();
-window.controller = controller;
+
 export default controller;

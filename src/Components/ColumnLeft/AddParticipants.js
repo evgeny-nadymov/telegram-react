@@ -9,9 +9,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
 import { compose, withRestoreRef, withSaveRef } from '../../Utils/HOC';
-import Checkbox from '@material-ui/core/Checkbox';
-import IconButton from '@material-ui/core/IconButton';
-import ListItem from '@material-ui/core/ListItem';
+import Checkbox from '@mui/material/Checkbox';
+import IconButton from '@mui/material/IconButton';
+import ListItem from '@mui/material/ListItem';
 import ArrowBackIcon from '../../Assets/Icons/Back';
 import CloseIcon from '../../Assets/Icons/Close';
 import User from '../Tile/User';
@@ -26,7 +26,6 @@ import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Contacts.css';
-import { scrollBottom } from '../../Utils/DOM';
 
 class UserListItem extends React.Component {
     shouldComponentUpdate(nextProps, nextState, nextContext) {
@@ -79,7 +78,7 @@ class AddParticipants extends React.Component {
             focusedItem: null
         };
 
-        this.handleDebounceScroll = debounce(this.handleDebounceScroll, 100);
+        this.handleDebounceScroll = debounce(this.handleDebounceScroll, 100, false);
         this.handleThrottleScroll = throttle(this.handleThrottleScroll, 200, false);
     }
 
@@ -220,12 +219,12 @@ class AddParticipants extends React.Component {
                 requestAnimationFrame(() => {
                     wrapPanel.style.cssText = `max-height: ${Math.min(currentHeight, maxHeight)}px;`;
                     setTimeout(() => {
-                        scrollBottom(wrapPanel, 'auto');
+                        this.searchInputRef.current.scrollIntoView({ behavior: 'auto' });
                     }, 250);
                 });
             } else {
                 wrapPanel.style.cssText = `max-height: ${maxHeight}px;`;
-                scrollBottom(wrapPanel, 'smooth');
+                this.searchInputRef.current.scrollIntoView({ behavior: 'smooth' });
             }
         } else if (collapsed) {
             if (currentHeight < maxHeight) {
@@ -242,7 +241,7 @@ class AddParticipants extends React.Component {
                 wrapPanel.style.cssText = prevCSSText;
                 wrapPanel.scrollTop = prevScrollTop;
             } else {
-                scrollBottom(wrapPanel, 'smooth');
+                this.searchInputRef.current.scrollIntoView({ behavior: 'smooth' });
             }
         }
     }

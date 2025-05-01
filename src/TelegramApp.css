@@ -5,12 +5,12 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-*:focus {
+ *:focus {
     outline: none;
 }
 
 html {
-    background: #fff;
+    /* background: #fff; */
     height: 100%;
     width: 100%;
     overflow: hidden;
@@ -21,9 +21,10 @@ body {
     padding: 0;
     height: 100%;
     width: 100%;
-    font: 16px/21px 'Roboto', sans-serif;
+    /* font: 16px/21px 'Roboto', sans-serif; */
+    font-family: Segoe UI,Helvetica Neue,Helvetica,Lucida Grande,Arial,Ubuntu,Cantarell,Fira Sans,sans-serif;
     overflow: hidden;
-    background: var(--background);
+    background: rgb(14, 22, 33);
     color: var(--text-primary);
 
     scrollbar-color: rgba(0, 0, 0, 0.25) transparent;
@@ -86,10 +87,21 @@ mark {
 }
 
 #app {
-    height: 100%;
-    width: 100%;
+    position: absolute;
+    height: 95%;
+    width: 95%;
+    margin: auto;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    /* margin-left: auto; */
+    /* margin-right: auto; */
+    /* margin-top: auto !important; */
+    /* margin-bottom: auto; */
+    /* vertical-align: middle; */
     overflow: hidden;
-    background: transparent;
+    background: rgb(14, 22, 33);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .page {
@@ -111,8 +123,7 @@ mark {
     max-width: 1680px;
 }
 
-.item-selected {
-}
+/* .item-selected {} */
 
 .pointer {
     cursor: pointer;

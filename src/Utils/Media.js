@@ -27,7 +27,7 @@ import FileStore from '../Stores/FileStore';
 import MessageStore from '../Stores/MessageStore';
 import { getSrc } from './File';
 import classNames from 'classnames';
-import Invoice from '../Components/Message/Media/Invoice';
+import UserStore from '../Stores/UserStore';
 
 const waveformCache = new Map();
 
@@ -139,6 +139,25 @@ export function getThumb(thumbnail, minithumbnail, width, height) {
     }
 
     return thumb;
+}
+
+export function getCallTitle(chatId, messageId) {
+    const message = MessageStore.get(chatId, messageId);
+    if (!message) return null;
+
+    const { content, is_outgoing } = message;
+    if (content['@type'] !== 'messageCall') return null;
+
+    const { discard_reason, duration } = content;
+    if (is_outgoing) {
+        return discard_reason['@type'] === 'callDiscardReasonMissed' ? 'Cancelled Call' : 'Outgoing Call';
+    } else if (discard_reason['@type'] === 'callDiscardReasonMissed') {
+        return 'Missed Call';
+    } else if (discard_reason['@type'] === 'callDiscardReasonDeclined') {
+        return 'Declined Call';
+    }
+
+    return 'Incoming Call';
 }
 
 export function isEditedMedia(chatId, messageId) {
@@ -611,9 +630,10 @@ export function getMedia(message, openMedia, options = {}) {
                     caption={hasCaption}
                     chatId={chat_id}
                     messageId={id}
-                    call={content}
+                    duraton={content.duration}
+                    discardReason={content.discard_reason}
                     openMedia={openMedia}
-                    meta={meta}
+                    meta={inlineMeta}
                 />
             );
         case 'messageContact':
@@ -649,18 +669,6 @@ export function getMedia(message, openMedia, options = {}) {
                     chatId={chat_id}
                     messageId={id}
                     game={content.game}
-                    openMedia={openMedia}
-                    meta={inlineMeta}
-                />
-            );
-        case 'messageInvoice':
-            return (
-                <Invoice
-                    title={hasTitle}
-                    caption={hasCaption}
-                    chatId={chat_id}
-                    messageId={id}
-                    invoice={content}
                     openMedia={openMedia}
                     meta={inlineMeta}
                 />

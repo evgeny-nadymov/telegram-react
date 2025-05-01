@@ -1,0 +1,47 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+ .dialogs {
+    /* max-width: 25%; */
+    /* flex: 1 1 25%; */
+    margin: 0;
+    box-sizing: border-box;
+    border-right: 1px solid var(--border);
+    background: var(--panel-background);
+    height: 100%;
+    width: 100%;
+    /* display: flex; */
+    /* flex-direction: column; */
+    position: relative;
+}
+
+.dialogs-content {
+    overflow: hidden;
+    flex-grow: 1;
+    flex-shrink: 1;
+    position: relative;
+}
+
+.dialogs-content-internal {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* .page-third-column .dialogs {
+    max-width: 25%;
+    flex: 1 1 25%;
+}
+
+.page-small .dialogs {
+    flex: 0 0 89px;
+    max-width: 89px;
+} */

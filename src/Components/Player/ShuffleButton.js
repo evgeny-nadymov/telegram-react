@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import IconButton from '@material-ui/core/IconButton';
-import ShuffleIcon from '@material-ui/icons/Shuffle';
+import IconButton from '@mui/material/IconButton';
+import ShuffleIcon from '@mui/icons-material/Shuffle';
 import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
 

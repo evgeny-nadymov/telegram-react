@@ -23,8 +23,7 @@ import NewChannel from './NewChannel';
 import { openChat } from '../../Actions/Client';
 import { getArchiveTitle } from '../../Utils/Archive';
 import { loadChatsContent } from '../../Utils/File';
-import { duration } from '@material-ui/core/styles/transitions';
-import { CHAT_SLICE_LIMIT } from '../../Constants';
+import { duration } from '@mui/material';
 import AppStore from '../../Stores/ApplicationStore';
 import CacheStore from '../../Stores/CacheStore';
 import ChatStore from '../../Stores/ChatStore';
@@ -41,6 +40,7 @@ const defaultTimeout = {
 class Dialogs extends Component {
     constructor(props) {
         super(props);
+        // this.page_change = props.page_change.bind(this);
 
         this.dialogListRef = React.createRef();
         this.archiveListRef = React.createRef();
@@ -52,6 +52,7 @@ class Dialogs extends Component {
             showArchive: false,
             archiveTitle: null,
 
+            mainItems: [],
             archiveItems: [],
 
             timeout: defaultTimeout,
@@ -73,6 +74,7 @@ class Dialogs extends Component {
             cache,
             showArchive,
             archiveTitle,
+            mainItems,
             archiveItems,
             openSearch,
             openArchive,
@@ -97,6 +99,10 @@ class Dialogs extends Component {
         }
 
         if (nextState.archiveItems !== archiveItems) {
+            return true;
+        }
+
+        if (nextState.mainItems !== mainItems) {
             return true;
         }
 
@@ -168,7 +174,7 @@ class Dialogs extends Component {
     }
 
     onUpdateChatFilters = update => {
-        this.handleSaveCache();
+        this.saveCache();
     };
 
     onClientUpdatePageWidth = update => {
@@ -213,23 +219,17 @@ class Dialogs extends Component {
         });
     }
 
-    async saveCache() {
-        const promises = [];
-        promises.push(TdLibController.send({
-            '@type': 'getChats',
-            chat_list: { '@type': 'chatListMain' },
-            limit: CHAT_SLICE_LIMIT
-        }));
-        promises.push(TdLibController.send({
-            '@type': 'getChats',
-            chat_list: { '@type': 'chatListArchive' },
-            limit: CHAT_SLICE_LIMIT
-        }));
-        const [mainChats, archiveChats] = await Promise.all(promises);
+    saveCache() {
+        const { current: archiveCurrent } = this.archiveListRef;
+        const archiveChatIds =
+            archiveCurrent && archiveCurrent.state.chats ? archiveCurrent.state.chats.slice(0, 25) : [];
+
+        const { current: mainCurrent } = this.dialogListRef;
+        const mainChatIds = mainCurrent && mainCurrent.state.chats ? mainCurrent.state.chats.slice(0, 25) : [];
 
         const { filters } = FilterStore;
 
-        CacheStore.save(filters, mainChats.chat_ids, archiveChats.chat_ids);
+        CacheStore.save(filters, mainChatIds, archiveChatIds);
     }
 
     onUpdateChatOrder = update => {
@@ -397,7 +397,7 @@ class Dialogs extends Component {
 
     loadChatContents(chatIds) {
         const store = FileStore.getStore();
-        loadChatsContent(store, chatIds);
+        // loadChatsContent(store, chatIds);
     }
 
     handleCloseArchive = () => {
@@ -425,6 +425,7 @@ class Dialogs extends Component {
             cache,
             showArchive,
             archiveTitle,
+            mainItems,
             archiveItems,
             meChatId,
             openSettings,
@@ -438,14 +439,15 @@ class Dialogs extends Component {
             searchText
         } = this.state;
 
-        const mainCacheItems = cache && cache.chats ? cache.chats : null;
-        const archiveCacheItems = cache && cache.archiveChats ? cache.archiveChats : null;
+        const mainCacheItems = cache ? cache.chats || [] : null;
+        const archiveCacheItems = cache ? cache.archiveChats || [] : null;
 
         return (
             <>
                 <div className='dialogs'>
                     <div className='sidebar-page'>
                         <DialogsHeader
+                            page_change={this.props.page_change}
                             ref={this.dialogsHeaderRef}
                             openSearch={openSearch}
                             timeout={timeout !== 0}
@@ -456,11 +458,15 @@ class Dialogs extends Component {
                         <div className='dialogs-content'>
                             <div className='dialogs-content-internal'>
                                 <Filters/>
-                                {/*<div className='sidebar-page-top-divider' style={{ zIndex: 1 }}/>*/}
+                                <div className='sidebar-page-top-divider' style={{ zIndex: 1 }}/>
                                 <DialogsList
                                     type='chatListMain'
                                     ref={this.dialogListRef}
                                     cacheItems={mainCacheItems}
+                                    items={mainItems}
+                                    showArchive={showArchive}
+                                    archiveTitle={archiveTitle}
+                                    open={true}
                                     onSaveCache={this.handleSaveCache}
                                 />
                             </div>
@@ -478,7 +484,7 @@ class Dialogs extends Component {
                                 />
                             </CSSTransition>
                         </div>
-                        {/*<UpdatePanel />*/}
+                        <UpdatePanel />
                     </div>
 
                     <SidebarPage open={openArchive} timeout={timeout} onClose={this.handleCloseArchive}>

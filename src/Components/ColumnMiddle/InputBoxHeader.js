@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
 import CloseIcon from '../../Assets/Icons/Close';
-import IconButton from '@material-ui/core/IconButton';
+import IconButton from '@mui/material/IconButton';
 import Reply from '../Message/Reply';
 import { editMessage, replyMessage } from '../../Actions/Client';
 import MessageStore from '../../Stores/MessageStore';

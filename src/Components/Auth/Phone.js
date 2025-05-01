@@ -8,12 +8,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import Button from '@material-ui/core/Button';
-import Checkbox from '@material-ui/core/Checkbox';
-import TextField from '@material-ui/core/TextField';
-import Link from '@material-ui/core/Link';
-import Typography from '@material-ui/core/Typography';
+import Autocomplete from '@mui/material/Autocomplete';
+import Button from '@mui/material/Button';
+import Checkbox from '@mui/material/Checkbox';
+import TextField from '@mui/material/TextField';
+import Link from '@mui/material/Link';
+import Typography from '@mui/material/Typography';
 import Country from './Country';
 import HeaderProgress from '../ColumnMiddle/HeaderProgress';
 import { KEY_SUGGESTED_LANGUAGE_PACK_ID } from '../../Constants';
@@ -357,7 +357,7 @@ class Phone extends React.Component {
 
         const { phone, country } = this.state;
 
-        const prevPhone = (country ? phone.replace(country.phone, '') : phone) || '';
+        const prevPhone = country ? phone.replace(country.phone, '') : phone;
         const nextPhone = nextCountry.phone + ' ' + prevPhone.trimStart();
 
         this.setState({ country: nextCountry, phone: nextPhone }, () => {
@@ -439,11 +439,11 @@ class Phone extends React.Component {
                     <span>{title}</span>
                     {connecting && <HeaderProgress />}
                 </Typography>
-                <Typography variant='body1' className='auth-subtitle' style={{ width: 264 }}>
+                <Typography variant='body1' className='auth-subtitle' style={{ width: 254 }}>
                     {t('StartText')}
                 </Typography>
                 <Autocomplete
-                    debug={false}
+                    // debug="false"
                     id='country-select'
                     noOptionsText={t('NoResult')}
                     options={data || []}

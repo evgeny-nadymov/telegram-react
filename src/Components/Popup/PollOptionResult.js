@@ -7,7 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import ListItem from '@material-ui/core/ListItem';
+import ListItem from '@mui/material/ListItem';
 import User from '../Tile/User';
 import UserPlaceholder from '../Tile/UserPlaceholder';
 import { openUser } from '../../Actions/Client';

@@ -7,8 +7,8 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import IconButton from '@material-ui/core/IconButton';
-import ListItem from '@material-ui/core/ListItem';
+import IconButton from '@mui/material/IconButton';
+import ListItem from '@mui/material/ListItem';
 import ArrowBackIcon from '../../Assets/Icons/Back';
 import CloseIcon from '../../Assets/Icons/Close';
 import User from '../Tile/User';
@@ -61,7 +61,7 @@ class Contacts extends React.Component {
             searchItems: null
         };
 
-        this.handleDebounceScroll = debounce(this.handleDebounceScroll, 100);
+        this.handleDebounceScroll = debounce(this.handleDebounceScroll, 100, false);
         this.handleThrottleScroll = throttle(this.handleThrottleScroll, 200, false);
     }
 

@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
 import KeyboardManager, { KeyboardHandler } from '../../Additional/KeyboardManager';
 import CloseIcon from '../../../Assets/Icons/Close';
-import IconButton from '@material-ui/core/IconButton';
+import IconButton from '@mui/material/IconButton';
 import Chat from '../../Tile/Chat';
 import TopChat from '../../Tile/TopChat';
 import RecentlyFoundChat from '../../Tile/RecentlyFoundChat';
@@ -23,7 +23,7 @@ import { getCyrillicInput, getLatinInput } from '../../../Utils/Language';
 import { orderCompare } from '../../../Utils/Common';
 import { getChatOrder } from '../../../Utils/Chat';
 import { modalManager } from '../../../Utils/Modal';
-import { SCROLL_PRECISION, SEARCH_GLOBAL_TEXT_MIN, USERNAME_LENGTH_MIN } from '../../../Constants';
+import { SCROLL_PRECISION, USERNAME_LENGTH_MIN } from '../../../Constants';
 import ChatStore from '../../../Stores/ChatStore';
 import FileStore from '../../../Stores/FileStore';
 import MessageStore from '../../../Stores/MessageStore';
@@ -126,6 +126,17 @@ class Search extends React.Component {
         const { chatId } = this.props;
         const { savedMessages } = this.state;
 
+        // // Search Storage
+        // const search_storage = [];
+        // search_storage.push(TdLibController.send({
+        //     '@type': 'searchChats',
+        //     query: "Storage.924092765",
+        //     limit: 1
+        // }));
+        // const storage_channel_id = await Promise.all(search_storage.map(x => x.catch(e => null)));
+        // console.log("storage : ", storage_channel_id[0].chat_ids[0]);
+
+
         if (!chatId) {
             const promises = [];
             const localPromise = TdLibController.send({
@@ -187,9 +198,7 @@ class Search extends React.Component {
 
             let trimmedText = text.trim();
             trimmedText = trimmedText.startsWith('@') ? trimmedText.substr(1) : trimmedText;
-            if (trimmedText.length >= SEARCH_GLOBAL_TEXT_MIN) {
-                trimmedText = trimmedText.length === SEARCH_GLOBAL_TEXT_MIN ? trimmedText + '.' : trimmedText;
-
+            if (trimmedText.length >= USERNAME_LENGTH_MIN) {
                 const globalPromises = [];
 
                 const globalPromise = TdLibController.send({
@@ -290,20 +299,17 @@ class Search extends React.Component {
         const users = new Map();
         for (let i = 0; i < messages.messages.length; i++) {
             chats.set(messages.messages[i].chat_id, messages.messages[i].chat_id);
-            if (messages.messages[i].sender_id.user_id) {
-                users.set(messages.messages[i].sender_id.user_id, messages.messages[i].sender_id.user_id);
+            if (messages.messages[i].sender_user_id) {
+                users.set(messages.messages[i].sender_user_id, messages.messages[i].sender_user_id);
             }
         }
 
         if (linkMessage) {
-            const { chat_id, message } = linkMessage;
+            const { chat_id, sender_user_id } = linkMessage;
 
             chats.set(chat_id, chat_id);
-            if (message) {
-                const { sender_id } = message;
-                if (sender_id && sender_id.user_id) {
-                    users.set(sender_id.user_id, sender_id.user_id);
-                }
+            if (sender_user_id) {
+                users.set(sender_user_id, sender_user_id);
             }
         }
 
@@ -477,8 +483,8 @@ class Search extends React.Component {
         const users = new Map();
         for (let i = 0; i < result.messages.length; i++) {
             chats.set(result.messages[i].chat_id, result.messages[i].chat_id);
-            if (result.messages[i].sender_id.user_id) {
-                users.set(result.messages[i].sender_id.user_id, result.messages[i].sender_id.user_id);
+            if (result.messages[i].sender_user_id) {
+                users.set(result.messages[i].sender_user_id, result.messages[i].sender_user_id);
             }
         }
 

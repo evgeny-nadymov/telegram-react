@@ -10,25 +10,20 @@
 /*}*/
 
 .dialog {
+    border-radius: 10px;
     cursor: pointer;
     position: relative;
-    padding: 0;
-    box-sizing: border-box;
-    border-radius: 10px;
-    margin-bottom: 4px;
 }
 
 .dialog:hover {
     background: var(--color-hover);
 }
 
-.dialog:hover .online-status-icon,
-.dialog:hover .group-call-status-icon {
+.dialog:hover .online-status-icon {
     background: var(--color-hover);
 }
 
-.dialog.item-selected .online-status-icon,
-.dialog.item-selected .group-call-status-icon {
+.dialog.item-selected .online-status-icon {
     background: var(--color-hover);
 }
 
@@ -115,4 +110,8 @@
 
 .page-small .dialog-inner-wrapper {
     /*display: none;*/
+}
+
+.MuiPaper-root {
+    background-color: #17212b;    
 }

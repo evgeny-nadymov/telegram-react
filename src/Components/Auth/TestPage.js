@@ -5,13 +5,13 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
+import React from "react";
+import PropTypes from "prop-types";
 
 class TestPage extends React.Component {
-    render() {
-        return 'Test Page';
-    }
+  render() {
+    return "Test Page";
+  }
 }
 
 TestPage.propTypes = {};

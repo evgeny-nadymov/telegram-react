@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import ChatInfo from '../ColumnRight/ChatInfo';
 import { modalManager } from '../../Utils/Modal';
 import ApplicationStore from '../../Stores/ApplicationStore';

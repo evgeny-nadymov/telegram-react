@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import Contacts from '../ColumnLeft/Contacts';
 import DialogsHeader from '../ColumnLeft/DialogsHeader';
 import Search from '../ColumnLeft/Search/Search';

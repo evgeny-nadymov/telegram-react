@@ -7,10 +7,6 @@
 
 import OptionStore from '../Stores/OptionStore';
 
-export function sprintf(t, key, ...args) {
-    return t(key, { postProcess: 'sprintf', sprintf: args });
-}
-
 let cyrillicInput = null;
 
 function getCyrillicInputMap() {

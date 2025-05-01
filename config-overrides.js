@@ -8,6 +8,8 @@
 const {
     override,
     addWebpackModuleRule,
+    disableEsLint,
+    addBabelPlugin
 } = require('customize-cra');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
@@ -22,23 +24,58 @@ function addWebpackBundleAnalyzer(config, options = {}) {
     return config;
 }
 
+// Function to handle Material-UI v5 setup
+function addMuiV5Support(config) {
+    return config;
+}
+
 module.exports = override(
+    // Basic config modifications
     config => ({
         ...config,
         output: {
             ...config.output,
             globalObject: 'this',
+            // publicPath: '/'
         },
     }),
-    config => addWebpackBundleAnalyzer(config,{
-        // analyzerMode: 'static',
-        // reportFilename: 'report.html',
+    // Disable ESLint to avoid conflicts with newer dependencies
+    disableEsLint(),
+    // Add bundle analyzer
+    config => addWebpackBundleAnalyzer(config, {
         openAnalyzer: true,
         generateStatsFile: true,
         statsFilename: 'bundle-stats.json'
     }),
+    // Worker loader configuration
+    addWebpackModuleRule({
+        test: /\.worker\.js$/,
+        use: { 
+            loader: 'worker-loader',
+            options: { 
+                filename: '[name].[contenthash].worker.js',
+                publicPath: '/telegram-react/'
+            }
+        },
+    }),
     addWebpackModuleRule({
         test: /\.worker\.js$/,
         use: { loader: 'worker-loader' },
-    })
+    }),
+    // // TDLib worker configuration
+    // config => {
+    //     // Make sure tdlib worker doesn't get minified to avoid syntax errors
+    //     if (config.optimization && config.optimization.minimizer) {
+    //         config.optimization.minimizer.forEach(minimizer => {
+    //             if (minimizer.constructor.name === 'TerserPlugin') {
+    //                 minimizer.options.exclude = /\.worker\.js$/;
+    //             }
+    //         });
+    //     }
+    //     return config;
+    // },
+    // MUI v5 setup
+    addMuiV5Support,
+    // Add support for emotion (required by MUI v5)
+    addBabelPlugin('@emotion/babel-plugin')
 );

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import IconButton from '@material-ui/core/IconButton';
+import IconButton from '@mui/material/IconButton';
 import ArrowBackIcon from '../../Assets/Icons/Back';
 import './GroupsInCommonHeader.css';
 

@@ -8,8 +8,15 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
-import IconButton from '@material-ui/core/IconButton';
-import PlaylistEditIcon from '../../Assets/Icons/PlaylistEdit';
+import Button from '@mui/material/Button';
+import Checkbox from '@mui/material/Checkbox';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import IconButton from '@mui/material/IconButton';
 import SearchIcon from '../../Assets/Icons/Search';
 import MainMenuButton from './MainMenuButton';
 import HeaderChat from '../Tile/HeaderChat';
@@ -18,11 +25,13 @@ import HeaderProgress from './HeaderProgress';
 import PinnedMessage from './PinnedMessage';
 import { changeChatDetailsVisibility } from '../../Actions/Chat';
 import {
+    getChatShortTitle,
     getChatSubtitle,
     getChatTitle,
-    isAccentChatSubtitle
+    isAccentChatSubtitle, isChannelChat,
+    isPrivateChat, isSupergroup
 } from '../../Utils/Chat';
-import { openChat, searchChat } from '../../Actions/Client';
+import { clearSelection, openChat, searchChat } from '../../Actions/Client';
 import AppStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
 import MessageStore from '../../Stores/MessageStore';
@@ -33,78 +42,102 @@ class Header extends Component {
     constructor(props) {
         super(props);
 
-        const chatId = AppStore.getChatId();
-        const media = MessageStore.getMedia(chatId);
-        const pinned = media ? media.pinned : [];
-
         this.state = {
-            chatId,
-            pinned,
             authorizationState: AppStore.getAuthorizationState(),
-            connectionState: AppStore.getConnectionState()
+            connectionState: AppStore.getConnectionState(),
+            openDeleteDialog: false
         };
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        if (nextState !== this.state) {
+            return true;
+        }
+
+        if (nextProps.theme !== this.props.theme) {
+            return true;
+        }
+
+        if (nextProps.t !== this.props.t) {
+            return true;
+        }
+
+        return false;
     }
 
     componentDidMount() {
         AppStore.on('clientUpdateChatId', this.onClientUpdateChatId);
+        AppStore.on('clientUpdateDeleteMessages', this.onClientUpdateDeleteMessages);
         AppStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
         AppStore.on('updateConnectionState', this.onUpdateConnectionState);
 
-        MessageStore.on('clientUpdateChatMedia', this.onClientUpdateChatMedia);
         MessageStore.on('clientUpdateClearSelection', this.onClientUpdateMessageSelected);
         MessageStore.on('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
-        MessageStore.on('updateMessageIsPinned', this.onUpdateMessageIsPinned);
     }
 
     componentWillUnmount() {
         AppStore.off('clientUpdateChatId', this.onClientUpdateChatId);
+        AppStore.off('clientUpdateDeleteMessages', this.onClientUpdateDeleteMessages);
         AppStore.off('updateAuthorizationState', this.onUpdateAuthorizationState);
         AppStore.off('updateConnectionState', this.onUpdateConnectionState);
 
-        MessageStore.off('clientUpdateChatMedia', this.onClientUpdateChatMedia);
         MessageStore.off('clientUpdateClearSelection', this.onClientUpdateMessageSelected);
         MessageStore.off('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
-        MessageStore.off('updateMessageIsPinned', this.onUpdateMessageIsPinned);
     }
 
-    onUpdateMessageIsPinned = update => {
-        const { chatId } = this.state;
-        const { chat_id } = update;
-        if (chatId !== chat_id) return;
+    onClientUpdateDeleteMessages = update => {
+        const { chatId, messageIds } = update;
 
-        this.setPinnedState();
+        let canBeDeletedForAllUsers = true;
+        for (let messageId of messageIds) {
+            const message = MessageStore.get(chatId, messageId);
+            if (!message) {
+                canBeDeletedForAllUsers = false;
+                break;
+            }
+            if (!message.can_be_deleted_for_all_users) {
+                canBeDeletedForAllUsers = false;
+                break;
+            }
+        }
+
+        this.setState({
+            openDeleteDialog: true,
+            chatId,
+            messageIds,
+            canBeDeletedForAllUsers: canBeDeletedForAllUsers,
+            revoke: canBeDeletedForAllUsers
+        });
     };
 
-    onClientUpdateChatMedia = update => {
-        const { chatId: currentChatId } = this.state;
-        const { chatId } = update;
-        if (chatId !== currentChatId) return;
-
-        this.setPinnedState();
+    handleRevokeChange = () => {
+        this.setState({ revoke: !this.state.revoke });
     };
 
-    setPinnedState() {
-        const { chatId } = this.state;
+    handleCloseDelete = () => {
+        this.setState({ openDeleteDialog: false });
+    };
 
-        const media = MessageStore.getMedia(chatId);
-        const pinned = media ? media.pinned : [];
+    handleDeleteContinue = () => {
+        const { revoke, chatId, messageIds } = this.state;
 
-        this.setState({ pinned });
-    }
+        clearSelection();
+        this.handleCloseDelete();
+
+        TdLibController.send({
+            '@type': 'deleteMessages',
+            chat_id: chatId,
+            message_ids: messageIds,
+            revoke: revoke
+        });
+    };
 
     onClientUpdateMessageSelected = update => {
         this.setState({ selectionCount: MessageStore.selectedItems.size });
     };
 
     onClientUpdateChatId = update => {
-        const chatId = AppStore.getChatId();
-        const media = MessageStore.getMedia(chatId);
-        const pinned = media ? media.pinned : [];
-
-        this.setState({
-            chatId,
-            pinned
-        });
+        this.forceUpdate();
     };
 
     onUpdateConnectionState = update => {
@@ -116,7 +149,7 @@ class Header extends Component {
     };
 
     openChatDetails = () => {
-        const { chatId } = this.state;
+        const chatId = AppStore.getChatId();
         const chat = ChatStore.get(chatId);
         if (!chat) return;
 
@@ -130,7 +163,7 @@ class Header extends Component {
     };
 
     handleSearchChat = () => {
-        const { chatId } = this.state;
+        const chatId = AppStore.getChatId();
         const chat = ChatStore.get(chatId);
         if (!chat) return;
 
@@ -145,29 +178,26 @@ class Header extends Component {
             .replace('…', '');
     };
 
-    handleMouseDown = event => {
-        event.stopPropagation();
-    };
-
-    handlePinClick = () => {
-        const { chatId } = this.state;
-
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateOpenPinned',
-            chatId
-        })
-    };
-
     render() {
         const { t } = this.props;
         const {
-            chatId,
-            pinned,
             authorizationState,
             connectionState,
             selectionCount,
+            openDeleteDialog,
+            canBeDeletedForAllUsers,
+            revoke,
+            messageIds
         } = this.state;
 
+        const count = messageIds ? messageIds.length : 0;
+
+        let control = null;
+        if (selectionCount) {
+            control = <HeaderCommand count={selectionCount} />;
+        }
+
+        const chatId = AppStore.getChatId();
         const chat = ChatStore.get(chatId);
 
         const isAccentSubtitle = isAccentChatSubtitle(chatId);
@@ -229,58 +259,101 @@ class Header extends Component {
                     subtitle = '';
                     showProgressAnimation = true;
                     break;
+                }
+            } else {
+                title = this.localize('Loading');
+                subtitle = '';
+                showProgressAnimation = true;
             }
-        } else {
-            title = this.localize('Loading');
-            subtitle = '';
-            showProgressAnimation = true;
-        }
-
-        return (
-            <div className={classNames('header-details', { 'header-details-selection': selectionCount > 0 })}>
-                <div className='header-details-content'>
-                    <HeaderCommand count={selectionCount} />
-                    <div className='header-details-row'>
-                        {showProgressAnimation ? (
-                            <div
-                                className={classNames('header-status', 'grow', chat ? 'cursor-pointer' : 'cursor-default')}
-                                onClick={this.openChatDetails}>
-                                <span className='header-status-content'>{title}</span>
-                                <HeaderProgress />
-                                <span className={classNames('header-status-title', { 'header-status-accent': isAccentSubtitle })}>
-                                    {subtitle}
-                                </span>
-                                <span className='header-status-tail' />
-                            </div>
-                        ) : (
-                            <HeaderChat
-                                className={classNames('grow', 'cursor-pointer')}
-                                chatId={chatId}
-                                onClick={this.openChatDetails}
-                            />
-                        )}
-                        <PinnedMessage chatId={chatId} />
-                        {chat && (
-                            <div className='header-right-buttons'>
-                                { pinned.length > 1 && (
-                                    <IconButton
-                                        aria-label='Pins'
-                                        onClick={this.handlePinClick}
-                                        onMouseDown={this.handleMouseDown}>
-                                        <PlaylistEditIcon />
-                                    </IconButton>
-                                )}
-                                <IconButton
-                                    aria-label='Search'
-                                    onClick={this.handleSearchChat}>
-                                    <SearchIcon />
-                                </IconButton>
-                                <MainMenuButton openChatDetails={this.openChatDetails} />
-                            </div>
-                        )}
+            
+            control = control || (
+                <div className='header-details'>
+                {showProgressAnimation ? (
+                    <div
+                        className={classNames('header-status', 'grow', chat ? 'cursor-pointer' : 'cursor-default')}
+                        onClick={this.openChatDetails}>
+                        <span className='header-status-content'>{title}</span>
+                        <HeaderProgress />
+                        <span
+                            className={classNames('header-status-title', { 'header-status-accent': isAccentSubtitle })}>
+                            {subtitle}
+                        </span>
+                        <span className='header-status-tail' />
                     </div>
-                </div>
+                ) : (
+                    <HeaderChat
+                        className={classNames('grow', 'cursor-pointer')}
+                        chatId={chatId}
+                        onClick={this.openChatDetails}
+                    />
+                )}
+                <PinnedMessage chatId={chatId} />
+                {chat && (
+                    <>
+                        <IconButton
+                            className='header-right-second-button'
+                            aria-label='Search'
+                            onClick={this.handleSearchChat}>
+                            <SearchIcon />
+                        </IconButton>
+                        <MainMenuButton openChatDetails={this.openChatDetails} />
+                    </>
+                )}
             </div>
+        );
+        // console.log("chatId : ", chatId);
+        return (
+            <>
+                {control}
+                <Dialog
+                    transitionDuration={0}
+                    open={openDeleteDialog}
+                    onClose={this.handleCloseDelete}
+                    aria-labelledby='delete-dialog-title'>
+                    <DialogTitle id='delete-dialog-title'>Confirm</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            {count === 1
+                                ? 'Do you want to delete this message?'
+                                : `Do you want to delete ${count} messages?`}
+                        </DialogContentText>
+                        { isSupergroup(chatId) ? (
+                            <DialogContentText>
+                                { !isChannelChat(chatId) && (count === 1
+                                    ? 'This will delete it for everyone in this chat'
+                                    : 'This will delete them for everyone in this chat')
+                                }
+                            </DialogContentText>
+                        ) : (
+                            <>
+                                {
+                                    canBeDeletedForAllUsers && (
+                                    <FormControlLabel
+                                    control={
+                                        <Checkbox checked={revoke} onChange={this.handleRevokeChange} color='primary' />
+                                    }
+                                    label={
+                                        isPrivateChat(chatId)
+                                            ? `Delete for ${getChatShortTitle(chatId, false, t)}`
+                                            : 'Delete for all'
+                                    }
+                                    />
+                                )}
+                            </>
+                        )}
+
+
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={this.handleCloseDelete} color='primary'>
+                            {t('Cancel')}
+                        </Button>
+                        <Button onClick={this.handleDeleteContinue} color='primary'>
+                            {t('Ok')}
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            </>
         );
     }
 }

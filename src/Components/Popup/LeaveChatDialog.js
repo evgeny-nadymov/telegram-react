@@ -8,15 +8,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
-import Dialog from '@material-ui/core/Dialog';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogActions from '@material-ui/core/DialogActions';
-import Button from '@material-ui/core/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogActions from '@mui/material/DialogActions';
+import Button from '@mui/material/Button';
 import ChatTile from '../Tile/ChatTile';
 import { getChatShortTitle } from '../../Utils/Chat';
-import { modalManager } from '../../Utils/Modal';
 import ChatStore from '../../Stores/ChatStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
 
@@ -54,7 +53,6 @@ class LeaveChatDialog extends React.Component {
 
         return (
             <Dialog
-                manager={modalManager}
                 open={true}
                 transitionDuration={0}
                 onClose={() => onClose(false)}

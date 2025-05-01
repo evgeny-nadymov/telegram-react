@@ -135,7 +135,7 @@
 389;MK;Macedonia;;0;🇲🇰
 261;MG;Madagascar;261 XX XX XXX XX;12;🇲🇬
 265;MW;Malawi;;0;🇲🇼
-60;MY;Malaysia;;0;🇲🇾
+60;MM;Malaysia;;0;🇲🇲
 960;MV;Maldives;;0;🇲🇻
 223;ML;Mali;223 XXXX XXXX;11;🇲🇱
 356;MT;Malta;356 XX XX XX XX;11;🇲🇹

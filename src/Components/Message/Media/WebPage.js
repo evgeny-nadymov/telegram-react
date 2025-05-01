@@ -8,8 +8,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
-import Button from '@material-ui/core/Button';
-import SvgIcon from '@material-ui/core/SvgIcon';
+import Button from '@mui/material/Button';
+import SvgIcon from '@mui/material/SvgIcon';
 import Animation from './Animation';
 import Audio from './Audio';
 import Document from './Document';
@@ -117,19 +117,8 @@ class WebPage extends React.Component {
                 (type === 'article' || type === 'photo' || type === 'telegram_megagroup' || type === 'telegram_channel') &&
                 (site_name || title || description && description.text.length > 0) &&
                 photoSize &&
-                (photoSize.width === photoSize.height || Math.max(photoSize.width, photoSize.height) < PHOTO_SIZE );
-            let totalLength = 0;
-            if (site_name) {
-                totalLength += site_name.length;
-            }
-            if (title) {
-                totalLength += title.length;
-            }
-            if (description) {
-                totalLength += description.text.length;
-            }
-
-            const extraSmallPhoto = smallPhoto && totalLength < 50;
+                (photoSize.width === photoSize.height || Math.max(photoSize.width, photoSize.height) < PHOTO_DISPLAY_SIZE );
+            const extraSmallPhoto = smallPhoto && (!description || description.text.length < 50);
 
             const style =
                 smallPhoto || extraSmallPhoto

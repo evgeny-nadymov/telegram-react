@@ -96,7 +96,7 @@ class SharedVoiceNote extends React.Component {
 
         if (!voiceNote) return null;
 
-        const { date, sender_id } = message;
+        const { date, sender_user_id } = message;
         const dateString = new Date(date * 1000).toLocaleDateString([i18n.language], {
             day: 'numeric',
             month: 'short',
@@ -113,7 +113,7 @@ class SharedVoiceNote extends React.Component {
                 <div className='shared-voice-note' onContextMenu={this.handleOpenContextMenu}>
                     <VoiceNoteTile chatId={chatId} messageId={messageId} file={file} openMedia={openMedia} />
                     <div className='voice-note-content'>
-                        <div className='document-title'><MessageAuthor sender={sender_id} messageId={messageId} /></div>
+                        <div className='document-title'><MessageAuthor chatId={chatId} messageId={messageId} userId={sender_user_id} /></div>
                         <div className='voice-note-meta'>
                             <AudioAction
                                 chatId={chatId}

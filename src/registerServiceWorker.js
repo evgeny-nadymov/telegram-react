@@ -89,14 +89,11 @@ async function registerValidSW(swUrl) {
                         console.log('[SW] New content is available; please refresh.');
 
                         TdLibController.clientUpdate({ '@type': 'clientUpdateNewContentAvailable' });
-                        showAlert({
-                            title: LStore.getString('NewVersionTitle'),
-                            message: LStore.getString('NewVersionText'),
-                            ok: LStore.getString('OK'),
-                            onResult: async () => {
-                                window.location.reload();
-                            }
-                        });
+                        
+                        // Optional: Dispatch a message to notify users of update
+                        // and offer to reload when they're ready
+                        const event = new CustomEvent('swUpdated', { detail: registration });
+                        window.dispatchEvent(event);
                     } else {
                         // At this point, everything has been precached.
                         // It's the perfect time to display a
@@ -119,7 +116,10 @@ export async function subscribeNotifications() {
         let pushSubscription = await registration.pushManager.getSubscription();
         if (pushSubscription) await pushSubscription.unsubscribe();
 
-        pushSubscription = await registration.pushManager.subscribe({ userVisibleOnly: true });
+        pushSubscription = await registration.pushManager.subscribe({ 
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(process.env.REACT_APP_VAPID_PUBLIC_KEY || '')
+        });
         console.log('[SW] Received push subscription: ', JSON.stringify(pushSubscription));
 
         const { endpoint } = pushSubscription;
@@ -150,11 +150,30 @@ export async function subscribeNotifications() {
     }
 }
 
+function urlBase64ToUint8Array(base64String) {
+    if (!base64String) return new Uint8Array();
+    
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+        .replace(/-/g, '+')
+        .replace(/_/g, '/');
+
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+
+    for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+}
+
 async function checkValidServiceWorker(swUrl) {
     console.log('[SW] checkValid');
     // Check if the service worker can be found. If it can't reload the page.
     try {
-        const response = await fetch(swUrl);
+        const response = await fetch(swUrl, {
+            headers: { 'Service-Worker': 'script' }
+        });
 
         // Ensure service worker exists, and that we really are getting a JS file.
         if (response.status === 404 || response.headers.get('content-type').indexOf('javascript') === -1) {
@@ -189,6 +208,14 @@ export async function update() {
     }
 }
 
+// Used to update the service worker immediately when user clicks "Update now" button
+export function handleServiceWorkerUpdate(registration) {
+    if (registration && registration.waiting) {
+        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+        window.location.reload();
+    }
+}
+
 const requests = [];
 window.requests = requests;
 
@@ -203,10 +230,10 @@ async function processRequest(request) {
                 const { local } = file;
                 if (local) {
                     const { download_offset, downloaded_prefix_size } = local;
-                    // console.log('[cache] checkFile', fileId, [offset, limit], [download_offset, downloaded_prefix_size]);
+                    console.log('[cache] checkFile', fileId, [offset, limit], [download_offset, downloaded_prefix_size]);
                     if (download_offset <= offset && offset + limit <= download_offset + downloaded_prefix_size) {
 
-                        // console.log('[cache] readExistingFile', fileId);
+                        console.log('[cache] readExistingFile', fileId);
                         filePart = await TdLibController.send({
                             '@type': 'readFilePart',
                             file_id: fileId,
@@ -221,7 +248,7 @@ async function processRequest(request) {
         }
 
         if (!filePart) {
-            // console.log('[cache] downloadFile', fileId, [offset, limit]);
+            console.log('[cache] downloadFile', fileId, [offset, limit]);
             await TdLibController.send({
                 '@type': 'downloadFile',
                 file_id: fileId,
@@ -231,7 +258,7 @@ async function processRequest(request) {
                 synchronous: true
             });
 
-            // console.log('[cache] readFilePart', fileId, [offset, limit]);
+            console.log('[cache] readFilePart', fileId, [offset, limit]);
             filePart = await TdLibController.send({
                 '@type': 'readFilePart',
                 file_id: fileId,
@@ -278,7 +305,7 @@ async function getFilePart(fileId, offset, limit) {
 
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.onmessage = async (e) => {
-        // console.log('[stream] client.onmessage', e.data);
+        console.log('[stream] client.onmessage', e.data);
 
         switch (e.data['@type']) {
             case 'getFile': {

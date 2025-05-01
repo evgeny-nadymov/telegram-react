@@ -1,0 +1,39 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+ .dialog-details {
+    /* max-width: 75%; */
+    /* flex: 1 1 75%; */
+    margin: 0;
+    box-sizing: border-box;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--chat-background);
+    background-size: cover;
+    background-position: center;
+    transition: background-image 0.25s ease;
+}
+
+.light .dialog-details {
+    background-image: url('../../Assets/camomile_blurred.jpg');
+}
+
+.page-small .dialog-details {
+    /* max-width: calc(100% - 89px); */
+    /* flex: 1 1 calc(100% - 89px); */
+}
+
+.page-third-column .dialog-details {
+    /* max-width: 50%; */
+    /* flex: 1 1 50%; */
+}
+
+.page-small.page-third-column .dialog-details {
+    /* max-width: calc(75% - 89px); */
+    /* flex: 1 1 calc(75% - 89px); */
+}

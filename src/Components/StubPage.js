@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
-import IconButton from '@material-ui/core/IconButton';
+import IconButton from '@mui/material/IconButton';
 import DialogPlaceholder from './Tile/DialogPlaceholder';
 import Footer from './Footer';
 import HeaderProgress from './ColumnMiddle/HeaderProgress';

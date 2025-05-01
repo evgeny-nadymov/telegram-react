@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import VolumeMuteIcon from '@material-ui/icons/VolumeMute';
-import VolumeDownIcon from '@material-ui/icons/VolumeDown';
-import VolumeUpIcon from '@material-ui/icons/VolumeUp';
-import VolumeOffIcon from '@material-ui/icons/VolumeOff';
-import IconButton from '@material-ui/core/IconButton';
-import Slider from '@material-ui/core/Slider';
+import VolumeMuteIcon from '@mui/icons-material/VolumeMute';
+import VolumeDownIcon from '@mui/icons-material/VolumeDown';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import VolumeOffIcon from '@mui/icons-material/VolumeOff';
+import IconButton from '@mui/material/IconButton';
+import Slider from '@mui/material/Slider';
 import { PLAYER_VOLUME_NORMAL } from '../../Constants';
 import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';

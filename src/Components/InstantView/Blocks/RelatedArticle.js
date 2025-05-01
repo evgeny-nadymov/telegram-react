@@ -40,7 +40,7 @@ class RelatedArticle extends React.Component {
                     <address>
                         {author}
                         {hasAuthorDateSeparator && ' • '}
-                        {d && <time dateTime={d.toISOString()}>{dateFormat(d, 'dd MMM, yyyy')}</time>}
+                        {d && <time dateTime={d.toISOString()}>{dateFormat(d, 'dd mmm, yyyy')}</time>}
                     </address>
                 )}
                 {/*{ description && (*/}

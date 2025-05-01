@@ -8,8 +8,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
-import IconButton from '@material-ui/core/IconButton';
-import TextField from '@material-ui/core/TextField';
+import IconButton from '@mui/material/IconButton';
+import TextField from '@mui/material/TextField';
 import ArrowBackIcon from '../../Assets/Icons/Back';
 import CloseIcon from '../../Assets/Icons/Close';
 import NextIcon from '../../Assets/Icons/Back';
@@ -71,15 +71,17 @@ class NewChannel extends React.Component {
             location: null
         });
 
-        if (defaultPhotoFile || defaultPhoto) {
-            const photo = defaultPhotoFile
-                ? { '@type': 'inputFileId', id: defaultPhotoFile.id }
-                : { '@type': 'inputFileBlob', name: 'photo.jpg', data: defaultPhoto };
-
+        if (defaultPhotoFile) {
             TdLibController.send({
                 '@type': 'setChatPhoto',
                 chat_id: chat.id,
-                photo: { '@type': 'inputChatPhotoStatic', photo }
+                photo: { '@type': 'inputFileId', id: defaultPhotoFile.id }
+            });
+        } else if (defaultPhoto) {
+            TdLibController.send({
+                '@type': 'setChatPhoto',
+                chat_id: chat.id,
+                photo: { '@type': 'inputFileBlob', name: 'photo.jpg', data: defaultPhoto }
             });
         }
 

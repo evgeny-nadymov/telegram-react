@@ -10,15 +10,15 @@ import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
 import emojiRegex from 'emoji-regex';
 import MediaRecorder from 'opus-media-recorder';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import SpeedDialIcon from '@mui/material/SpeedDialIcon';
 import DoneIcon from '../../Assets/Icons/Done';
-import IconButton from '@material-ui/core/IconButton';
+import IconButton from '@mui/material/IconButton';
 import InsertEmoticonIcon from '../../Assets/Icons/Smile';
 import SendIcon from '../../Assets/Icons/Send';
 import MicrophoneIcon from '../../Assets/Icons/Microphone';
@@ -31,22 +31,19 @@ import PasteFilesDialog from '../Popup/PasteFilesDialog';
 import RecordTimer from './RecordTimer';
 import EditMediaDialog from '../Popup/EditMediaDialog';
 import OutputTypingManager from '../../Utils/OutputTypingManager';
-import { draftEquals, getChatDraft, getChatDraftReplyToMessageId, getChatFullInfo, isMeChat, isPrivateChat, isSupergroup } from '../../Utils/Chat';
+import { draftEquals, getChatDraft, getChatDraftReplyToMessageId, isMeChat, isPrivateChat } from '../../Utils/Chat';
 import { findLastTextNode, focusInput } from '../../Utils/DOM';
 import { getMediaDocumentFromFile, getMediaPhotoFromFile, isEditedMedia } from '../../Utils/Media';
 import { getEntities, getNodes, isTextMessage } from '../../Utils/Message';
 import { getSize, readImageSize } from '../../Utils/Common';
 import { editMessage, replyMessage } from '../../Actions/Client';
-import { isDeletedUser, isMeUser } from '../../Utils/User';
-import { PHOTO_SIZE, SEND_BY_CTRL_ENTER_KEY, VOICENOTE_MIN_RECORD_DURATION } from '../../Constants';
+import { PHOTO_SIZE, VOICENOTE_MIN_RECORD_DURATION } from '../../Constants';
 import AnimationStore from '../../Stores/AnimationStore';
 import AppStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
-import OptionStore from '../../Stores/OptionStore';
 import StickerStore from '../../Stores/StickerStore';
-import UserStore from '../../Stores/UserStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './InputBox.css';
 
@@ -188,7 +185,6 @@ class InputBox extends Component {
         FileStore.on('clientUpdateSendFiles', this.onClientUpdateSendFiles);
         MessageStore.on('clientUpdateEditMessage', this.onClientUpdateEditMessage);
         MessageStore.on('clientUpdateReply', this.onClientUpdateReply);
-        MessageStore.on('clientUpdateSendText', this.onClientUpdateSendText);
         MessageStore.on('updateDeleteMessages', this.onUpdateDeleteMessages);
         StickerStore.on('clientUpdateStickerSend', this.onClientUpdateStickerSend);
 
@@ -207,30 +203,11 @@ class InputBox extends Component {
         MessageStore.off('clientUpdateEditMessage', this.onClientUpdateEditMessage);
         MessageStore.off('clientUpdateReply', this.onClientUpdateReply);
         MessageStore.off('updateDeleteMessages', this.onUpdateDeleteMessages);
-        MessageStore.off('clientUpdateSendText', this.onClientUpdateSendText);
         StickerStore.off('clientUpdateStickerSend', this.onClientUpdateStickerSend);
 
         document.removeEventListener('selectionchange', this.selectionChangeListener, true);
 
         this.handleCancelRecord();
-    }
-
-    onClientUpdateClearHistory = update => {
-        const { chatId } = this.props;
-
-        if (chatId !== update.chatId) return;
-    };
-
-    onClientUpdateSendText = update => {
-        const { text } = update;
-
-        if (!text) return;
-
-        const element = this.newMessageRef.current;
-        if (!element) return;
-
-        element.innerText = text;
-        focusInput(element);
     }
 
     onClientUpdateInputShake = update => {
@@ -480,12 +457,6 @@ class InputBox extends Component {
 
         const element = this.newMessageRef.current;
 
-        const { chatSelectOptions } = AppStore;
-        if (chatSelectOptions && chatSelectOptions.switchInline) {
-            this.setFormattedText({ '@type': 'formattedText', text: chatSelectOptions.switchInline, entities: [] });
-            return;
-        }
-
         const formattedText = getChatDraft(chatId);
         if (formattedText) {
             this.setFormattedText(formattedText);
@@ -721,20 +692,22 @@ class InputBox extends Component {
 
     handleAttachDocument = () => {
         if (!this.attachDocumentRef) return;
-
+        
         this.attachDocumentRef.current.click();
     };
-
+    
     handleAttachDocumentComplete = async () => {
         const { files } = this.attachDocumentRef.current;
+        console.warn(files)
         if (files.length === 0) return;
-
+        
         if (files.length === 1) {
             const [ newFile, ...rest ] = Array.from(files);
             if (!newFile) return;
-
+            
             const newItem = await this.getNewItem(newFile, false);
 
+            console.warn("BbContent", newItem);
             this.setState({
                 openEditMedia: true,
                 newItem
@@ -745,7 +718,6 @@ class InputBox extends Component {
                     '@type': 'inputMessageDocument',
                     document: { '@type': 'inputFileBlob', name: file.name, size: file.size, data: file }
                 };
-
                 this.handleSendDocument(content, file);
             });
         }
@@ -935,37 +907,19 @@ class InputBox extends Component {
             }
             case 'Enter':
             case 'NumpadEnter': {
-                const sendByCtrlEnter = OptionStore.get(SEND_BY_CTRL_ENTER_KEY);
-                if (sendByCtrlEnter && sendByCtrlEnter.value) {
-                    // enter+cmd, enter+ctrl, enter+shift
-                    if (!altKey && !ctrlKey && !metaKey && !repeat) {
-                        document.execCommand('insertLineBreak');
+                // enter+cmd, enter+ctrl, enter+shift
+                if (!altKey && (ctrlKey || metaKey || shiftKey) && !repeat) {
+                    document.execCommand('insertLineBreak');
 
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }
-                    // enter+cmd, enter+ctrl
-                    else if (!altKey && (ctrlKey || metaKey) && !shiftKey && !repeat) {
-                        this.handleSubmit(false);
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                // enter
+                else if (!altKey && !ctrlKey && !metaKey && !shiftKey && !repeat) {
+                    this.handleSubmit(false);
 
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }
-                } else {
-                    // enter+cmd, enter+ctrl, enter+shift
-                    if (!altKey && (ctrlKey || metaKey || shiftKey) && !repeat) {
-                        document.execCommand('insertLineBreak');
-
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }
-                    // enter
-                    else if (!altKey && !ctrlKey && !metaKey && !shiftKey && !repeat) {
-                        this.handleSubmit(false);
-
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }
+                    event.preventDefault();
+                    event.stopPropagation();
                 }
                 break;
             }
@@ -1182,7 +1136,7 @@ class InputBox extends Component {
         FileStore.updatePhotoBlob(chat_id, id, file.id);
     };
 
-    async editMessageMedia(content) {
+    editMessageMedia(content) {
         const { chatId, editMessageId } = this.state;
         // console.log('[em] editMessageMedia start', chatId, editMessageId, content);
 
@@ -1190,7 +1144,7 @@ class InputBox extends Component {
         if (!editMessageId) return;
         if (!content) return;
 
-        return TdLibController.send({
+        TdLibController.send({
             '@type': 'editMessageMedia',
             chat_id: chatId,
             message_id: editMessageId,
@@ -1235,12 +1189,14 @@ class InputBox extends Component {
 
     sendMessage = async (content, clearDraft, callback) => {
         const { chatId, replyToMessageId } = this.state;
+        console.log("Reply", chatId, replyToMessageId)
 
         if (!chatId) return;
         if (!content) return;
 
         try {
             await AppStore.invokeScheduledAction(`clientUpdateClearHistory chatId=${chatId}`);
+
             const result = await TdLibController.send({
                 '@type': 'sendMessage',
                 chat_id: chatId,
@@ -1283,244 +1239,7 @@ class InputBox extends Component {
         this.setTyping();
         this.setHints();
         this.setRecordingReadyState();
-
-        // const { text, position } = this.getTextAndCaretPosition();
-        // this.searchUsernameOrHashtag(text, position, [], false);
     };
-
-    getTextAndCaretPosition = () => {
-        const { current: input } = this.newMessageRef;
-        if (!input) return;
-
-        input.focus()
-        let _range = document.getSelection().getRangeAt(0);
-        let range = _range.cloneRange();
-        range.selectNodeContents(input);
-        range.setEnd(_range.endContainer, _range.endOffset);
-
-        return { text: input.innerText, position: range.toString().length };
-    };
-
-    searchUsernameOrHashtag(text, position, messages, usernameOnly) {
-        const { chatId } = this.state;
-
-        const searchResultUsernames = [];
-
-        if (this.cancelDelayRunnable) {
-            clearTimeout(this.cancelDelayRunnable);
-            this.cancelDelayRunnable = null;
-        }
-
-        const info = getChatFullInfo(chatId);
-        const needUsernames = true;
-        const needBotContext = true;
-
-        const now = Date.now();
-        this.now = now;
-
-        let searchPosition = position;
-        if (text.length > 0) {
-            searchPosition--;
-        }
-
-        this.lastText = text;
-        this.lastUsernameOnly = usernameOnly;
-
-        let foundType = -1;
-        let result = '';
-        let resultStartPosition;
-        let resultLength;
-
-        let dogPosition = -1;
-        if (usernameOnly) {
-            result += text.substring(1);
-            resultStartPosition = 0;
-            resultLength = result.length;
-            foundType = 0;
-        } else {
-            for (let i = searchPosition; i >= 0; i--) {
-                if (i >= text.length){
-                    continue;
-                }
-                let ch = text[i];
-                if (i === 0 || text[i - 1] === ' ' || text[i - 1] === '\n' || text[i - 1] === ':') {
-                    if (ch === '@') {
-                        if (needUsernames || needBotContext && i === 0){
-                            if (!info && i !== 0) {
-                                this.lastText = text;
-                                this.lastPosition = position;
-                                this.messages = messages;
-                                this.closeHints(now);
-                                return;
-                            }
-                            dogPosition = i;
-                            foundType = 0;
-                            resultStartPosition = i;
-                            resultLength = result.length + 1;
-                        }
-                    }
-                }
-
-                result = ch + result;
-            }
-        }
-
-        if (foundType === -1) {
-            this.closeHints(now);
-            return;
-        }
-
-        if (foundType === 0) {
-            const users = [];
-            const usersMap = new Map();
-            for (let i = 0; i < Math.min(100, messages.length); i++) {
-                const { sender } = messages[i];
-                if (sender && sender.user_id && !usersMap.has(sender.user_id)) {
-                    usersMap.set(sender.user_id, sender.user_id);
-                    users.push(sender.user_id);
-                }
-            }
-
-            let usernameString = result.substr(resultStartPosition, resultLength).toLowerCase();
-            const hasSpace = usernameString.indexOf(' ') >= 0;
-            const newResult = [];
-            const newResultsMap = new Map();
-            const newMap = new Map();
-
-            const inlineBots = [];
-            if (!usernameOnly && needBotContext && dogPosition === 0 && inlineBots.length > 0) {
-
-            }
-
-            const chat = ChatStore.get(chatId);
-            if (chat && info && info.members) {
-                for (let i = -1; i < info.members.length; i++) {
-                    let username;
-                    let firstName;
-                    let lastName;
-                    let object;
-                    let id;
-                    if (i === -1) {
-                        if (!usernameString.length) {
-                            newResult.push(chat);
-                            continue;
-                        }
-                        firstName = chat.title;
-                        lastName = '';
-                        username = chat.username;
-                        object = chat;
-                        id = -chat.id;
-                    } else {
-                        const { user_id } = info.members[i];
-                        const user = UserStore.get(user_id);
-                        if (!user || !usernameOnly && isMeUser(user_id) || newResultsMap.has(user_id)) {
-                            continue;
-                        }
-                        if (!usernameString.length) {
-                            if (!isDeletedUser(user_id)) {
-                                newResult.push(user);
-                                continue;
-                            }
-                        }
-                        firstName = user.first_name;
-                        lastName = user.last_name;
-                        username = user.username;
-                        object = user;
-                        id = user.id;
-                    }
-
-                    if (username.length > 0 && username.toLowerCase().startsWith(usernameString)
-                        || firstName.length > 0 && firstName.toLowerCase().startsWith(usernameString)
-                        || lastName.length > 0 && lastName.toLowerCase().startsWith(usernameString)
-                        || hasSpace && `${firstName} ${lastName}`.toLowerCase().startsWith(usernameString)) {
-                        newResult.push(object);
-                        newMap.set(id, object);
-                    }
-                }
-            }
-
-            if (isSupergroup(chatId) && usernameString.length > 0) {
-                if (newResult.length < 5) {
-                    this.cancelDelayRunnable = setTimeout(() => {
-                        this.cancelDelayRunnable = null;
-                        this.showUsersResult(now, newResult, newMap, true);
-                    }, 0);
-                } else {
-                    this.showUsersResult(now, newResult, newMap, true);
-                }
-
-                setTimeout(async () => {
-                    if (this.now !== now) {
-                        return;
-                    }
-
-                    const result = await TdLibController.send({
-                        '@type': 'searchChatMembers',
-                        chat_id: chatId,
-                        query: usernameString,
-                        limit: 20,
-                        filter: { '@type': 'chatMembersFilterMention', message_thread_id: 0 }
-                    });
-
-                    if (this.now !== now) {
-                        return;
-                    }
-
-                    const { members } = result;
-                    if (members.length > 0) {
-                        for (let i = 0; i < members.length; i++) {
-                            const { user_id } = members[i];
-                            if (isMeUser(user_id)) {
-                                continue;
-                            }
-                            const user = UserStore.get(user_id);
-                            if (!user) {
-                                continue;
-                            }
-
-                            searchResultUsernames.push(user);
-                        }
-
-                        this.notifyDataSetChanged(now, searchResultUsernames);
-                    }
-
-
-                }, 200);
-            } else {
-                this.showUsersResult(now, newResult, newMap, true);
-            }
-        }
-    }
-
-    notifyDataSetChanged(id, searchResultUsernames) {
-        console.log('[search] global', searchResultUsernames);
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateHintsGlobal',
-            id,
-            global: searchResultUsernames
-        });
-    }
-
-    showUsersResult(id, newResult, newMap, notify) {
-        console.log('[search] local', newResult);
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateHintsLocal',
-            id,
-            local: newResult
-        });
-    }
-
-    closeHints(id) {
-        console.log('[search] close');
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateHintsClose',
-            id
-        });
-    }
-
-    openHints() {
-
-    }
 
     setRecordingReadyState() {
         const { editMessageId } = this.state;
@@ -1666,33 +1385,9 @@ class InputBox extends Component {
         this.closeEditMediaDialog();
     };
 
-    handleEditMedia = async (caption, content) => {
+    handleEditMedia = (caption, content) => {
         if (content) {
-            const message = await this.editMessageMedia(content);
-            if (message) {
-                const { content: editContent } = message;
-                switch (editContent['@type']) {
-                    case 'messagePhoto': {
-                        const { photo: sendPhoto } = content;
-                        if (!sendPhoto) break;
-
-                        const { data: blob } = sendPhoto;
-                        if (!blob) break;
-
-                        const { photo } = editContent;
-                        if (!photo) break;
-
-                        const iSize = photo.sizes.find(x => x.type === 'i');
-                        if (!iSize) break;
-
-                        const { photo: file } = iSize;
-                        if (file) {
-                            FileStore.setBlob(file.id, blob);
-                        }
-                        break;
-                    }
-                }
-            }
+            this.editMessageMedia(content);
             return;
         }
 

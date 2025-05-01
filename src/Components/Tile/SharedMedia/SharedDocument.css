@@ -8,13 +8,12 @@
 .shared-document {
     position: relative;
     background: transparent;
-    padding: 10px 12px;
+    padding: 10px;
 }
 
 .shared-document .document {
     max-width: unset;
     min-width: unset;
-    margin: 0;
 }
 
 .shared-document .audio-content {

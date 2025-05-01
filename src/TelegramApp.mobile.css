@@ -1,0 +1,143 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+ *:focus {
+    outline: none;
+}
+
+html {
+    /* background: #fff; */
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    /* font: 16px/21px 'Roboto', sans-serif; */
+    font-family: Segoe UI,Helvetica Neue,Helvetica,Lucida Grande,Arial,Ubuntu,Cantarell,Fira Sans,sans-serif;
+    overflow: hidden;
+    background: rgb(14, 22, 33);
+    color: var(--text-primary);
+
+    scrollbar-color: rgba(0, 0, 0, 0.25) transparent;
+    scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+    /*border: 1px solid transparent;*/
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 5px;
+    /*border: 3px solid transparent;*/
+    /*min-height: 50px;*/
+    /*height: 50px;*/
+    /*max-height: 50px;*/
+}
+
+a {
+    color: var(--color-accent-main);
+}
+
+code {
+    color: var(--color-accent-dark);
+}
+
+pre {
+    border-color: var(--border);
+    color: var(--color-accent-dark);
+}
+
+pre::selection {
+    color: var(--text-primary);
+    background-color: highlight;
+}
+
+b,
+strong {
+    font-weight: 700;
+}
+
+mark {
+    background-color: #fff8cc;
+    border-radius: 3px;
+    padding: 0 3px;
+}
+
+#root {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+#app {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    margin: auto;
+    /* top: 50%; */
+    /* left: 50%; */
+    /* transform: translate(-50%, -50%); */
+    /* margin-left: auto; */
+    /* margin-right: auto; */
+    /* margin-top: auto !important; */
+    /* margin-bottom: auto; */
+    /* vertical-align: middle; */
+    overflow: hidden;
+    background: rgb(112, 145, 190);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.page {
+    height: 100%;
+    /* display: flex; */
+    flex-direction: row;
+    max-width: 1680px;
+    /*min-width: 300px;*/
+    margin: 0 auto;
+    border-style: solid;
+    border-width: 0 1px 0 1px;
+    border-color: var(--border);
+    background: var(--background);
+    color: var(--text-primary);
+    overflow: hidden;
+}
+
+.page-third-column {
+    max-width: 1680px;
+}
+
+/* .item-selected {} */
+
+.pointer {
+    cursor: pointer;
+}
+
+.notification-close-button {
+    padding: 4px;
+}
+
+.scrollbars-hidden {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.scrollbars-hidden::-webkit-scrollbar {
+    display: none;
+}

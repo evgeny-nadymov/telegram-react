@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="11px" height="20px" viewBox="0 0 11 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<defs>
+    <path d="M5.99997265,0 L0,0 L0,17 C0.193003149,14.1607017 0.876197869,11.2332513 2.04958416,8.21764872 C2.95395324,5.89342034 4.49586977,3.73337411 6.67533376,1.73751004 C7.08266144,1.36452676 7.11047701,0.731958677 6.73747691,0.324646419 C6.54804863,0.117792698 6.28045715,5.15241543e-17 5.99997265,0 Z" id="path-1"></path>
+</defs>
+<g id="Page-1" stroke="none" stroke-width="1" fill-rule="evenodd">
+    <g id="right-corner" transform="translate(2.000000, 2.000000)">
+        <g id="Rectangle" transform="translate(3.500000, 8.500000) scale(1, -1) translate(-3.500000, -8.500000) ">
+            <use fill-rule="evenodd" xlink:href="#path-1"></use>
+<!--            <rect x="-1" y="-1" fill="#cfd6da" width="6" height="1"/>-->
+        </g>
+    </g>
+</g>
+</svg>

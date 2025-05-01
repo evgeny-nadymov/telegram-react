@@ -9,26 +9,26 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { compose } from '../../Utils/HOC';
-import { withSnackbar } from 'notistack';
+import { useSnackbar } from 'notistack';
 import { withTranslation } from 'react-i18next';
-import AlternateEmailIcon from '@material-ui/icons/AlternateEmail';
-import GroupIcon from '@material-ui/icons/Group';
-import CallIcon from '@material-ui/icons/Call';
+import AlternateEmailIcon from '@mui/icons-material/AlternateEmail';
+import GroupIcon from '@mui/icons-material/Group';
+import CallIcon from '@mui/icons-material/Call';
 import CloseIcon from '../../Assets/Icons/Close';
-import Divider from '@material-ui/core/Divider';
-import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
-import HeadsetIcon from '@material-ui/icons/Headset';
-import IconButton from '@material-ui/core/IconButton';
+import Divider from '@mui/material/Divider';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import HeadsetIcon from '@mui/icons-material/Headset';
+import IconButton from '@mui/material/IconButton';
 import InsertDriveFileIcon from '../../Assets/Icons/Document2';
-import InsertLinkIcon from '@material-ui/icons/InsertLink';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import MicIcon from '@material-ui/icons/Mic';
+import InsertLinkIcon from '@mui/icons-material/InsertLink';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import MicIcon from '@mui/icons-material/Mic';
 import PhotoIcon from '../../Assets/Icons/SharedMedia';
-import Typography from '@material-ui/core/Typography';
-import VideocamIcon from '@material-ui/icons/Videocam';
+import Typography from '@mui/material/Typography';
+import VideocamIcon from '@mui/icons-material/Videocam';
 import User from '../Tile/User';
 import Chat from '../Tile/Chat';
 import ChatDetailsHeader from './ChatDetailsHeader';
@@ -61,6 +61,7 @@ import OptionStore from '../../Stores/OptionStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
 import UserStore from '../../Stores/UserStore';
 import TdLibController from '../../Controllers/TdLibController';
+import { withSnackbarCompat } from '../../withSnackbarCompat';
 import './MoreListItem.css';
 import './ChatDetails.css';
 
@@ -364,6 +365,14 @@ class ChatDetails extends React.Component {
             className,
             chatId,
             onClose,
+            onOpenGroupInCommon,
+            onOpenSharedAudios,
+            onOpenSharedDocuments,
+            onOpenSharedLinks,
+            onOpenSharedMedia,
+            onOpenSharedPhotos,
+            onOpenSharedVideos,
+            onOpenSharedVoiceNotes,
             popup,
             t
         } = this.props;
@@ -427,28 +436,6 @@ class ChatDetails extends React.Component {
             }
         }
 
-        let openChatTitle = t('SendMessage');
-        if (isChannelChat(chatId)) {
-            openChatTitle = t('OpenChannel');
-        } else if (isGroupChat(chatId)) {
-            openChatTitle = t('OpenGroup');
-        }
-
-        let chatUrl = ''
-        if (username) {
-            if (isPrivateChat(chatId)) {
-                chatUrl = username;
-            } else {
-                const tMeUrl = OptionStore.get('t_me_url')
-                    .value
-                    .toLowerCase()
-                    .replace('https://', '')
-                    .replace('http://', '');
-
-                chatUrl = tMeUrl + username;
-            }
-        }
-
         const content = (
             <>
                 <ChatDetailsHeader
@@ -478,7 +465,7 @@ class ChatDetails extends React.Component {
                                         </ListItemIcon>
                                         <ListItemText
                                             primary={bio}
-                                            secondary={isPrivateChat(chatId) ? t('Bio') : t('DescriptionPlaceholder')}
+                                            secondary={t('Bio')}
                                             style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
                                         />
                                     </ListItem>
@@ -491,35 +478,37 @@ class ChatDetails extends React.Component {
                                         <ListItemText
                                             primary={
                                                 <Typography variant='inherit' noWrap>
-                                                    {chatUrl}
+                                                    {username}
                                                 </Typography>
                                             }
-                                            secondary={isPrivateChat(chatId) ? t('Username') : t('InviteLink')}
+                                            secondary={t('Username')}
                                         />
                                     </ListItem>
                                 )}
-                                {isPrivateChat(chatId) && (
-                                    <ListItem button className='list-item-rounded' alignItems='flex-start' onClick={this.handlePhoneHint}>
-                                        <ListItemIcon>
-                                            <CallIcon />
-                                        </ListItemIcon>
-                                        <ListItemText
-                                            primary={
-                                                <Typography variant='inherit' noWrap>
-                                                    {phoneNumber ? formatPhoneNumber(phoneNumber) : t('PhoneHidden')}
-                                                </Typography>
-                                            }
-                                            secondary={t('Phone')}
-                                        />
-                                    </ListItem>
+                                {phoneNumber && (
+                                    <>
+                                        <ListItem button className='list-item-rounded' alignItems='flex-start' onClick={this.handlePhoneHint}>
+                                            <ListItemIcon>
+                                                <CallIcon />
+                                            </ListItemIcon>
+                                            <ListItemText
+                                                primary={
+                                                    <Typography variant='inherit' noWrap>
+                                                        {formatPhoneNumber(phoneNumber)}
+                                                    </Typography>
+                                                }
+                                                secondary={t('Phone')}
+                                            />
+                                        </ListItem>
+                                    </>
                                 )}
                                 <NotificationsListItem chatId={chatId} />
-                                {popup && (
+                                {popup && !isGroup && (
                                     <ListItem button className='list-item-rounded' alignItems='flex-start' onClick={this.handleOpenChat}>
                                         <ListItemText
                                             primary={
                                                 <Typography color='primary' variant='inherit' noWrap>
-                                                    {openChatTitle.toUpperCase()}
+                                                    {t('SendMessage').toUpperCase()}
                                                 </Typography>
                                             }
                                             style={{ paddingLeft: 40 }}
@@ -532,7 +521,128 @@ class ChatDetails extends React.Component {
 
                     <div ref={this.dividerRef}/>
                     <SharedMediaTabs chatId={chatId} onClick={this.handleTabClick}/>
-                    <SharedMediaContent ref={this.mediaRef} chatId={chatId} popup={popup}/>
+                    <SharedMediaContent ref={this.mediaRef} chatId={chatId}/>
+                    {/*{(photoCount > 0 ||*/}
+                    {/*    videoCount > 0 ||*/}
+                    {/*    documentCount > 0 ||*/}
+                    {/*    audioCount > 0 ||*/}
+                    {/*    urlCount > 0 ||*/}
+                    {/*    voiceAndVideoNoteCount > 0 ||*/}
+                    {/*    groupInCommonCount > 0) && (*/}
+                    {/*    <>*/}
+                            {/*<Divider />*/}
+                            {/*<List className='shared-media-list'>*/}
+                            {/*    {photoCount > 0 && (*/}
+                            {/*        <ListItem button className='list-item' onClick={onOpenSharedPhotos}>*/}
+                            {/*            <ListItemIcon>*/}
+                            {/*                <PhotoIcon />*/}
+                            {/*            </ListItemIcon>*/}
+                            {/*            <ListItemText*/}
+                            {/*                primary={*/}
+                            {/*                    <Typography variant='inherit' noWrap>*/}
+                            {/*                        {photoCount === 1 ? '1 photo' : `${photoCount} photos`}*/}
+                            {/*                    </Typography>*/}
+                            {/*                }*/}
+                            {/*            />*/}
+                            {/*        </ListItem>*/}
+                            {/*    )}*/}
+                            {/*    {videoCount > 0 && (*/}
+                            {/*        <ListItem button className='list-item' onClick={onOpenSharedVideos}>*/}
+                            {/*            <ListItemIcon>*/}
+                            {/*                <VideocamIcon />*/}
+                            {/*            </ListItemIcon>*/}
+                            {/*            <ListItemText*/}
+                            {/*                primary={*/}
+                            {/*                    <Typography variant='inherit' noWrap>*/}
+                            {/*                        {videoCount === 1 ? '1 video' : `${videoCount} videos`}*/}
+                            {/*                    </Typography>*/}
+                            {/*                }*/}
+                            {/*            />*/}
+                            {/*        </ListItem>*/}
+                            {/*    )}*/}
+                            {/*    {documentCount > 0 && (*/}
+                            {/*        <ListItem button className='list-item' onClick={onOpenSharedDocuments}>*/}
+                            {/*            <ListItemIcon>*/}
+                            {/*                <InsertDriveFileIcon />*/}
+                            {/*            </ListItemIcon>*/}
+                            {/*            <ListItemText*/}
+                            {/*                primary={*/}
+                            {/*                    <Typography variant='inherit' noWrap>*/}
+                            {/*                        {documentCount === 1 ? '1 file' : `${documentCount} files`}*/}
+                            {/*                    </Typography>*/}
+                            {/*                }*/}
+                            {/*            />*/}
+                            {/*        </ListItem>*/}
+                            {/*    )}*/}
+                            {/*    {audioCount > 0 && (*/}
+                            {/*        <ListItem button className='list-item' onClick={onOpenSharedAudios}>*/}
+                            {/*            <ListItemIcon>*/}
+                            {/*                <HeadsetIcon />*/}
+                            {/*            </ListItemIcon>*/}
+                            {/*            <ListItemText*/}
+                            {/*                primary={*/}
+                            {/*                    <Typography variant='inherit' noWrap>*/}
+                            {/*                        {audioCount === 1 ? '1 audio file' : `${audioCount} audio files`}*/}
+                            {/*                    </Typography>*/}
+                            {/*                }*/}
+                            {/*            />*/}
+                            {/*        </ListItem>*/}
+                            {/*    )}*/}
+                            {/*    {urlCount > 0 && (*/}
+                            {/*        <ListItem button className='list-item' onClick={onOpenSharedLinks}>*/}
+                            {/*            <ListItemIcon>*/}
+                            {/*                <InsertLinkIcon />*/}
+                            {/*            </ListItemIcon>*/}
+                            {/*            <ListItemText*/}
+                            {/*                primary={*/}
+                            {/*                    <Typography variant='inherit' noWrap>*/}
+                            {/*                        {urlCount === 1 ? '1 shared link' : `${urlCount} shared links`}*/}
+                            {/*                    </Typography>*/}
+                            {/*                }*/}
+                            {/*            />*/}
+                            {/*        </ListItem>*/}
+                            {/*    )}*/}
+                            {/*    {voiceAndVideoNoteCount > 0 && (*/}
+                            {/*        <ListItem button className='list-item' onClick={onOpenSharedVoiceNotes}>*/}
+                            {/*            <ListItemIcon>*/}
+                            {/*                <MicIcon />*/}
+                            {/*            </ListItemIcon>*/}
+                            {/*            <ListItemText*/}
+                            {/*                primary={*/}
+                            {/*                    <Typography variant='inherit' noWrap>*/}
+                            {/*                        {voiceAndVideoNoteCount === 1*/}
+                            {/*                            ? '1 voice message'*/}
+                            {/*                            : `${voiceAndVideoNoteCount} voice messages`}*/}
+                            {/*                    </Typography>*/}
+                            {/*                }*/}
+                            {/*            />*/}
+                            {/*        </ListItem>*/}
+                            {/*    )}*/}
+                            {/*    {groupInCommonCount > 0 && (*/}
+                            {/*        <ListItem button className='list-item' onClick={onOpenGroupInCommon}>*/}
+                            {/*            <ListItemIcon>*/}
+                            {/*                <GroupIcon />*/}
+                            {/*            </ListItemIcon>*/}
+                            {/*            <ListItemText*/}
+                            {/*                primary={*/}
+                            {/*                    <Typography variant='inherit' noWrap>*/}
+                            {/*                        {groupInCommonCount === 1*/}
+                            {/*                            ? '1 group in common'*/}
+                            {/*                            : `${groupInCommonCount} groups in common`}*/}
+                            {/*                    </Typography>*/}
+                            {/*                }*/}
+                            {/*            />*/}
+                            {/*        </ListItem>*/}
+                            {/*    )}*/}
+                            {/*</List>*/}
+                    {/*    </>*/}
+                    {/*)}*/}
+                    {/*{items.length > 0 && (*/}
+                    {/*    <>*/}
+                    {/*        <Divider />*/}
+                    {/*        <List>{items}</List>*/}
+                    {/*    </>*/}
+                    {/*)}*/}
                 </div>
             </>
         );
@@ -554,11 +664,7 @@ ChatDetails.propTypes = {
     onOpenSharedVoiceNotes: PropTypes.func
 };
 
-const enhance = compose(
-    withSaveRef(),
-    withTranslation(),
-    withSnackbar,
-    withRestoreRef()
-);
+// Apply HOCs sequentially
+const EnhancedChatDetails = withRestoreRef()(withSnackbarCompat(withTranslation()(withSaveRef()(ChatDetails))));
 
-export default enhance(ChatDetails);
+export default EnhancedChatDetails;

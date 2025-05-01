@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-:root {
+ :root {
     --text-primary: #000000;
     --text-secondary: #707579;
     --text-disabled: rgba(0, 0, 0, 0.38);
@@ -21,8 +21,7 @@
     --tile-size-extra-small: 16px;
 
     --color-accent-main: #50a2e9;
-    --color-accent-main44: #50a2e944;
-    --color-accent-main88: #50a2e988;
+    --color-accent-main22: #50a2e944;
     --color-accent-light: #50a2e9;
     --color-accent-dark: #50a2e9;
     --color-grey700: rgba(97, 97, 97, 0.9);
@@ -55,9 +54,6 @@
 
     --media-in-tile-background: #50a2e9;
     --media-out-tile-background: #50a2e9;
-
-    --message-keyboard-button: #00000033;
-    --message-keyboard-button-hover: #00000022;
 
     --message-service-background: #00000033;
     --message-service-color: #ffffff;

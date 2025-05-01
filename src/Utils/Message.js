@@ -8,90 +8,30 @@
 import React from 'react';
 import emojiRegex from 'emoji-regex';
 import MentionLink from '../Components/Additional/MentionLink';
-import Poll from '../Components/Message/Media/Poll';
+// import Poll from '../Components/Message/Media/Poll';
 import SafeLink from '../Components/Additional/SafeLink';
 import dateFormat from '../Utils/Date';
 import { searchChat, setMediaViewerContent } from '../Actions/Client';
-import { getChatTitle, getChatUserId, isMeChat, isPrivateChat } from './Chat';
-import { openUser } from '../Actions/Client';
+import { getChatTitle, isMeChat } from './Chat';
+import { openUser } from './../Actions/Client';
 import { getFitSize, getPhotoSize, getSize } from './Common';
 import { download, saveOrDownload, supportsStreaming } from './File';
+
+// import { getAudioSubtitle, getAudioTitle } from './Media';
 import { getAudioTitle } from './Media';
+
 import { getDecodedUrl } from './Url';
 import { getServiceMessageContent } from './ServiceMessage';
-import { getUserFullName, isBotUser, isMeUser } from './User';
+import { getUserFullName } from './User';
 import { getBlockAudio } from './InstantView';
-import { LOCATION_HEIGHT, LOCATION_SCALE, LOCATION_WIDTH, LOCATION_ZOOM, PHOTO_DISPLAY_SIZE, PHOTO_SIZE, PHOTO_THUMBNAIL_SIZE, PLAYER_AUDIO_2X_MIN_DURATION } from '../Constants';
+import { LOCATION_HEIGHT, LOCATION_SCALE, LOCATION_WIDTH, LOCATION_ZOOM, PHOTO_DISPLAY_SIZE, PHOTO_SIZE, PLAYER_AUDIO_2X_MIN_DURATION } from '../Constants';
 import AppStore from '../Stores/ApplicationStore';
-import CallStore from '../Stores/CallStore';
 import ChatStore from '../Stores/ChatStore';
 import FileStore from '../Stores/FileStore';
-import LStore from '../Stores/LocalizationStore';
 import MessageStore from '../Stores/MessageStore';
 import PlayerStore from '../Stores/PlayerStore';
 import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
-
-export function isCallMessage(chatId, messageId) {
-    const message = MessageStore.get(chatId, messageId);
-    if (!message) return false;
-
-    const { content } = message;
-    if (!content) return false;
-
-    return content && content['@type'] === 'messageCall';
-}
-
-export function isEmptySelection(selection) {
-    // new line symbol
-    if (selection.length === 1 && selection.charCodeAt(0) === 10) {
-        return true;
-    }
-
-    if (selection.length === 2 && selection.charCodeAt(0) === 10 && selection.charCodeAt(1) === 10) {
-        return true;
-    }
-
-    // console.log('[selection] isBad=false', { selection });
-    return selection.length === 0;
-}
-
-export function senderEquals(lhs, rhs) {
-    if (!lhs && !rhs) return true;
-    if (!lhs && rhs) return false;
-    if (lhs && !rhs) return false;
-
-    switch (lhs['@type']) {
-        case 'messageSenderUser': {
-            return lhs.user_id === rhs.user_id;
-        }
-        case 'messageSenderChat': {
-            return lhs.chat_id === rhs.chat_id;
-        }
-    }
-
-    return false;
-}
-
-export function forwardInfoEquals(lhs, rhs) {
-    if (!lhs && !rhs) return true;
-    if (!lhs && rhs) return false;
-    if (lhs && !rhs) return false;
-
-    switch (lhs.origin['@type']) {
-        case 'messageForwardOriginChannel': {
-            return lhs.origin.chat_id === rhs.origin.chat_id;
-        }
-        case 'messageForwardOriginHiddenUser': {
-            return lhs.origin.sender_name === rhs.origin.sender_name;
-        }
-        case 'messageForwardOriginUser': {
-            return lhs.origin.sender_user_id === rhs.origin.sender_user_id;
-        }
-    }
-
-    return false;
-}
 
 export function isMetaBubble(chatId, messageId) {
     const message = MessageStore.get(chatId, messageId);
@@ -112,10 +52,6 @@ export function isMetaBubble(chatId, messageId) {
     switch (content['@type']) {
         case 'messageAnimation': {
             return true;
-        }
-        case 'messageInvoice': {
-            const { photo } = content;
-            return Boolean(photo);
         }
         case 'messageLocation': {
             return true;
@@ -191,17 +127,12 @@ function getAuthor(message, t = k => k) {
 function getTitle(message, t = k => k) {
     if (!message) return null;
 
-    const { sender_id, chat_id } = message;
+    const { sender_user_id, chat_id } = message;
 
-    if (!sender_id) {
-        return null;
-    }
-
-    const { user_id } = sender_id;
-    if (user_id) {
-        const user = UserStore.get(user_id);
+    if (sender_user_id) {
+        const user = UserStore.get(sender_user_id);
         if (user) {
-            return getUserFullName(user_id, null, t);
+            return getUserFullName(sender_user_id, null, t);
         }
     }
 
@@ -237,7 +168,7 @@ function searchCurrentChat(event, text) {
     searchChat(chatId, text);
 }
 
-function getFormattedText(formattedText, t = k => k, options = { }) {
+function getFormattedText(formattedText, t = k => k) {
     if (formattedText['@type'] !== 'formattedText') return null;
 
     const { text, entities } = formattedText;
@@ -245,10 +176,8 @@ function getFormattedText(formattedText, t = k => k, options = { }) {
     if (!entities) return [text];
     if (!entities.length) return [text];
 
-    const isValidEntity = options.isValidEntity || (() => true);
     let deleteLineBreakAfterPre = false;
     let result = [];
-
     let index = 0;
     for (let i = 0; i < entities.length; i++) {
         const entity = entities[i];
@@ -278,159 +207,124 @@ function getFormattedText(formattedText, t = k => k, options = { }) {
             deleteLineBreakAfterPre = false;
         }
 
-        if (!isValidEntity(entity)) {
-            result.push(entityText);
-        } else {
-
-            switch (type['@type']) {
-                case 'textEntityTypeBold': {
-                    result.push(<strong key={entityKey}>{entityText}</strong>);
-                    break;
-                }
-                case 'textEntityTypeBotCommand': {
-                    let username = '';
-                    let command = entityText.length > 0 && entityText[0] === '/' ? substring(entityText, 1) : entityText;
-
-                    const split = command.split('@');
-                    if (split.length === 2) {
-                        command = split[0];
-                        username = split[1];
-                    } else {
-                        const chatId = AppStore.getChatId();
-                        if (!isPrivateChat(chatId)) {
-                            let botUserId = 0;
-
-                            const { chatId, messageId } = options;
-                            const message = MessageStore.get(chatId, messageId);
-                            if (message) {
-                                const { sender_id, via_bot_user_id } = message;
-                                botUserId = sender_id.user_id;
-                                if (via_bot_user_id) {
-                                    botUserId = via_bot_user_id;
-                                }
-
-                                if (isBotUser(botUserId)) {
-                                    const bot = UserStore.get(botUserId);
-                                    if (bot) {
-                                        username = bot.username;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    result.push(
-                        <SafeLink key={entityKey} url={`tg://bot_command?command=${command}` + (username ? `&bot=${username}` : '')}>
-                            {entityText}
-                        </SafeLink>
-                    );
-                    break;
-                }
-                case 'textEntityTypeCashtag': {
-                    result.push(
-                        <a key={entityKey} onClick={event => searchCurrentChat(event, entityText)}>
-                            {entityText}
-                        </a>
-                    );
-                    break;
-                }
-                case 'textEntityTypeCode': {
-                    result.push(<code key={entityKey}>{entityText}</code>);
-                    break;
-                }
-                case 'textEntityTypeEmailAddress': {
-                    result.push(
-                        <a
-                            key={entityKey}
-                            href={`mailto:${entityText}`}
-                            onClick={stopPropagation}
-                            target='_blank'
-                            rel='noopener noreferrer'>
-                            {entityText}
-                        </a>
-                    );
-                    break;
-                }
-                case 'textEntityTypeHashtag': {
-                    result.push(
-                        <a key={entityKey} onClick={event => searchCurrentChat(event, entityText)}>
-                            {entityText}
-                        </a>
-                    );
-                    break;
-                }
-                case 'textEntityTypeItalic': {
-                    result.push(<em key={entityKey}>{entityText}</em>);
-                    break;
-                }
-                case 'textEntityTypeMentionName': {
-                    result.push(
-                        <MentionLink key={entityKey} userId={type.user_id} title={getUserFullName(type.user_id, null, t)}>
-                            {entityText}
-                        </MentionLink>
-                    );
-                    break;
-                }
-                case 'textEntityTypeMention': {
-                    result.push(
-                        <MentionLink key={entityKey} username={entityText}>
-                            {entityText}
-                        </MentionLink>
-                    );
-                    break;
-                }
-                case 'textEntityTypePhoneNumber': {
-                    result.push(
-                        <a key={entityKey} href={`tel:${entityText}`} onClick={stopPropagation}>
-                            {entityText}
-                        </a>
-                    );
-                    break;
-                }
-                case 'textEntityTypePre': {
-                    result.push(<pre key={entityKey}>{entityText}</pre>);
-                    deleteLineBreakAfterPre = true;
-                    break;
-                }
-                case 'textEntityTypePreCode': {
-                    result.push(
-                        <pre key={entityKey}>
+        switch (type['@type']) {
+            case 'textEntityTypeBold': {
+                result.push(<strong key={entityKey}>{entityText}</strong>);
+                break;
+            }
+            case 'textEntityTypeBotCommand': {
+                const command = entityText.length > 0 && entityText[0] === '/' ? substring(entityText, 1) : entityText;
+                result.push(
+                    <a key={entityKey} onClick={stopPropagation} href={`tg://bot_command?command=${command}&bot=`}>
+                        {entityText}
+                    </a>
+                );
+                break;
+            }
+            case 'textEntityTypeCashtag': {
+                result.push(
+                    <a key={entityKey} onClick={event => searchCurrentChat(event, entityText)}>
+                        {entityText}
+                    </a>
+                );
+                break;
+            }
+            case 'textEntityTypeCode': {
+                result.push(<code key={entityKey}>{entityText}</code>);
+                break;
+            }
+            case 'textEntityTypeEmailAddress': {
+                result.push(
+                    <a
+                        key={entityKey}
+                        href={`mailto:${entityText}`}
+                        onClick={stopPropagation}
+                        target='_blank'
+                        rel='noopener noreferrer'>
+                        {entityText}
+                    </a>
+                );
+                break;
+            }
+            case 'textEntityTypeHashtag': {
+                result.push(
+                    <a key={entityKey} onClick={event => searchCurrentChat(event, entityText)}>
+                        {entityText}
+                    </a>
+                );
+                break;
+            }
+            case 'textEntityTypeItalic': {
+                result.push(<em key={entityKey}>{entityText}</em>);
+                break;
+            }
+            case 'textEntityTypeMentionName': {
+                result.push(
+                    <MentionLink key={entityKey} userId={type.user_id} title={getUserFullName(type.user_id, null, t)}>
+                        {entityText}
+                    </MentionLink>
+                );
+                break;
+            }
+            case 'textEntityTypeMention': {
+                result.push(
+                    <MentionLink key={entityKey} username={entityText}>
+                        {entityText}
+                    </MentionLink>
+                );
+                break;
+            }
+            case 'textEntityTypePhoneNumber': {
+                result.push(
+                    <a key={entityKey} href={`tel:${entityText}`} onClick={stopPropagation}>
+                        {entityText}
+                    </a>
+                );
+                break;
+            }
+            case 'textEntityTypePre': {
+                result.push(<pre key={entityKey}>{entityText}</pre>);
+                deleteLineBreakAfterPre = true;
+                break;
+            }
+            case 'textEntityTypePreCode': {
+                result.push(
+                    <pre key={entityKey}>
                         <code>{entityText}</code>
                     </pre>
-                    );
-                    deleteLineBreakAfterPre = true;
-                    break;
-                }
-                case 'textEntityTypeStrikethrough': {
-                    result.push(<strike key={entityKey}>{entityText}</strike>);
-                    break;
-                }
-                case 'textEntityTypeTextUrl': {
-                    const url = type.url ? type.url : entityText;
-
-                    result.push(
-                        <SafeLink key={entityKey} url={url}>
-                            {entityText}
-                        </SafeLink>
-                    );
-                    break;
-                }
-                case 'textEntityTypeUrl': {
-                    result.push(
-                        <SafeLink key={entityKey} url={entityText}>
-                            {entityText}
-                        </SafeLink>
-                    );
-                    break;
-                }
-                case 'textEntityTypeUnderline': {
-                    result.push(<u key={entityKey}>{entityText}</u>);
-                    break;
-                }
-                default:
-                    result.push(entityText);
-                    break;
+                );
+                deleteLineBreakAfterPre = true;
+                break;
             }
+            case 'textEntityTypeStrikethrough': {
+                result.push(<strike key={entityKey}>{entityText}</strike>);
+                break;
+            }
+            case 'textEntityTypeTextUrl': {
+                const url = type.url ? type.url : entityText;
+
+                result.push(
+                    <SafeLink key={entityKey} url={url}>
+                        {entityText}
+                    </SafeLink>
+                );
+                break;
+            }
+            case 'textEntityTypeUrl': {
+                result.push(
+                    <SafeLink key={entityKey} url={entityText}>
+                        {entityText}
+                    </SafeLink>
+                );
+                break;
+            }
+            case 'textEntityTypeUnderline': {
+                result.push(<u key={entityKey}>{entityText}</u>);
+                break;
+            }
+            default:
+                result.push(entityText);
+                break;
         }
 
         index += textBeforeLength + entity.length;
@@ -449,7 +343,7 @@ function getFormattedText(formattedText, t = k => k, options = { }) {
     return result;
 }
 
-function getText(message, meta, t = k => k, options = { }) {
+function getText(message, meta, t = k => k) {
     if (!message) return null;
 
     let result = [];
@@ -460,7 +354,7 @@ function getText(message, meta, t = k => k, options = { }) {
     const { text, caption } = content;
 
     if (text && text['@type'] === 'formattedText' && text.text) {
-        result = getFormattedText(text, t, options);
+        result = getFormattedText(text, t);
     } else if (caption && caption['@type'] === 'formattedText' && caption.text) {
         const formattedText = getFormattedText(caption, t);
         if (formattedText) {
@@ -504,15 +398,14 @@ function getDate(date) {
 
     const d = new Date(date * 1000);
 
-    return dateFormat(d, LStore.formatterDay);
+    return dateFormat(d, 'H:MM'); //date.toDateString();
 }
 
 function getDateHint(date) {
     if (!date) return null;
 
     const d = new Date(date * 1000);
-
-    return LStore.formatString('formatDateAtTime', dateFormat(d, LStore.formatterYear), dateFormat(d, LStore.formatterDay));
+    return dateFormat(d, 'H:MM:ss d.mm.yyyy'); //date.toDateString();
 }
 
 function isForwardOriginHidden(forwardInfo) {
@@ -574,6 +467,12 @@ function getUnread(message) {
     return chat.last_read_outbox_message_id < message.id;
 }
 
+function getSenderUserId(message) {
+    if (!message) return null;
+
+    return message.sender_user_id;
+}
+
 function filterDuplicateMessages(result, history) {
     if (result.messages.length === 0) return;
     if (history.length === 0) return;
@@ -586,51 +485,14 @@ function filterDuplicateMessages(result, history) {
     result.messages = result.messages.filter(x => !map.has(x.id));
 }
 
-export function getCallContent(senderId, content) {
-    const { is_video, discard_reason } = content;
-    const isMissed = discard_reason && discard_reason['@type'] === 'callDiscardReasonMissed';
-    const isBusy = discard_reason && discard_reason['@type'] === 'callDiscardReasonDeclined';
-    if (isMeUser(senderId.user_id)) {
-        if (isMissed) {
-            if (is_video) {
-                return LStore.getString('CallMessageVideoOutgoingMissed');
-            } else {
-                return LStore.getString('CallMessageOutgoingMissed');
-            }
-        } else {
-            if (is_video) {
-                return LStore.getString('CallMessageVideoOutgoing');
-            } else {
-                return LStore.getString('CallMessageOutgoing');
-            }
-        }
-    } else {
-        if (isMissed) {
-            if (is_video) {
-                return LStore.getString('CallMessageVideoIncomingMissed');
-            } else {
-                return LStore.getString('CallMessageIncomingMissed');
-            }
-        } else if (isBusy) {
-            if (is_video) {
-                return LStore.getString('CallMessageVideoIncomingDeclined');
-            } else {
-                return LStore.getString('CallMessageIncomingDeclined');
-            }
-        } else {
-            if (is_video) {
-                return LStore.getString('CallMessageVideoIncoming');
-            } else {
-                return LStore.getString('CallMessageIncoming');
-            }
-        }
-    }
+function filterMessages(messages) {
+    return messages.filter(x => x.content['@type'] !== 'messageChatUpgradeTo');
 }
 
 function getContent(message, t = key => key) {
     if (!message) return null;
 
-    const { content, is_outgoing, sender_id } = message;
+    const { content } = message;
     if (!content) return null;
 
     let caption = '';
@@ -656,14 +518,7 @@ function getContent(message, t = key => key) {
             return getServiceMessageContent(message);
         }
         case 'messageCall': {
-            const text = getCallContent(sender_id, content);
-
-            const { duration } = content;
-            if (duration > 0) {
-                return LStore.formatString('CallMessageWithDuration', text, LStore.formatCallDuration(duration));
-            }
-
-            return text;
+            return t('Call') + caption;
         }
         case 'messageChatAddMembers': {
             return getServiceMessageContent(message);
@@ -721,13 +576,8 @@ function getContent(message, t = key => key) {
         case 'messageGameScore': {
             return getServiceMessageContent(message);
         }
-        case 'messageInviteVoiceChatParticipants': {
-            return getServiceMessageContent(message);
-        }
         case 'messageInvoice': {
-            const { title } = content;
-
-            return title + caption;
+            return getServiceMessageContent(message);
         }
         case 'messageLocation': {
             return t('AttachLocation') + caption;
@@ -785,12 +635,6 @@ function getContent(message, t = key => key) {
         case 'messageVideoNote': {
             return t('AttachRound') + caption;
         }
-        case 'messageVoiceChatStarted': {
-            return getServiceMessageContent(message);
-        }
-        case 'messageVoiceChatEnded': {
-            return getServiceMessageContent(message);
-        }
         case 'messageVoiceNote': {
             return t('AttachAudio') + caption;
         }
@@ -835,7 +679,7 @@ function isVideoMessage(chatId, messageId) {
         }
         case 'messageText': {
             const { web_page } = content;
-            return web_page && Boolean(web_page.video);
+            return Boolean(web_page.video);
         }
         default: {
             return false;
@@ -1254,20 +1098,6 @@ function openAudio(audio, message, fileCancel) {
     });
 }
 
-function openCall(message) {
-    if (!message) return;
-
-    if (!CallStore.p2pCallsEnabled) return;
-    const { chat_id, content } = message;
-    if (!content) return;
-    if (content['@type'] !== 'messageCall') return;
-
-    const { is_video } = content;
-
-    const userId = getChatUserId(chat_id);
-    CallStore.p2pStartCall(userId, is_video);
-}
-
 function openChatPhoto(photo, message, fileCancel) {
     if (!photo) return;
     if (!message) return;
@@ -1326,7 +1156,7 @@ function openDocument(document, message, fileCancel) {
 
     let { document: file } = document;
     if (!file) return;
-
+    
     file = FileStore.get(file.id) || file;
     if (fileCancel && file.local.is_downloading_active) {
         FileStore.cancelGetRemoteFile(file.id, message);
@@ -1335,14 +1165,27 @@ function openDocument(document, message, fileCancel) {
         FileStore.cancelUploadFile(file.id, message);
         return;
     }
-
+    
     TdLibController.send({
         '@type': 'openMessageContent',
         chat_id: chat_id,
         message_id: id
     });
 
-    saveOrDownload(file, document.file_name, message);
+    if (isLottieMessage(chat_id, id)) {
+        TdLibController.send({
+            '@type': 'openMessageContent',
+            chat_id: chat_id,
+            message_id: id
+        });
+
+        setMediaViewerContent({
+            chatId: chat_id,
+            messageId: id
+        });
+    } else {
+        saveOrDownload(file, document.file_name, message);
+    }
 }
 
 function openGame(game, message, fileCancel) {
@@ -1575,13 +1418,6 @@ function openMedia(chatId, messageId, fileCancel = true) {
 
             break;
         }
-        case 'messageCall': {
-            if (message) {
-                openCall(message);
-            }
-
-            break;
-        }
         case 'messageChatChangePhoto': {
             const { photo } = content;
             if (photo) {
@@ -1602,6 +1438,7 @@ function openMedia(chatId, messageId, fileCancel = true) {
             const { document } = content;
             if (document) {
                 openDocument(document, message, fileCancel);
+                // saveOrDownload(document.document, document.file_name, message);
             }
 
             break;
@@ -1614,7 +1451,6 @@ function openMedia(chatId, messageId, fileCancel = true) {
 
             break;
         }
-        case 'messageInvoice':
         case 'messagePhoto': {
             const { photo } = content;
             if (photo) {
@@ -1820,7 +1656,7 @@ export function getReplyMinithumbnail(chatId, messageId) {
     return null;
 }
 
-export function getReplyThumbnail(chatId, messageId) {
+function getReplyPhotoSize(chatId, messageId) {
     const message = MessageStore.get(chatId, messageId);
     if (!message) return;
 
@@ -1846,7 +1682,7 @@ export function getReplyThumbnail(chatId, messageId) {
             const { photo } = content;
             if (!photo) return null;
 
-            return getPhotoSize(photo.sizes, PHOTO_THUMBNAIL_SIZE);
+            return getPhotoSize(photo.sizes);
         }
         case 'messageDocument': {
             const { document } = content;
@@ -1868,7 +1704,7 @@ export function getReplyThumbnail(chatId, messageId) {
             }
 
             if (photo) {
-                return getPhotoSize(photo.sizes, PHOTO_THUMBNAIL_SIZE);
+                return getPhotoSize(photo.sizes);
             }
 
             return null;
@@ -1877,7 +1713,7 @@ export function getReplyThumbnail(chatId, messageId) {
             const { photo } = content;
             if (!photo) return null;
 
-            return getPhotoSize(photo.sizes, PHOTO_THUMBNAIL_SIZE);
+            return getPhotoSize(photo.sizes);
         }
         case 'messageSticker': {
             const { sticker } = content;
@@ -1891,7 +1727,7 @@ export function getReplyThumbnail(chatId, messageId) {
             if (web_page) {
                 const { animation, audio, document, photo, sticker, video, video_note } = web_page;
                 if (photo) {
-                    return getPhotoSize(photo.sizes, PHOTO_THUMBNAIL_SIZE);
+                    return getPhotoSize(photo.sizes);
                 }
                 if (animation) {
                     const { thumbnail } = animation;
@@ -2757,8 +2593,6 @@ export function showMessageForward(chatId, messageId) {
     const message = MessageStore.get(chatId, messageId);
     if (!message) return false;
 
-    if (isMeChat(chatId)) return false;
-
     const { forward_info, content } = message;
 
     return forward_info && content && content['@type'] !== 'messageSticker' && content['@type'] !== 'messageAudio';
@@ -2774,9 +2608,10 @@ export function isTextMessage(chatId, messageId) {
 }
 
 export function isMessagePinned(chatId, messageId) {
-    const message = MessageStore.get(chatId, messageId);
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
 
-    return message && message.is_pinned;
+    return chat.pinned_message_id === messageId;
 }
 
 export function canMessageBeUnvoted(chatId, messageId) {
@@ -2849,18 +2684,6 @@ export function getMessageStyle(chatId, messageId) {
         case 'messageGame': {
             return { maxWidth : PHOTO_DISPLAY_SIZE + 10 + 9 * 2 };
         }
-        case 'messageInvoice': {
-            const { photo } = content;
-            if (!photo) return null;
-
-            const size = getSize(photo.sizes, PHOTO_SIZE);
-            if (!size) return null;
-
-            const fitSize = getFitSize(size, PHOTO_DISPLAY_SIZE, true);
-            if (!fitSize) return null;
-
-            return { width: fitSize.width };
-        }
         case 'messagePhoto': {
             const { photo, caption } = content;
             if (caption && caption.text) {
@@ -2917,7 +2740,9 @@ export {
     isForwardOriginHidden,
     getForwardTitle,
     getUnread,
+    getSenderUserId,
     filterDuplicateMessages,
+    filterMessages,
     isMediaContent,
     isDeletedMessage,
     isVideoMessage,
@@ -2929,6 +2754,7 @@ export {
     hasVideoNote,
     getSearchMessagesFilter,
     openMedia,
+    getReplyPhotoSize,
     getEmojiMatches,
     messageComparatorDesc,
     substring,

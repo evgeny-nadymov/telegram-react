@@ -34,18 +34,14 @@ class SharedMediaTabs extends React.Component {
         if (chatId !== state.prevChatId) {
             const media = MessageStore.getMedia(props.chatId);
 
-            const members = media ? (media.supergroupMembers && media.supergroupMembers.members) || (media.fullInfo && media.fullInfo.members) || [] : [];
             const photoAndVideo = media ? media.photoAndVideo : [];
             const document = media ? media.document : [];
             const audio = media ? media.audio : [];
             const url = media ? media.url : [];
             const voiceNote = media ? media.voiceNote : [];
-            const groupsInCommon = media ? media.groupsInCommon : [];
 
             let selectedIndex = -1;
-            if (members.length > 0) {
-                selectedIndex = 0;
-            } else if (photoAndVideo.length > 0) {
+            if (photoAndVideo.length > 0) {
                 selectedIndex = 1;
             } else if (document.length > 0) {
                 selectedIndex = 2;
@@ -55,20 +51,16 @@ class SharedMediaTabs extends React.Component {
                 selectedIndex = 4;
             } else if (voiceNote.length > 0) {
                 selectedIndex = 5;
-            } else if (groupsInCommon.length > 0) {
-                selectedIndex = 6;
             }
 
             return {
                 prevChatId: props.chatId,
                 selectedIndex,
-                members,
                 photoAndVideo,
                 document,
                 audio,
                 url,
                 voiceNote,
-                groupsInCommon,
                 isSmallWidth: false
             }
         }
@@ -170,35 +162,27 @@ class SharedMediaTabs extends React.Component {
     setMediaState = (media, selectedIndex) => {
         const { chatId } = this.props;
 
-        const members = media ? (media.supergroupMembers && media.supergroupMembers.members) || (media.fullInfo && media.fullInfo.members) || [] : [];
         const photoAndVideo = media ? media.photoAndVideo : [];
         const document = media ? media.document : [];
         const audio = media ? media.audio : [];
         const url = media ? media.url : [];
         const voiceNote = media ? media.voiceNote : [];
-        const groupsInCommon = media ? media.groupsInCommon : [];
 
-        const hasMembers = members.length > 0;
         const hasPhotoAndVideo = photoAndVideo.length > 0;
         const hasDocument = document.length > 0;
         const hasAudio = audio.length > 0;
         const hasUrl = url.length > 0;
         const hasVoiceNote = voiceNote.length > 0;
-        const hasGroupsInCommon = groupsInCommon.length > 0;
 
         const replaceSelectedIndex =
             selectedIndex === -1
-            || selectedIndex === 0 && !hasMembers
             || selectedIndex === 1 && !hasPhotoAndVideo
             || selectedIndex === 2 && !hasDocument
             || selectedIndex === 3 && !hasAudio
             || selectedIndex === 4 && !hasUrl
-            || selectedIndex === 5 && !hasVoiceNote
-            || selectedIndex === 6 && !hasGroupsInCommon;
+            || selectedIndex === 5 && !hasVoiceNote;
         if (replaceSelectedIndex) {
-            if (hasMembers) {
-                selectedIndex = 0;
-            } else if (hasPhotoAndVideo) {
+            if (hasPhotoAndVideo) {
                 selectedIndex = 1;
             } else if (hasDocument) {
                 selectedIndex = 2;
@@ -208,8 +192,6 @@ class SharedMediaTabs extends React.Component {
                 selectedIndex = 4;
             } else if (hasVoiceNote) {
                 selectedIndex = 5;
-            } else if (hasGroupsInCommon) {
-                selectedIndex = 6;
             }
 
             TdLibController.clientUpdate({
@@ -221,13 +203,11 @@ class SharedMediaTabs extends React.Component {
 
         this.setState({
             selectedIndex,
-            members,
             photoAndVideo,
             document,
             audio,
             url,
-            voiceNote,
-            groupsInCommon
+            voiceNote
         }, () => {
             if (!this.hasObserver()) this.setSelection();
         });
@@ -263,12 +243,6 @@ class SharedMediaTabs extends React.Component {
 
         let item = null;
         let left = 0;
-        const membersFilter = this.filterRef.get('members');
-        if (selectedIndex === 0 && membersFilter) {
-            item = membersFilter.firstChild;
-            left = item.offsetLeft;
-        }
-
         const photoAndVideoFilter = this.filterRef.get('photoAndVideo');
         if (selectedIndex === 1 && photoAndVideoFilter) {
             item = photoAndVideoFilter.firstChild;
@@ -296,12 +270,6 @@ class SharedMediaTabs extends React.Component {
         const voiceNoteFilter = this.filterRef.get('voiceNote');
         if (selectedIndex === 5 && voiceNoteFilter) {
             item = voiceNoteFilter.firstChild;
-            left = item.offsetLeft;
-        }
-
-        const groupsInCommonFilter = this.filterRef.get('groupsInCommon');
-        if (selectedIndex === 6 && groupsInCommonFilter) {
-            item = groupsInCommonFilter.firstChild;
             left = item.offsetLeft;
         }
 
@@ -354,25 +322,20 @@ class SharedMediaTabs extends React.Component {
 
     render() {
         const { t } = this.props;
-        const { selectedIndex, members, photoAndVideo, document, audio, url, voiceNote, groupsInCommon } = this.state;
+        const { selectedIndex, photoAndVideo, document, audio, url, voiceNote } = this.state;
 
         const tabsCount =
-            (members.length > 0 ? 1 : 0) +
             (photoAndVideo.length > 0 ? 1 : 0) +
             (document.length > 0 ? 1 : 0) +
             (audio.length > 0 ? 1 : 0) +
             (url.length > 0 ? 1 : 0) +
-            (voiceNote.length > 0 ? 1 : 0) +
-            (groupsInCommon.length > 0 ? 1 : 0);
+            (voiceNote.length > 0 ? 1 : 0);
 
-        const hasSharedMedia =
-            members.length > 0
-            || photoAndVideo.length > 0
+        const hasSharedMedia = photoAndVideo.length > 0
             || document.length > 0
             || audio.length > 0
             || url.length > 0
-            || voiceNote.length > 0
-            || groupsInCommon.length > 0;
+            || voiceNote.length > 0;
 
         if (!hasSharedMedia) {
             return null;
@@ -380,17 +343,9 @@ class SharedMediaTabs extends React.Component {
 
         this.filterRef = new Map();
         return (
-            <div className={classNames('tabs', 'shared-media-tabs')}>
-                <div className='tabs-bottom-border'/>
+            <div className='shared-media-tabs'>
+                <div className='shared-media-tabs-bottom-border'/>
                 <div ref={this.filtersRef} className={classNames('filters', {'shared-media-tabs-container': tabsCount > 1})}>
-                    {members.length > 0 && (
-                        <div
-                            ref={r => this.filterRef.set('members', r)}
-                            className={classNames('filter', {'shared-media-tab': tabsCount > 1}, { 'item-selected': selectedIndex === 0})}
-                            onMouseDown={e => this.handleFilterClick(e, 0)}>
-                            <span>{t('GroupMembers')}</span>
-                        </div>
-                    )}
                     {photoAndVideo.length > 0 && (
                         <div
                             ref={r => this.filterRef.set('photoAndVideo', r)}
@@ -429,14 +384,6 @@ class SharedMediaTabs extends React.Component {
                             className={classNames('filter', {'shared-media-tab': tabsCount > 1}, { 'item-selected': selectedIndex === 5})}
                             onMouseDown={e => this.handleFilterClick(e, 5)}>
                             <span>{t('SharedVoiceTab2')}</span>
-                        </div>
-                    )}
-                    {groupsInCommon.length > 0 && (
-                        <div
-                            ref={r => this.filterRef.set('groupsInCommon', r)}
-                            className={classNames('filter', {'shared-media-tab': tabsCount > 1}, { 'item-selected': selectedIndex === 6})}
-                            onMouseDown={e => this.handleFilterClick(e, 6)}>
-                            <span>{t('SharedGroupsTab2')}</span>
                         </div>
                     )}
                     <div ref={this.filterSelectionRef} className='filter-selection'/>

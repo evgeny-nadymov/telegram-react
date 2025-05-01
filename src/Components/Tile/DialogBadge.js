@@ -15,6 +15,7 @@ import {
     showChatUnreadMentionCount
 } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';
+import FilterStore from '../../Stores/FilterStore';
 import NotificationStore from '../../Stores/NotificationStore';
 import './DialogBadge.css';
 

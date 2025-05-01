@@ -6,13 +6,14 @@
  */
 
 .dialog-placeholder {
+    margin: 0 12px;
     opacity: 0.2;
     will-change: opacity;
     animation: dialog-placeholder-animation 2s ease-in-out infinite;
 }
 
 .dialog-placeholder-wrapper {
-    padding: 9px 12px 9px 9px;
+    padding: 10px 12px 10px 10px;
     display: flex;
     align-items: center;
 }

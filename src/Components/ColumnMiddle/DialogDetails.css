@@ -17,45 +17,9 @@
     background-size: cover;
     background-position: center;
     transition: background-image 0.25s ease;
-    position: relative;
 }
 
-.dialog-details::after {
-    mask: url(../../Assets/bubble-tail-left.svg);
-    content: 'a';
-    font-weight: bold;
-    width: 0;
-    height: 0;
-    position: absolute;
-}
-
-.dialog-details-wrapper {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-}
-
-.light .dialog-details,
-.dark .dialog-details {
-    overflow: hidden;
-}
-
-.dialog-background {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: var(--chat-background);
-    background-size: cover;
-    background-position: center;
-}
-
-.light .dialog-background {
+.light .dialog-details {
     background-image: url('../../Assets/camomile_blurred.jpg');
 }
 

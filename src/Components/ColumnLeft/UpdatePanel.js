@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { withTranslation } from 'react-i18next';
-import Button from '@material-ui/core/Button';
+import Button from '@mui/material/Button';
 import DownloadIcon from '../../Assets/Icons/Download';
 import AppStore from '../../Stores/ApplicationStore';
 import './UpdatePanel.css';

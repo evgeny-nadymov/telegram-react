@@ -7,82 +7,66 @@
 
 import dateFormat from '../Utils/Date';
 import { getFirstLetter, getLetters, getSize } from './Common';
-import { PROFILE_PHOTO_BIG_SIZE, PROFILE_PHOTO_SMALL_SIZE, SERVICE_NOTIFICATIONS_USER_IDS } from '../Constants';
-import LStore from '../Stores/LocalizationStore';
+import { PROFILE_PHOTO_BIG_SIZE, PROFILE_PHOTO_SMALL_SIZE, SERVICE_NOTIFICATIONS_USER_ID } from '../Constants';
 import UserStore from '../Stores/UserStore';
-
-export function isBotUser(userId) {
-    const user = UserStore.get(userId);
-
-    return user && user.type['@type'] === 'userTypeBot';
-}
-
-export function isMeUser(userId) {
-    return UserStore.getMyId() === userId;
-}
 
 function getUserStatus(user) {
     if (!user) return null;
     if (!user.status) return null;
 
-    if (SERVICE_NOTIFICATIONS_USER_IDS.some(x => x === user.id)) {
-        return LStore.getString('ServiceNotifications');
-    }
-
-    if (user.is_support) {
-        return LStore.getString('SupportStatus');
+    if (user.id === SERVICE_NOTIFICATIONS_USER_ID) {
+        return 'service notifications';
     }
 
     if (user.type && user.type['@type'] === 'userTypeBot') {
-        return LStore.getString('Bot').toLowerCase();
+        return 'bot';
     }
 
     switch (user.status['@type']) {
         case 'userStatusEmpty': {
-            return LStore.getString('ALongTimeAgo');
+            return 'last seen a long time ago';
         }
         case 'userStatusLastMonth': {
-            return LStore.getString('WithinAMonth');
+            return 'last seen within a month';
         }
         case 'userStatusLastWeek': {
-            return LStore.getString('WithinAWeek');
+            return 'last seen within a week';
         }
         case 'userStatusOffline': {
             let { was_online } = user.status;
-            if (!was_online) return LStore.getString('Invisible');
+            if (!was_online) return 'offline';
 
             const now = new Date();
-             const wasOnline = new Date(was_online * 1000);
-            // if (wasOnline > now) {
-            //     return 'last seen just now';
-            // }
-            //
-            // let diff = new Date(now - wasOnline);
+            const wasOnline = new Date(was_online * 1000);
+            if (wasOnline > now) {
+                return 'last seen just now';
+            }
+
+            let diff = new Date(now - wasOnline);
 
             // within a minute
-            // if (diff.getTime() / 1000 < 60) {
-            //     return 'last seen just now';
-            // }
+            if (diff.getTime() / 1000 < 60) {
+                return 'last seen just now';
+            }
 
             // within an hour
-            // if (diff.getTime() / 1000 < 60 * 60) {
-            //     const minutes = Math.floor(diff.getTime() / 1000 / 60);
-            //     return `last seen ${minutes === 1 ? '1 minute' : minutes + ' minutes'} ago`;
-            // }
+            if (diff.getTime() / 1000 < 60 * 60) {
+                const minutes = Math.floor(diff.getTime() / 1000 / 60);
+                return `last seen ${minutes === 1 ? '1 minute' : minutes + ' minutes'} ago`;
+            }
 
             // today
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             if (wasOnline > today) {
                 // up to 6 hours ago
-                // if (diff.getTime() / 1000 < 6 * 60 * 60) {
-                //     const hours = Math.floor(diff.getTime() / 1000 / 60 / 60);
-                //     return `last seen ${hours === 1 ? '1 hour' : hours + ' hours'} ago`;
-                // }
+                if (diff.getTime() / 1000 < 6 * 60 * 60) {
+                    const hours = Math.floor(diff.getTime() / 1000 / 60 / 60);
+                    return `last seen ${hours === 1 ? '1 hour' : hours + ' hours'} ago`;
+                }
 
                 // other
-                return LStore.formatString('LastSeenFormatted', LStore.formatString('TodayAtFormatted', dateFormat(wasOnline, LStore.formatterDay)));
-                // return `last seen today at ${dateFormat(wasOnline, 'H:mm')}`;
+                return `last seen today at ${dateFormat(wasOnline, 'H:MM')}`;
             }
 
             // yesterday
@@ -90,18 +74,16 @@ function getUserStatus(user) {
             yesterday.setDate(now.getDate() - 1);
             today.setHours(0, 0, 0, 0);
             if (wasOnline > yesterday) {
-                return LStore.formatString('LastSeenFormatted', LStore.formatString('YesterdayAtFormatted', dateFormat(wasOnline, LStore.formatterDay)));
-                // return `last seen yesterday at ${dateFormat(wasOnline, 'H:mm')}`;
+                return `last seen yesterday at ${dateFormat(wasOnline, 'H:MM')}`;
             }
 
-            return LStore.formatString('LastSeenDateFormatted', LStore.formatString('formatDateAtTime', dateFormat(wasOnline, LStore.formatterYear), dateFormat(wasOnline, LStore.formatterDay)));
-            // return `last seen ${dateFormat(wasOnline, 'dd.MM.yyyy')}`;
+            return `last seen ${dateFormat(wasOnline, 'dd.mm.yyyy')}`;
         }
         case 'userStatusOnline': {
-            return LStore.getString('Online');
+            return 'online';
         }
         case 'userStatusRecently': {
-            return LStore.getString('Lately');
+            return 'last seen recently';
         }
     }
 
@@ -114,12 +96,12 @@ function isUserOnline(user) {
     const { id, status, type } = user;
     if (!status) return false;
     if (!type) return false;
-    if (SERVICE_NOTIFICATIONS_USER_IDS.some(x => x === id)) return false;
+    if (id === SERVICE_NOTIFICATIONS_USER_ID) return false;
 
     return status['@type'] === 'userStatusOnline' && type['@type'] !== 'userTypeBot';
 }
 
-function getUserFullName(userId, user) {
+function getUserFullName(userId, user, t = k => k) {
     user = UserStore.get(userId) || user;
     if (!user) return null;
 
@@ -135,7 +117,7 @@ function getUserFullName(userId, user) {
         }
         case 'userTypeDeleted':
         case 'userTypeUnknown': {
-            return LStore.i18n.t('HiddenName');
+            return t('HiddenName');
         }
     }
 
@@ -173,7 +155,7 @@ function isUserBlocked(userId) {
     return false;
 }
 
-function getUserLetters(userId, firstName = '', lastName = '', t = x => x) {
+function getUserLetters(userId, firstName, lastName, t) {
     const user = UserStore.get(userId);
     if (!user && !(firstName || lastName)) return null;
 
@@ -249,7 +231,7 @@ function getProfilePhotoDateHint(userProfilePhoto) {
     if (!added_date) return null;
 
     const date = new Date(added_date * 1000);
-    return dateFormat(date, 'H:mm:ss d.MM.yyyy');
+    return dateFormat(date, 'H:MM:ss d.mm.yyyy');
 }
 
 export function isDeletedUser(userId) {

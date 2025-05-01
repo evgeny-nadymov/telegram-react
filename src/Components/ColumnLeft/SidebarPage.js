@@ -7,7 +7,7 @@
 
 import React from 'react';
 import PropTypes, { number } from 'prop-types';
-import { Slide } from '@material-ui/core';
+import { Slide } from '@mui/material';
 import KeyboardManager, { KeyboardHandler } from '../Additional/KeyboardManager';
 import { modalManager } from '../../Utils/Modal';
 import './SidebarPage.css';

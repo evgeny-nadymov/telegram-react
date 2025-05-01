@@ -7,21 +7,20 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { compose } from '../../Utils/HOC';
-import { withSnackbar } from 'notistack';
+import { useSnackbar } from 'notistack';
 import { withTranslation } from 'react-i18next';
-import Button from '@material-ui/core/Button';
-import DialogActions from '@material-ui/core/DialogActions';
-import Dialog from '@material-ui/core/Dialog';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import IconButton from '@material-ui/core/IconButton';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import MenuItem from '@material-ui/core/MenuItem';
-import MenuList from '@material-ui/core/MenuList';
-import Popover from '@material-ui/core/Popover';
+import Button from '@mui/material/Button';
+import DialogActions from '@mui/material/DialogActions';
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import IconButton from '@mui/material/IconButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import MenuItem from '@mui/material/MenuItem';
+import MenuList from '@mui/material/MenuList';
+import Popover from '@mui/material/Popover';
 import CloseIcon from '../../Assets/Icons/Close';
 import CopyIcon from '../../Assets/Icons/Copy';
 import DeleteIcon from '../../Assets/Icons/Delete';
@@ -31,20 +30,21 @@ import RemoveCheckIcon from '../../Assets/Icons/RemoveCheck';
 import ShareIcon from '../../Assets/Icons/Share';
 import StopIcon from '../../Assets/Icons/Stop';
 import PinIcon from '../../Assets/Icons/Pin2';
-import UnpinIcon from '../../Assets/Icons/PinOff';
+import UnpinIcon from '../../Assets/Icons/Pin2';
 import { isPublicSupergroup } from '../../Utils/Supergroup';
-import { canMessageBeClosed, canMessageBeDeleted, canMessageBeEdited, canMessageBeForwarded, canMessageBeUnvoted, isEmptySelection, isMessagePinned } from '../../Utils/Message';
+import { canMessageBeClosed, canMessageBeDeleted, canMessageBeEdited, canMessageBeForwarded, canMessageBeUnvoted, isMessagePinned } from '../../Utils/Message';
 import { canPinMessages, canSendMessages } from '../../Utils/Chat';
 import { cancelPollAnswer, stopPoll } from '../../Actions/Poll';
 import { copy } from '../../Utils/Text';
-import { clearSelection, deleteMessages, editMessage, forwardMessages, requestPinMessage, requestUnpinMessage, replyMessage, selectMessage } from '../../Actions/Client';
+import { clearSelection, deleteMessages, editMessage, forwardMessages, replyMessage, selectMessage } from '../../Actions/Client';
+import { pinMessage, unpinMessage } from '../../Actions/Message';
 import { saveBlob } from '../../Utils/File';
-import { isServiceMessage } from '../../Utils/ServiceMessage';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
 import AppStore from '../../Stores/ApplicationStore';
 import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
+import { withSnackbarCompat } from '../../withSnackbarCompat';
 import './MessageMenu.css';
 
 class MessageMenu extends React.PureComponent {
@@ -111,11 +111,10 @@ class MessageMenu extends React.PureComponent {
         onClose(event);
 
         const httpUrl = await TdLibController.send({
-            '@type': 'getMessageLink',
+            '@type': 'getPublicMessageLink',
             chat_id: chatId,
             message_id: messageId,
-            for_album: false,
-            for_comment: false
+            for_album: false
         });
 
         if (!httpUrl) return;
@@ -163,9 +162,9 @@ class MessageMenu extends React.PureComponent {
         onClose(event);
 
         if (isMessagePinned(chatId, messageId)) {
-            requestUnpinMessage(chatId, messageId);
+            unpinMessage(chatId);
         } else {
-            requestPinMessage(chatId, messageId);
+            pinMessage(chatId, messageId);
         }
     };
 
@@ -186,20 +185,14 @@ class MessageMenu extends React.PureComponent {
 
     handleSelect = event => {
         const { chatId, messageId, onClose } = this.props;
+
         onClose(event);
-
-        const selection = window.getSelection().toString();
-        if (!isEmptySelection(selection)) {
-            return;
-        }
-
-        const selected = !MessageStore.selectedItems.has(`chatId=${chatId}_messageId=${messageId}`);
-        selectMessage(chatId, messageId, selected);
+        selectMessage(chatId, messageId, true);
     };
 
     handleDelete = event => {
         const { chatId, messageId, onClose } = this.props;
-
+        console.log("DMID", messageId)
         onClose(event);
         deleteMessages(chatId, [messageId]);
     };
@@ -225,32 +218,27 @@ class MessageMenu extends React.PureComponent {
     };
 
     render() {
-        const { t, chatId, messageId, anchorPosition, copyLink, open, onClose, source } = this.props;
+        const { t, chatId, messageId, anchorPosition, copyLink, open, onClose } = this.props;
+        console.log("msgmenuid", messageId);
         const { confirmStopPoll } = this.state;
         if (!confirmStopPoll && !open) return null;
 
         const isPinned = isMessagePinned(chatId, messageId);
-        const canBeUnvoted = canMessageBeUnvoted(chatId, messageId) && source === 'chat';
-        const canBeClosed = canMessageBeClosed(chatId, messageId) && source === 'chat';
-        const canBeReplied = canSendMessages(chatId) && source === 'chat';
-        const canBePinned = canPinMessages(chatId) && !isServiceMessage(MessageStore.get(chatId, messageId));
+        const canBeUnvoted = canMessageBeUnvoted(chatId, messageId);
+        const canBeClosed = canMessageBeClosed(chatId, messageId);
+        const canBeReplied = canSendMessages(chatId);
+        const canBePinned = canPinMessages(chatId);
         const canBeForwarded = canMessageBeForwarded(chatId, messageId);
         const canBeDeleted = canMessageBeDeleted(chatId, messageId);
-        const canBeEdited = canMessageBeEdited(chatId, messageId) && !AppStore.recording && source === 'chat';
-        const canBeSelected = !MessageStore.hasSelectedMessage(chatId, messageId) && !isServiceMessage(MessageStore.get(chatId, messageId));
+        const canBeEdited = canMessageBeEdited(chatId, messageId) && !AppStore.recording;
+        const canBeSelected = !MessageStore.hasSelectedMessage(chatId, messageId);
         const canCopyLink = Boolean(copyLink);
         const canCopyPublicMessageLink = isPublicSupergroup(chatId);
-
-        const hasItems =
-            canBeUnvoted || canBeClosed || canBeReplied || canBePinned || canBeForwarded || canBeDeleted || canBeEdited || canBeSelected || canCopyLink || canCopyPublicMessageLink;
-        if (!hasItems) {
-            return null;
-        }
 
         return (
             <>
                 <Popover
-                    open={true}
+                    open={open}
                     onClose={onClose}
                     anchorReference='anchorPosition'
                     anchorPosition={anchorPosition}
@@ -270,14 +258,6 @@ class MessageMenu extends React.PureComponent {
                         {/*    </ListItemIcon>*/}
                         {/*    <ListItemText primary={t('Download')} />*/}
                         {/*</MenuItem>*/}
-                        {canBeSelected && (
-                            <MenuItem onClick={this.handleSelect}>
-                                <ListItemIcon>
-                                    <FrameCheckIcon />
-                                </ListItemIcon>
-                                <ListItemText primary={t('Select')} />
-                            </MenuItem>
-                        )}
                         {canCopyPublicMessageLink && (
                             <MenuItem onClick={this.handleCopyPublicMessageLink}>
                                 <ListItemIcon>
@@ -309,16 +289,24 @@ class MessageMenu extends React.PureComponent {
                                         <ListItemIcon>
                                             <UnpinIcon />
                                         </ListItemIcon>
-                                        <ListItemText primary={t('UnpinMessage')} />
+                                        <ListItemText primary={t('UnpinFromTop')} />
                                     </>
                                 ) : (
                                     <>
                                         <ListItemIcon>
                                             <PinIcon />
                                         </ListItemIcon>
-                                        <ListItemText primary={t('PinMessage')} />
+                                        <ListItemText primary={t('PinToTop')} />
                                     </>
                                 )}
+                            </MenuItem>
+                        )}
+                        {canBeSelected && (
+                            <MenuItem onClick={this.handleSelect}>
+                                <ListItemIcon>
+                                    <FrameCheckIcon />
+                                </ListItemIcon>
+                                <ListItemText primary={t('Select')} />
                             </MenuItem>
                         )}
                         {canBeForwarded && (
@@ -396,9 +384,7 @@ MessageMenu.propTypes = {
     copyLink: PropTypes.string
 };
 
-const enhance = compose(
-    withTranslation(),
-    withSnackbar
-);
+// Apply HOCs sequentially
+const EnhancedMessageMenu = withSnackbarCompat(withTranslation()(MessageMenu));
 
-export default enhance(MessageMenu);
+export default EnhancedMessageMenu;

@@ -9,21 +9,22 @@ import React from 'react';
 import { copy } from '../../Utils/Text';
 import { compose } from '../../Utils/HOC';
 import { withTranslation } from 'react-i18next';
-import { withSnackbar } from 'notistack';
+import { useSnackbar } from 'notistack';
 import CloseIcon from '../../Assets/Icons/Close';
-import LinkIcon from '@material-ui/icons/Link';
+import LinkIcon from '@mui/icons-material/Link';
 import MoreIcon from '../../Assets/Icons/More';
-import IconButton from '@material-ui/core/IconButton';
-import ShareIcon from '@material-ui/icons/Share';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
+import IconButton from '@mui/material/IconButton';
+import ShareIcon from '@mui/icons-material/Share';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
 import { forward } from '../../Actions/Client';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
 import OptionStore from '../../Stores/OptionStore';
 import StickerStore from '../../Stores/StickerStore';
 import TdLibController from '../../Controllers/TdLibController';
+import { withSnackbarCompat } from '../../withSnackbarCompat';
 
 class ShareStickerSetButton extends React.Component {
     state = {
@@ -124,12 +125,11 @@ class ShareStickerSetButton extends React.Component {
                     <MoreIcon />
                 </IconButton>
                 <Menu
-                    id='sticker-set-menu'
+                    id='attach-menu'
                     anchorEl={anchorEl}
                     open={Boolean(anchorEl)}
                     getContentAnchorEl={null}
                     disableAutoFocusItem
-                    disableEnforceFocus={true}
                     disableRestoreFocus={true}
                     anchorOrigin={{
                         vertical: 'bottom',
@@ -160,9 +160,6 @@ class ShareStickerSetButton extends React.Component {
 
 ShareStickerSetButton.propTypes = {};
 
-const enhance = compose(
-    withTranslation(),
-    withSnackbar
-);
+const EnhancedShareStickerSetButton = withSnackbarCompat(withTranslation()(ShareStickerSetButton));
 
-export default enhance(ShareStickerSetButton);
+export default EnhancedShareStickerSetButton;

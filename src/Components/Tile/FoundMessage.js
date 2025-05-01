@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
-import ListItem from '@material-ui/core/ListItem';
+import ListItem from '@mui/material/ListItem';
 import ChatTile from './ChatTile';
 import UserTile from './UserTile';
 import DialogTitle from './DialogTitle';
@@ -63,7 +63,7 @@ class FoundMessage extends React.Component {
         const selectedMessageId = this.state.nextMessageId;
         const message = MessageStore.get(chatId, messageId);
 
-        const { sender_id } = message;
+        const { sender_user_id } = message;
 
         const date = getMessageDate(message);
         const senderName = getMessageSenderName(message, t);
@@ -72,8 +72,8 @@ class FoundMessage extends React.Component {
         const selected = chatId === selectedChatId && messageId === selectedMessageId;
 
         const tile =
-            sender_id.user_id && chatSearch ? (
-                <UserTile userId={sender_id.user_id} dialog />
+            sender_user_id && chatSearch ? (
+                <UserTile userId={sender_user_id} dialog />
             ) : (
                 <ChatTile chatId={chatId} dialog />
             );

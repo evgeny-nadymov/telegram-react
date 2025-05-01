@@ -24,7 +24,8 @@
 }
 
 .auth-subtitle {
-    color: var(--text-secondary);
+    /* color: var(--text-secondary); */
+    color: rgba(255, 255, 255, 0.801);
     min-height: 72px;
     margin: 0 auto 14px auto;
     text-align: center;
@@ -38,6 +39,7 @@
 
 .auth-input {
     margin: 12px 0;
+    /* color: white !important; */
 }
 
 .sign-in-wrapper {

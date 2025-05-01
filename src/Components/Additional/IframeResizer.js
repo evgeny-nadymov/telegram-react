@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
-import { iframeResizer as iframeResizerLib } from 'iframe-resizer';
+import iframeResizer from 'iframe-resizer';
 
 class IframeResizer extends React.Component {
     constructor(props) {

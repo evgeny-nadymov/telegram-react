@@ -8,24 +8,24 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { withSnackbar } from 'notistack';
+import { useSnackbar } from 'notistack';
 import { withRestoreRef, withSaveRef, compose } from '../../Utils/HOC';
 import { withTranslation } from 'react-i18next';
-import Button from '@material-ui/core/Button';
-import Checkbox from '@material-ui/core/Checkbox';
+import Button from '@mui/material/Button';
+import Checkbox from '@mui/material/Checkbox';
 import CloseIcon from '../../Assets/Icons/Close';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import Divider from '@material-ui/core/Divider';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormGroup from '@material-ui/core/FormGroup';
-import IconButton from '@material-ui/core/IconButton';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import Typography from '@material-ui/core/Typography';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import Divider from '@mui/material/Divider';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormGroup from '@mui/material/FormGroup';
+import IconButton from '@mui/material/IconButton';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import Typography from '@mui/material/Typography';
 import CreatePollOption from './CreatePollOption';
 import { focusNode } from '../../Utils/Component';
 import { utils } from '../../Utils/Key';
@@ -40,6 +40,7 @@ import {
 } from '../../Constants';
 import PollStore from '../../Stores/PollStore';
 import TdLibController from '../../Controllers/TdLibController';
+import { withSnackbarCompat } from '../../withSnackbarCompat';
 import './CreatePollDialog.css';
 
 class CreatePollDialog extends React.Component {
@@ -597,11 +598,7 @@ CreatePollDialog.propTypes = {
     onSend: PropTypes.func.isRequired
 };
 
-const enhance = compose(
-    withSaveRef(),
-    withTranslation(),
-    withSnackbar,
-    withRestoreRef()
-);
+// Apply HOCs sequentially
+const EnhancedCreatePollDialog = withRestoreRef()(withSnackbarCompat(withTranslation()(withSaveRef()(CreatePollDialog))));
 
-export default enhance(CreatePollDialog);
+export default EnhancedCreatePollDialog;

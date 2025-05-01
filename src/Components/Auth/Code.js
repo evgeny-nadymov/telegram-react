@@ -8,10 +8,10 @@
 import React from 'react';
 import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
-import Typography from '@material-ui/core/Typography';
-import IconButton from '@material-ui/core/IconButton';
-import EditIcon from '@material-ui/icons/EditOutlined';
-import TextField from '@material-ui/core/TextField';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import EditIcon from '@mui/icons-material/EditOutlined';
+import TextField from '@mui/material/TextField';
 import HeaderProgress from '../ColumnMiddle/HeaderProgress';
 import { cleanProgressStatus, formatPhoneNumber, isConnecting } from './Phone';
 import AppStore from '../../Stores/ApplicationStore';

@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.inputbox-background {
+ .inputbox-background {
 }
 
 .inputbox {
@@ -19,61 +19,16 @@
     /*border-top-width: 1px;*/
     /*border-top-style: solid;*/
     /*border-color: var(--border);*/
-    padding: 0 0 25px;
+    padding: 4px 0 15px;
     width: calc(100% - 22px);
-    max-width: 695px;
+    max-width: 90%;
     margin: 0 auto;
-    position: relative;
-    z-index: 1;
-}
-
-@media (max-width: 600px) {
-    .inputbox:before {
-        left:0;
-        right: 0;
-        z-index: -1;
-        --shadow-color:#678a64
-    }
-}
-
-@media screen and (min-height: 750px) {
-    .inputbox:before {
-        --shadow-color:#759b72
-    }
-}
-
-@media screen and (min-width: 1276px) {
-    .inputbox:before {
-        --shadow-color:#97af8e
-    }
-}
-
-@media screen and (min-width: 1276px) and (min-height:750px) {
-    .inputbox:before {
-        --shadow-color:#91a67f
-    }
-}
-
-.inputbox::before {
-    --shadow-color: #84a686;
-    content: '';
-    display: block;
-    position: absolute;
-    top: 0;
-    left: -34px;
-    right: 0;
-    /* height: 50%; */
-    box-shadow: 0 0 0.5rem 0.5rem var(--shadow-color);
-    background: var(--shadow-color);
-}
-
-.dark .inputbox::before {
-    --shadow-color: var(--chat-background) !important;
 }
 
 .inputbox-icon-button {
     padding: 6px;
     margin: 9px;
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .inputbox-bubble {
@@ -88,18 +43,17 @@
     margin-right: 9px;
     background: var(--message-in-background);
     min-height: 54px;
-    z-index: 1;
 }
 
 .inputbox-bubble::after {
     position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 8px;
-    height: 17px;
+    bottom: -3px;
+    right: -11px;
+    width: 11px;
+    height: 20px;
     content: '';
-    mask: url(../../Assets/bubble-tail-left.svg);
-    transform: translateX(7px) scaleX(-1);
+    mask: url(../../Assets/bubble-tail-right.svg);
+    transform: translate(-2px, -2px);
     box-sizing: border-box;
     background: var(--message-in-background);
 }
@@ -181,7 +135,6 @@
 .inputbox-send-button {
     width: 100%;
     height: 100%;
-    z-index: 1;
 }
 
 .inputbox-send-accent-button {
@@ -192,7 +145,6 @@
     width: 100%;
     height: 100%;
     /*color: var(--color-);*/
-    z-index: 1;
 }
 
 .inputbox-cancel-record-button-background {
@@ -202,7 +154,6 @@
     border-radius: 50%;
     box-shadow: 0 1px 2px 0 rgba(16, 35, 47, 0.15);
     background: var(--panel-background);
-    z-index: 1;
 }
 
 .inputbox-send-button-background {
@@ -212,5 +163,4 @@
     border-radius: 50%;
     box-shadow: 0 1px 2px 0 rgba(16, 35, 47, 0.15);
     background: var(--panel-background);
-    z-index: 1;
 }

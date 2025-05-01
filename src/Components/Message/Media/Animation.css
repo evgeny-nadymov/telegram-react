@@ -44,7 +44,7 @@
 }
 
 .animation-thumbnail {
-    object-fit: cover;
+    object-fit: contain;
     position: absolute;
     left: 0;
     top: 0;
@@ -53,7 +53,7 @@
 }
 
 .animation-player {
-    object-fit: cover;
+    object-fit: contain;
     position: absolute;
     left: 0;
     top: 0;

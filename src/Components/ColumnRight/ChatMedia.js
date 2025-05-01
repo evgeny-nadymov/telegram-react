@@ -9,19 +9,19 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { compose } from '../../Utils/HOC';
-import { withSnackbar } from 'notistack';
+import { useSnackbar } from 'notistack';
 import { withTranslation } from 'react-i18next';
-import AlternateEmailIcon from '@material-ui/icons/AlternateEmail';
-import CallIcon from '@material-ui/icons/Call';
+import AlternateEmailIcon from '@mui/icons-material/AlternateEmail';
+import CallIcon from '@mui/icons-material/Call';
 import CloseIcon from '../../Assets/Icons/Close';
-import Divider from '@material-ui/core/Divider';
-import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
-import IconButton from '@material-ui/core/IconButton';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import Typography from '@material-ui/core/Typography';
+import Divider from '@mui/material/Divider';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import IconButton from '@mui/material/IconButton';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import Typography from '@mui/material/Typography';
 import Chat from '../Tile/Chat';
 import ChatDetailsHeader from './ChatDetailsHeader';
 import NotificationsListItem from './NotificationsListItem';
@@ -50,6 +50,7 @@ import OptionStore from '../../Stores/OptionStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
 import UserStore from '../../Stores/UserStore';
 import TdLibController from '../../Controllers/TdLibController';
+import { withSnackbarCompat } from '../../withSnackbarCompat';
 import './ChatDetails.css';
 
 class ChatMedia extends React.Component {
@@ -447,7 +448,7 @@ ChatMedia.propTypes = {
 const enhance = compose(
     withSaveRef(),
     withTranslation(),
-    withSnackbar,
+    useSnackbar(),
     withRestoreRef()
 );
 

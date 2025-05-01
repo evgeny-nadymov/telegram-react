@@ -6,6 +6,7 @@
  */
 
 .footer-wrapper {
+    display: none;
     text-align: center;
     color: var(--dialog-subtle-color);
     font-size: 12px;

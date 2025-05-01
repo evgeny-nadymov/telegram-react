@@ -5,69 +5,12 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { canSendMessages, getChatUserId, isGroupChat, isPrivateChat } from '../Utils/Chat';
-import AppStore from '../Stores/ApplicationStore';
-import LStore from '../Stores/LocalizationStore';
 import TdLibController from '../Controllers/TdLibController';
-
-export function showLeaveVoiceChatAlert(params) {
-    TdLibController.clientUpdate({
-        '@type': 'clientUpdateLeaveVoiceChatAlert',
-        params
-    });
-}
-
-export function showInputPasswordAlert(state, onPassword) {
-    TdLibController.clientUpdate({
-        '@type': 'clientUpdateInputPasswordAlert',
-        state,
-        onPassword
-    });
-}
-
-export function setText(text) {
-    TdLibController.clientUpdate({
-        '@type': 'clientUpdateSendText',
-        text
-    });
-}
-
-export function showOpenGameAlert(game, params) {
-    TdLibController.clientUpdate({
-        '@type': 'clientUpdateOpenGameAlert',
-        game,
-        params
-    });
-}
-
-export function showOpenUrlAlert(url, params) {
-    TdLibController.clientUpdate({
-        '@type': 'clientUpdateOpenUrlAlert',
-        url,
-        params
-    });
-}
-
-export function showRequestUrlAlert(url, params) {
-    TdLibController.clientUpdate({
-        '@type': 'clientUpdateRequestUrlAlert',
-        url,
-        params
-    });
-}
 
 export function showAlert(params) {
     TdLibController.clientUpdate({
         '@type': 'clientUpdateAlert',
         params
-    });
-}
-
-export function showSnackbar(message, action) {
-    TdLibController.clientUpdate({
-        '@type': 'clientUpdateSnackbar',
-        message,
-        action
     });
 }
 
@@ -134,55 +77,12 @@ export function openUser(userId, popup = false) {
     });
 }
 
-export function openChat(chatId, messageId = null, popup = false, options = null) {
-    const { chatSelectOptions } = AppStore;
-    if (chatSelectOptions) {
-        const { switchInline, botStartMessage } = chatSelectOptions;
-
-        let rejected = false
-        if (switchInline) {
-            if (!canSendMessages(chatId)) {
-                rejected = true;
-            }
-        } else if (botStartMessage) {
-            if (!canSendMessages(chatId)) {
-                rejected = true;
-            }
-
-            if (isPrivateChat(chatId)) {
-                if (getChatUserId(chatId) !== botStartMessage.botUserId) {
-                    rejected = true;
-                }
-            } else if (!isGroupChat(chatId)) {
-                rejected = true;
-            }
-        }
-
-        if (rejected) {
-            showAlert({
-                title: LStore.getString('AppName'),
-                message: LStore.getString('WriteChatCant'),
-                ok: LStore.getString('OK')
-            });
-
-            return;
-        }
-
-        AppStore.chatSelectOptions = null;
-
-        options = {
-            ...options,
-            ...chatSelectOptions,
-            ...{ closeChatSelect: true }
-        };
-    }
-
+export function openChat(chatId, messageId = null, popup = false) {
     TdLibController.clientUpdate({
         '@type': 'clientUpdateOpenChat',
         chatId,
         messageId,
-        popup,
-        options,
+        popup
     });
 }
 
@@ -191,13 +91,8 @@ export function closeChat() {
         '@type': 'clientUpdateOpenChat',
         chatId: 0,
         messageId: null,
-        popup: false,
-        options: null
+        popup: false
     });
-}
-
-export function clearOpenChatOptions() {
-    TdLibController.clientUpdate({ '@type': 'clientUpdateClearOpenChatOptions' });
 }
 
 export function openReply(chatId, messageId) {
@@ -227,10 +122,6 @@ export function selectMessage(chatId, messageId, selected) {
 
 export function clearSelection() {
     TdLibController.clientUpdate({ '@type': 'clientUpdateClearSelection' });
-}
-
-export function closePinned() {
-    TdLibController.clientUpdate({ '@type': 'clientUpdateClosePinned' });
 }
 
 export function setInstantViewViewerContent(content) {
@@ -266,21 +157,5 @@ export function searchChat(chatId, query = null) {
         '@type': 'clientUpdateSearchChat',
         chatId,
         query
-    });
-}
-
-export function requestUnpinMessage(chatId, messageId) {
-    TdLibController.clientUpdate({
-        '@type': 'clientUpdateUnpinMessage',
-        chatId,
-        messageId
-    });
-}
-
-export function requestPinMessage(chatId, messageId) {
-    TdLibController.clientUpdate({
-        '@type': 'clientUpdatePinMessage',
-        chatId,
-        messageId
     });
 }

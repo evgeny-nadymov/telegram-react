@@ -9,23 +9,23 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { compose } from '../../Utils/HOC';
 import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
-import withTheme from '@material-ui/core/styles/withTheme';
+import withTheme from '@mui/styles/withTheme';
 import { withTranslation } from 'react-i18next';
-import Dialog from '@material-ui/core/Dialog';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import Radio from '@material-ui/core/Radio';
-import RadioGroup from '@material-ui/core/RadioGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormControl from '@material-ui/core/FormControl';
-import FormLabel from '@material-ui/core/FormLabel';
-import red from '@material-ui/core/colors/red';
-import orange from '@material-ui/core/colors/orange';
-import amber from '@material-ui/core/colors/amber';
-import green from '@material-ui/core/colors/green';
-import blue from '@material-ui/core/colors/blue';
-import indigo from '@material-ui/core/colors/indigo';
-import deepPurple from '@material-ui/core/colors/deepPurple';
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormControl from '@mui/material/FormControl';
+import FormLabel from '@mui/material/FormLabel';
+import red from '@mui/material/colors/red';
+import orange from '@mui/material/colors/orange';
+import amber from '@mui/material/colors/amber';
+import green from '@mui/material/colors/green';
+import blue from '@mui/material/colors/blue';
+import indigo from '@mui/material/colors/indigo';
+import deepPurple from '@mui/material/colors/deepPurple';
 import { modalManager } from '../../Utils/Modal';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import './ThemePicker.css';
@@ -34,24 +34,15 @@ class ThemePicker extends React.Component {
     constructor(props) {
         super(props);
 
-        let { type, primary } = { type: 'light', primary: { main: '#50A2E9' } };
-        try {
-            const themeOptions = JSON.parse(localStorage.getItem('themeOptions'));
-            type = themeOptions.type;
-            primary = themeOptions.primary;
-        } catch {}
-
         this.state = {
             open: false,
-            type,
+            type: this.props.theme.palette.type,
             color: this.getColorString(this.props.theme.palette.primary.main)
         };
     }
 
     handleChange = event => {
-        const type = event.target.value;
-
-        this.setState({ type });
+        this.setState({ type: event.target.value });
 
         ApplicationStore.emit('clientUpdateThemeChanging', {
             type: event.target.value,
@@ -124,14 +115,13 @@ class ThemePicker extends React.Component {
 
         return (
             <Dialog
-                disableEnforceFocus={true}
                 manager={modalManager}
                 transitionDuration={0}
                 open={open}
                 onClose={this.handleClose}
                 aria-labelledby='alert-dialog-title'
                 aria-describedby='alert-dialog-description'>
-                <DialogTitle id='alert-dialog-title'>{t('Theme')}</DialogTitle>
+                <DialogTitle id='alert-dialog-title'>{t('Appearance')}</DialogTitle>
                 <DialogContent>
                     <FormControl component='fieldset' className='theme-picker-form'>
                         <FormLabel focused component='legend'>
@@ -143,7 +133,6 @@ class ThemePicker extends React.Component {
                             className='theme-picker-group'
                             value={type}
                             onChange={this.handleChange}>
-                            <FormControlLabel value='default' control={<Radio color='primary' />} label='System Default' />
                             <FormControlLabel value='light' control={<Radio color='primary' />} label='Light' />
                             <FormControlLabel value='dark' control={<Radio color='primary' />} label='Dark' />
                         </RadioGroup>

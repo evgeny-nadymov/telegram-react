@@ -34,7 +34,7 @@ class User extends React.Component {
     };
 
     render() {
-        const { userId, showStatus, showUsername } = this.props;
+        const { userId, showStatus } = this.props;
 
         const user = UserStore.get(userId);
         if (!user) {
@@ -42,7 +42,7 @@ class User extends React.Component {
             return null;
         }
 
-        const { username } = user;
+        const { is_contact, username } = user;
 
         return (
             <div className='user' onClick={this.handleClick}>
@@ -54,7 +54,7 @@ class User extends React.Component {
                         </div>
                         {showStatus && (
                             <div className='tile-second-row'>
-                                {username && showUsername ? <div className='user-content dialog-content'>{'@' + username}</div> : <UserStatus userId={userId} /> }
+                                {!is_contact && username ? <div className='user-content dialog-content'>{'@' + username}</div> : <UserStatus userId={userId} /> }
                             </div>
                         )}
                     </div>
@@ -67,13 +67,11 @@ class User extends React.Component {
 User.propTypes = {
     userId: PropTypes.number.isRequired,
     onSelect: PropTypes.func,
-    showStatus: PropTypes.bool,
-    showUsername: PropTypes.bool
+    showStatus: PropTypes.bool
 };
 
 User.defaultProps = {
-    showStatus: true,
-    showUsername: false
+    showStatus: true
 };
 
 export default User;

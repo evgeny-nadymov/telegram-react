@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
-import IconButton from '@material-ui/core/IconButton';
+import IconButton from '@mui/material/IconButton';
 import ArrowBackIcon from '../../../Assets/Icons/Back';
 import ContactsIcon from '../../../Assets/Icons/NewPrivate';
 import FilterChat from '../../Tile/FilterChat';
@@ -28,7 +28,6 @@ import { loadChatsContent } from '../../../Utils/File';
 import FileStore from '../../../Stores/FileStore';
 import TdLibController from '../../../Controllers/TdLibController';
 import './EditFilterChats.css';
-import { scrollBottom } from '../../../Utils/DOM';
 
 class EditFilterChats extends React.Component {
 
@@ -133,12 +132,12 @@ class EditFilterChats extends React.Component {
                 requestAnimationFrame(() => {
                     wrapPanel.style.cssText = `max-height: ${Math.min(currentHeight, maxHeight)}px;`;
                     setTimeout(() => {
-                        scrollBottom(wrapPanel, 'auto');
+                        this.searchInputRef.current.scrollIntoView({ behavior: 'auto' });
                     }, 250);
                 });
             } else {
                 wrapPanel.style.cssText = `max-height: ${maxHeight}px;`;
-                scrollBottom(wrapPanel, 'smooth');
+                this.searchInputRef.current.scrollIntoView({ behavior: 'smooth' });
             }
         } else if (collapsed) {
             if (currentHeight < maxHeight) {
@@ -155,7 +154,7 @@ class EditFilterChats extends React.Component {
                 wrapPanel.style.cssText = prevCSSText;
                 wrapPanel.scrollTop = prevScrollTop;
             } else {
-                scrollBottom(wrapPanel, 'smooth');
+                this.searchInputRef.current.scrollIntoView({ behavior: 'smooth' });
             }
         }
     }
@@ -409,7 +408,7 @@ class EditFilterChats extends React.Component {
                         </>
                     )}
                     {items.map(x => <ChatChip selected={focusedItem === x} ref={el => { this.itemsRef.set(x, el); }} key={x} chatId={x} onClick={() => this.handleChatChange(x)}/>)}
-                    <SearchInput wrapperRef={this.searchRef} inputRef={this.searchInputRef} hint={t('Search')} onClose={this.handleSearchClose} onChange={this.handleSearch} onBackspace={this.handleBackspace} />
+                    <SearchInput inputRef={this.searchInputRef} hint={t('Search')} onClose={this.handleSearchClose} onChange={this.handleSearch} onBackspace={this.handleBackspace} />
                 </div>
                 <div className='sidebar-page-top-divider' style={{ zIndex: 1 }}/>
                 <div ref={this.scrollRef} className='sidebar-page-content' style={{ marginTop: -3, position: 'relative', height: '100%' }} onScroll={onScroll}>

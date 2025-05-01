@@ -6,15 +6,12 @@
  */
 
 import EventEmitter from './EventEmitter';
-import { STORAGE_AUTH_KEY, STORAGE_AUTH_TEST_KEY } from '../Constants';
+import { KEY_AUTH_STATE } from '../Constants';
 import TdLibController from '../Controllers/TdLibController';
 
 class AuthorizationStore extends EventEmitter {
     constructor() {
         super();
-
-        const { useTestDC } = TdLibController.parameters;
-        this.authKey = useTestDC? STORAGE_AUTH_TEST_KEY : STORAGE_AUTH_KEY;
 
         this.reset();
         this.load();
@@ -24,7 +21,7 @@ class AuthorizationStore extends EventEmitter {
 
     load() {
         try {
-            const value = localStorage.getItem(this.authKey);
+            const value = localStorage.getItem(KEY_AUTH_STATE);
             if (value) {
                 this.current = JSON.parse(value);
             } else {
@@ -35,9 +32,9 @@ class AuthorizationStore extends EventEmitter {
 
     save(state) {
         if (state) {
-            localStorage.setItem(this.authKey, JSON.stringify(state));
+            localStorage.setItem(KEY_AUTH_STATE, JSON.stringify(state));
         } else {
-            localStorage.removeItem(this.authKey);
+            localStorage.removeItem(KEY_AUTH_STATE);
         }
     }
 

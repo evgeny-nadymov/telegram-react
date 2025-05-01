@@ -4,24 +4,18 @@
  * This source code is licensed under the GPL v.3.0 license found in the
  * LICENSE file in the root directory of this source tree.
  */
-import { getSupergroupId } from './Chat';
-import ChatStore from '../Stores/ChatStore';
+
 import SupergroupStore from '../Stores/SupergroupStore';
-import LStore from '../Stores/LocalizationStore';
+import ChatStore from '../Stores/ChatStore';
+import { getSupergroupId } from './Chat';
 
 export function getSupergroupStatus(supergroup, chatId) {
     if (!supergroup) return null;
 
-    let { status, member_count: count, username, has_location } = supergroup;
+    let { status, is_channel, member_count: count } = supergroup;
 
-    if (status) {
-        if (status['@type'] === 'chatMemberStatusBanned') {
-            return LStore.getString('YouWereKicked');
-        } else if (status['@type'] === 'chatMemberStatusLeft') {
-            // return LStore.getString('YouLeft');
-        } else if (status['@type'] === 'chatMemberStatusCreator' && !status.is_member) {
-            // return LStore.getString('YouLeft');
-        }
+    if (status && status['@type'] === 'chatMemberStatusBanned') {
+        return is_channel ? 'channel is inaccessible' : 'group is inaccessible';
     }
 
     if (!count) {
@@ -31,26 +25,15 @@ export function getSupergroupStatus(supergroup, chatId) {
         }
     }
 
-    if (count <= 0) {
-        if (has_location){
-            return LStore.getString('MegaLocation').toLowerCase();
-        }
-
-        return username
-            ? LStore.getString('MegaPublic').toLowerCase()
-            : LStore.getString('MegaPrivate').toLowerCase();
-    }
-
-    if (count <= 1) {
-        return LStore.formatPluralString('Members', count);
-    }
+    if (!count) return '0 members';
+    if (count === 1) return '1 member';
 
     const onlineCount = ChatStore.getOnlineMemberCount(chatId);
     if (onlineCount > 1) {
-        return `${LStore.formatPluralString('Members', count)}, ${LStore.formatPluralString('OnlineCount', onlineCount)}`;
+        return `${count} members, ${onlineCount} online`;
     }
 
-    return LStore.formatPluralString('Members', count);
+    return `${count} members`;
 }
 
 export function isPublicSupergroup(chatId) {

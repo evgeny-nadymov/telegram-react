@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
-import Button from '@material-ui/core/Button';
+import Button from '@mui/material/Button';
 import PollOptionResult from './PollOptionResult';
 import { loadUsersContent } from '../../Utils/File';
 import { POLL_RESULTS_FIRST_SLICE_LENGTH, POLL_RESULTS_LEAVE_LENGTH, POLL_RESULTS_SLICE_LENGTH } from '../../Constants';

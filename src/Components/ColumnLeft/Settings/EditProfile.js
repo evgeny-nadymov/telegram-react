@@ -9,8 +9,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
 import { compose, withRestoreRef, withSaveRef } from '../../../Utils/HOC';
-import TextField from '@material-ui/core/TextField';
-import { IconButton } from '@material-ui/core';
+import TextField from '@mui/material/TextField';
+import { IconButton } from '@mui/material';
 import ArrowBackIcon from '../../../Assets/Icons/Back';
 import NewChatPhoto from '../NewChatPhoto';
 import { getSrc, loadChatContent } from '../../../Utils/File';
@@ -134,7 +134,7 @@ class EditProfile extends React.Component {
 
         await TdLibController.send({
             '@type': 'setProfilePhoto',
-            photo: { '@type': 'inputChatPhotoStatic', photo: { '@type': 'inputFileBlob', name: 'profile_photo.jpg', data } }
+            photo: { '@type': 'inputFileBlob', name: 'profile_photo.jpg', data }
         });
 
         const store = FileStore.getStore();

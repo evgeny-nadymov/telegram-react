@@ -149,7 +149,7 @@ export class VirtualizedList extends React.Component {
     render() {
         const { className, source, renderItem, rowHeight } = this.props;
         const { renderIds } = this.state;
-
+        
         const items = (source || []).map((item, index) => {
             return renderIds.has(index) && renderItem({ index, style: style.item(index, rowHeight) });
         });
@@ -161,7 +161,7 @@ export class VirtualizedList extends React.Component {
                 <div style={style.listWrapper((source || []).length * rowHeight)}>
                     {items}
                 </div>
-                {/*<div className='vlist-top-border'/>*/}
+                {/* <div className='vlist-top-border'/> */}
             </div>
         );
     }

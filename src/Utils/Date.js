@@ -1,11 +1,4 @@
 /*
- *  Copyright (c) 2018-present, Evgeny Nadymov
- *
- * This source code is licensed under the GPL v.3.0 license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-/*
  * Date Format 1.2.3
  * (c) 2007-2009 Steven Levithan <stevenlevithan.com>
  * MIT license
@@ -20,7 +13,7 @@
  */
 
 const dateFormat = (function() {
-    const token = /d{1,4}|M{1,4}|yy(?:yy)?|([HhmsAa])\1?|[LloSZWN]|"[^"]*"|'[^']*'/g;
+    const token = /d{1,4}|m{1,4}|yy(?:yy)?|([HhMsTt])\1?|[LloSZWN]|"[^"]*"|'[^']*'/g;
     const timezone = /\b(?:[PMCEA][SDP]T|(?:Pacific|Mountain|Central|Eastern|Atlantic) (?:Standard|Daylight|Prevailing) Time|(?:GMT|UTC)(?:[-+]\d{4})?)\b/g;
     const timezoneClip = /[^-+\dA-Z]/g;
 
@@ -57,10 +50,10 @@ const dateFormat = (function() {
         var _ = utc ? 'getUTC' : 'get';
         var d = date[_ + 'Date']();
         var D = date[_ + 'Day']();
-        var M = date[_ + 'Month']();
+        var m = date[_ + 'Month']();
         var y = date[_ + 'FullYear']();
         var H = date[_ + 'Hours']();
-        var m = date[_ + 'Minutes']();
+        var M = date[_ + 'Minutes']();
         var s = date[_ + 'Seconds']();
         var L = date[_ + 'Milliseconds']();
         var o = utc ? 0 : date.getTimezoneOffset();
@@ -71,26 +64,26 @@ const dateFormat = (function() {
             dd: pad(d),
             ddd: dateFormat.i18n.dayNames[D],
             dddd: dateFormat.i18n.dayNames[D + 7],
-            M: M + 1,
-            MM: pad(M + 1),
-            MMM: dateFormat.i18n.monthNames[M],
-            MMMM: dateFormat.i18n.monthNames[M + 12],
+            m: m + 1,
+            mm: pad(m + 1),
+            mmm: dateFormat.i18n.monthNames[m],
+            mmmm: dateFormat.i18n.monthNames[m + 12],
             yy: String(y).slice(2),
             yyyy: y,
             h: H % 12 || 12,
             hh: pad(H % 12 || 12),
             H: H,
             HH: pad(H),
-            m: m,
-            mm: pad(m),
+            M: M,
+            MM: pad(M),
             s: s,
             ss: pad(s),
             l: pad(L, 3),
             L: pad(Math.round(L / 10)),
-            a: H < 12 ? dateFormat.i18n.timeNames[0] : dateFormat.i18n.timeNames[1],
-            aa: H < 12 ? dateFormat.i18n.timeNames[2] : dateFormat.i18n.timeNames[3],
-            A: H < 12 ? dateFormat.i18n.timeNames[4] : dateFormat.i18n.timeNames[5],
-            AA: H < 12 ? dateFormat.i18n.timeNames[6] : dateFormat.i18n.timeNames[7],
+            t: H < 12 ? dateFormat.i18n.timeNames[0] : dateFormat.i18n.timeNames[1],
+            tt: H < 12 ? dateFormat.i18n.timeNames[2] : dateFormat.i18n.timeNames[3],
+            T: H < 12 ? dateFormat.i18n.timeNames[4] : dateFormat.i18n.timeNames[5],
+            TT: H < 12 ? dateFormat.i18n.timeNames[6] : dateFormat.i18n.timeNames[7],
             Z: gmt ? 'GMT' : utc ? 'UTC' : (String(date).match(timezone) || ['']).pop().replace(timezoneClip, ''),
             o: (o > 0 ? '-' : '+') + pad(Math.floor(Math.abs(o) / 60) * 100 + (Math.abs(o) % 60), 4),
             S: ['th', 'st', 'nd', 'rd'][d % 10 > 3 ? 0 : (((d % 100) - (d % 10) != 10) * d) % 10],
@@ -108,19 +101,19 @@ const dateFormat = (function() {
 })();
 
 dateFormat.masks = {
-    default: 'ddd MMM dd yyyy HH:mm:ss',
-    shortDate: 'M/d/yy',
-    mediumDate: 'MMM d, yyyy',
-    longDate: 'MMMM d, yyyy',
-    fullDate: 'dddd, MMMM d, yyyy',
-    shortTime: 'h:mm AA',
-    mediumTime: 'h:mm:ss AA',
-    longTime: 'h:mm:ss AA Z',
-    isoDate: 'yyyy-MM-dd',
-    isoTime: 'HH:mm:ss',
-    isoDateTime: "yyyy-MM-dd'T'HH:mm:sso",
-    isoUtcDateTime: "UTC:yyyy-MM-dd'T'HH:mm:ss'Z'",
-    expiresHeaderFormat: 'ddd, dd MMM yyyy HH:mm:ss Z'
+    default: 'ddd mmm dd yyyy HH:MM:ss',
+    shortDate: 'm/d/yy',
+    mediumDate: 'mmm d, yyyy',
+    longDate: 'mmmm d, yyyy',
+    fullDate: 'dddd, mmmm d, yyyy',
+    shortTime: 'h:MM TT',
+    mediumTime: 'h:MM:ss TT',
+    longTime: 'h:MM:ss TT Z',
+    isoDate: 'yyyy-mm-dd',
+    isoTime: 'HH:MM:ss',
+    isoDateTime: "yyyy-mm-dd'T'HH:MM:sso",
+    isoUtcDateTime: "UTC:yyyy-mm-dd'T'HH:MM:ss'Z'",
+    expiresHeaderFormat: 'ddd, dd mmm yyyy HH:MM:ss Z'
 };
 
 // Internationalization strings
@@ -167,7 +160,7 @@ dateFormat.i18n = {
         'November',
         'December'
     ],
-    timeNames: ['AM', 'PM', 'AM', 'PM', 'AM', 'PM', 'AM', 'PM']
+    timeNames: ['a', 'p', 'am', 'pm', 'A', 'P', 'AM', 'PM']
 };
 
 function pad(val, len) {

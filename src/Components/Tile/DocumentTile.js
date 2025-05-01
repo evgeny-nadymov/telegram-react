@@ -74,9 +74,8 @@ class DocumentTile extends React.Component {
                         completeIcon={typeof completeIcon === 'function' ? completeIcon(src) : completeIcon}
                     />
                 )}
-                {miniSrc && <img className='tile-photo' src={miniSrc} draggable={false} alt=''/>}
-                {thumbnailSrc && <img className='tile-photo' src={thumbnailSrc} onLoad={this.handleLoad} draggable={false} alt='' />}
-                {!miniSrc && !tileLoaded && <div className='document-tile-background' />}
+                {src && <img className='tile-photo' src={src} onLoad={this.handleLoad} draggable={false} alt='' />}
+                {!tileLoaded && <div className='document-tile-background' />}
             </div>
         );
     }

@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import ListItem from '@material-ui/core/ListItem';
+import ListItem from '@mui/material/ListItem';
 import Chat from './Chat';
 import { getChatUsername } from '../../Utils/Chat';
 import AppStore from '../../Stores/ApplicationStore';

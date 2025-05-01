@@ -5,14 +5,18 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+* {
+    color: white !important;
+}
+
 .authorization-form {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    overflow-x: hidden;
     height: 100%;
 }
 
 .authorization-form-content {
+    color: white;
     margin: 0 auto 0;
     max-width: 360px;
     height: 100%;

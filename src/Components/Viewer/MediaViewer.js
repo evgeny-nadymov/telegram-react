@@ -10,16 +10,16 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
 import KeyboardManager, { KeyboardHandler } from '../Additional/KeyboardManager';
-import Button from '@material-ui/core/Button';
-import Checkbox from '@material-ui/core/Checkbox';
+import Button from '@mui/material/Button';
+import Checkbox from '@mui/material/Checkbox';
 import CloseIcon from '../../Assets/Icons/Close';
 import DeleteIcon from '../../Assets/Icons/Delete';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import NavigateBeforeIcon from '../../Assets/Icons/Left';
 import ReplyIcon from '../../Assets/Icons/Share';
 import MediaInfo from '../Tile/MediaInfo';
@@ -50,7 +50,6 @@ import { PHOTO_BIG_SIZE, MEDIA_SLICE_LIMIT } from '../../Constants';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MediaViewer.css';
-import LStore from '../../Stores/LocalizationStore';
 
 class MediaViewer extends React.Component {
     constructor(props) {
@@ -855,7 +854,7 @@ class MediaViewer extends React.Component {
                     <MediaInfo chatId={chatId} messageId={currentMessageId} />
                     <MediaViewerFooterText
                         title={title}
-                        subtitle={maxCount > 1 && index >= 0 ? LStore.formatString('Of', maxCount - index, maxCount) : null}
+                        subtitle={maxCount && index >= 0 ? `${maxCount - index} of ${maxCount}` : null}
                     />
                     <MediaViewerDownloadButton title={t('Save')} fileId={fileId} disabled={isEmbedMessage(chatId, currentMessageId)} onClick={this.handleSave} />
                     <MediaViewerFooterButton
@@ -893,7 +892,6 @@ class MediaViewer extends React.Component {
                         </MediaViewerButton>
                     </div>
                 </div>
-                <div className='media-viewer-footer'/>
                 {deleteConfirmation}
             </div>
         );

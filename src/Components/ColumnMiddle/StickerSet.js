@@ -7,8 +7,8 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import IconButton from '@material-ui/core/IconButton';
-import ClearIcon from '@material-ui/icons/Clear';
+import IconButton from '@mui/material/IconButton';
+import ClearIcon from '@mui/icons-material/Clear';
 import Sticker, { StickerSourceEnum } from '../Message/Media/Sticker';
 import { STICKER_SMALL_DISPLAY_SIZE } from '../../Constants';
 import './StickerSet.css';

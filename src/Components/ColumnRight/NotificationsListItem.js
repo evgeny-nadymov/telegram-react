@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { withTranslation } from 'react-i18next';
-import Checkbox from '@material-ui/core/Checkbox';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import Typography from '@material-ui/core/Typography';
+import Checkbox from '@mui/material/Checkbox';
+import ListItem from '@mui/material/ListItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import Typography from '@mui/material/Typography';
 import Notifications from '../ColumnMiddle/Notifications';
 import './NotificationsListItem.css';
 
@@ -39,7 +39,7 @@ class NotificationsListItem extends Notifications {
                             {t('Notifications')}
                         </Typography>
                     }
-                    secondary={!isMuted ? t('NotificationsOn') : t('NotificationsOff')}
+                    secondary={!isMuted ? t('PopupEnabled') : t('PopupDisabled')}
                 />
             </ListItem>
         );
